@@ -1,0 +1,23 @@
+{
+  "name": "cine-arte-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plataforma web para centralizar la cartelera de cine arte local.",
+  "packageManager": "pnpm@11.7.0",
+  "scripts": {
+    "dev": "pnpm --parallel --filter ./frontend --filter ./backend --filter ./scraper dev",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "dev:backend": "pnpm --filter backend dev",
+    "dev:scraper": "pnpm --filter scraper dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:migrate": "pnpm --filter backend db:migrate",
+    "db:seed": "pnpm --filter backend db:seed"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.5"
+  }
+}
