@@ -37,6 +37,19 @@ Frontend React
 5. **Trazabilidad obligatoria.** Funciones y recursos externos conservan su URL y fuente de
    origen, la fecha de captura y su condición de uso.
 6. **API versionada.** Los endpoints públicos parten bajo `/api/v1`.
+7. **Frontend y backend independientes.** React solo consume contratos HTTP. Las consultas,
+   transacciones y credenciales permanecen en el backend.
+8. **Contratos compartidos sin infraestructura.** `packages/contracts` contiene únicamente DTO;
+   no importa Express, React, MySQL ni código del scraper.
+
+## Capas implementadas
+
+- `scraper`: conectores, contrato crudo y normalización por lotes;
+- `backend/modules/ingestion`: validación de entrada, staging y publicación transaccional;
+- `backend/modules/catalog`: rutas, servicio de aplicación y repositorio MySQL;
+- `packages/contracts`: respuestas y modelos públicos de la API;
+- `frontend/api`: cliente HTTP y adaptación explícita de datos de demostración;
+- `frontend/components` y `frontend/views`: presentación responsive basada en el prototipo.
 
 ## Límites del primer día
 

@@ -8,7 +8,8 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run src",
+    "test:coverage": "vitest run src --coverage"
   },
   "dependencies": {
     "zod": "^4.4.3"

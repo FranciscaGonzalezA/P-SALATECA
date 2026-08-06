@@ -16,6 +16,7 @@ INSERT INTO genres (name, slug)
 VALUES
   ('Documental', 'documental'),
   ('Drama', 'drama'),
-  ('Experimental', 'experimental')
+  ('Experimental', 'experimental'),
+  ('Animación', 'animacion'),
+  ('Cine chileno', 'cine-chileno')
 ON DUPLICATE KEY UPDATE name = VALUES(name);
-

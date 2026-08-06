@@ -30,8 +30,9 @@ pnpm dev
 ## 4. Verificación
 
 ```powershell
-pnpm format:check
-pnpm lint
-pnpm test
-pnpm build
+pnpm quality
+pnpm qa:audit
 ```
+
+`pnpm quality` comprueba formato, lint, cobertura con umbrales y compilación. Para integración con
+MySQL, carga y revisión exploratoria sigue [qa-strategy.md](qa-strategy.md).
