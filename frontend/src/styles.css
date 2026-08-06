@@ -1449,6 +1449,185 @@ main {
   border-left-color: var(--pink);
 }
 
+.admin-import {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.65fr) minmax(0, 1.35fr);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  margin-bottom: 4rem;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  color: #fff;
+  background: #171615;
+}
+
+.admin-import-copy h2 {
+  margin: 0.3rem 0 1rem;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 400;
+  line-height: 1;
+}
+
+.admin-import-copy > p:last-child {
+  margin: 0;
+  color: #c9c4bd;
+  line-height: 1.65;
+}
+
+.admin-import-form {
+  display: grid;
+  gap: 1.15rem;
+}
+
+.admin-import-form label {
+  display: grid;
+  gap: 0.5rem;
+  color: #c9c4bd;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.admin-import-form input {
+  width: 100%;
+  padding: 0.85rem;
+  color: var(--ink);
+  border: 1px solid #56524d;
+  background: #fff;
+  font-weight: 400;
+}
+
+.admin-file-field input {
+  padding: 0;
+  color: transparent;
+  border: 0;
+  background: transparent;
+}
+
+.admin-file-field input::file-selector-button {
+  margin-right: 1rem;
+  padding: 0.8rem 1rem;
+  color: #171615;
+  border: 0;
+  background: var(--acid);
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.admin-file-field > span {
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 400;
+}
+
+.admin-import-form > button {
+  justify-self: start;
+  padding: 0.9rem 1.25rem;
+  color: #171615;
+  border: 0;
+  background: var(--acid);
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.admin-import-form > button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.admin-import-message,
+.admin-import-result {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--ink);
+}
+
+.admin-import-result {
+  padding: clamp(1.25rem, 3vw, 2rem);
+  background: var(--paper);
+}
+
+.admin-import-result-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.admin-import-result-heading span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-import-result-heading h3 {
+  margin: 0.2rem 0 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 2rem;
+  font-weight: 400;
+}
+
+.admin-import-summary {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: 1.5rem 0;
+  border-block: 1px solid var(--line);
+}
+
+.admin-import-summary div {
+  padding: 1rem;
+  border-right: 1px solid var(--line);
+}
+
+.admin-import-summary div:last-child {
+  border-right: 0;
+}
+
+.admin-import-summary dt {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.admin-import-summary dd {
+  margin: 0.25rem 0 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 2rem;
+}
+
+.admin-import-log {
+  overflow-x: auto;
+}
+
+.admin-import-log table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.admin-import-log caption {
+  margin-bottom: 0.7rem;
+  font-weight: 850;
+  text-align: left;
+}
+
+.admin-import-log th,
+.admin-import-log td {
+  max-width: 360px;
+  padding: 0.7rem;
+  overflow-wrap: anywhere;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.admin-import-log th {
+  color: var(--muted);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
 .admin-layout {
   display: grid;
   grid-template-columns: minmax(240px, 0.7fr) minmax(0, 1.6fr);
@@ -1708,8 +1887,17 @@ main {
   .detail-hero,
   .post-reading-layout,
   .site-footer,
-  .admin-layout {
+  .admin-layout,
+  .admin-import {
     grid-template-columns: 1fr;
+  }
+
+  .admin-import-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-import-summary div {
+    border-bottom: 1px solid var(--line);
   }
 
   .post-source-note {

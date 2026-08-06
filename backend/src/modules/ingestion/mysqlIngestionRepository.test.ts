@@ -115,6 +115,23 @@ describe('MysqlIngestionRepository', () => {
     expect(connection.execute.mock.calls[5]?.[1]).toEqual(['partially_succeeded', 2, 1, 1, 0, 20]);
   });
 
+  it('usa una URL segura en staging cuando el valor rechazado excede la columna', async () => {
+    connection.execute.mockResolvedValueOnce([{ insertId: 30 }]);
+
+    await withTransaction(connection, async (transaction) => {
+      await transaction.stageRecord(
+        20,
+        {
+          rawPayload: { sourceUrl: `https://example.com/${'a'.repeat(2_100)}` },
+          normalizedPayload: {},
+        },
+        null,
+      );
+    });
+
+    expect(connection.execute.mock.calls[0]?.[1]?.[1]).toBe('about:blank');
+  });
+
   it('crea una función nueva y detecta una repetición idéntica', async () => {
     connection.execute.mockImplementation((sql: string) => {
       if (sql.includes('INSERT INTO movies')) return Promise.resolve([{ insertId: 7 }]);

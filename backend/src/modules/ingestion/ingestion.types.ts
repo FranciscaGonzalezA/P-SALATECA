@@ -9,6 +9,9 @@ export interface IngestionSource {
 export interface IngestionCandidate {
   rawPayload: unknown;
   normalizedPayload: unknown;
+  source?: IngestionSource | undefined;
+  rowNumber?: number | undefined;
+  validationIssues?: readonly IngestionValidationIssue[] | undefined;
 }
 
 export interface IngestionRequest {
@@ -38,6 +41,12 @@ export interface IngestionValidationIssue {
   field: string;
   code: string;
   message: string;
+  rawValue?: unknown;
+}
+
+export interface IngestionRowError extends IngestionValidationIssue {
+  rowNumber: number;
+  value: string | null;
 }
 
 export type PublicationOutcome = 'inserted' | 'updated' | 'duplicate';
@@ -54,6 +63,7 @@ export interface IngestionSummary {
 export interface IngestionResult extends IngestionSummary {
   runId: number;
   status: IngestionRunStatus;
+  errors: IngestionRowError[];
 }
 
 export interface IngestionTransaction {

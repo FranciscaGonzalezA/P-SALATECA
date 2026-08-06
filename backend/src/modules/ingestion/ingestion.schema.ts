@@ -4,7 +4,7 @@ import type { IngestionValidationIssue, NormalizedScreeningDto } from './ingesti
 const canonicalKeySchema = z
   .string()
   .trim()
-  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+  .regex(/^[\p{Letter}\p{Number}]+(?:-[\p{Letter}\p{Number}]+)*$/u);
 
 export const normalizedScreeningSchema = z.object({
   movieTitle: z.string().trim().min(1),
@@ -15,7 +15,7 @@ export const normalizedScreeningSchema = z.object({
   screeningTime: z.string().regex(/^\d{2}:\d{2}$/),
   startsAt: z.string().datetime({ offset: true }),
   sourceTimezone: z.string().trim().min(1),
-  sourceUrl: z.string().url(),
+  sourceUrl: z.string().url().max(2_048),
   sourceType: z.enum(['website', 'calendar', 'social_media', 'manual', 'api']),
   sourceRecordKey: z.string().trim().min(1).optional(),
   capturedAt: z.string().datetime({ offset: true }),

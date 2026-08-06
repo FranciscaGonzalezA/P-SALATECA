@@ -3,6 +3,7 @@ import type {
   IngestionRepository,
   IngestionRequest,
   IngestionResult,
+  IngestionRowError,
   IngestionRunStatus,
   IngestionSummary,
   IngestionValidationIssue,
@@ -26,6 +27,27 @@ function databaseIssue(error: unknown): IngestionValidationIssue {
   };
 }
 
+function displayValue(value: unknown): string | null {
+  if (value === undefined || value === null) return null;
+  if (typeof value === 'string') return value;
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
+}
+
+function rowErrors(
+  rowNumber: number,
+  issues: readonly IngestionValidationIssue[],
+): IngestionRowError[] {
+  return issues.map((issue) => ({
+    ...issue,
+    rowNumber,
+    value: displayValue(issue.rawValue),
+  }));
+}
+
 export async function ingestScreenings(
   repository: IngestionRepository,
   request: IngestionRequest,
@@ -40,26 +62,36 @@ export async function ingestScreenings(
       rejected: 0,
       duplicates: 0,
     };
+    const errors: IngestionRowError[] = [];
 
     for (const [index, candidate] of request.records.entries()) {
       const parsed = parseNormalizedScreening(candidate.normalizedPayload);
+      const validationIssues = candidate.validationIssues?.length
+        ? candidate.validationIssues
+        : parsed.success
+          ? []
+          : parsed.issues;
       const stagingRecordId = await transaction.stageRecord(
         runId,
         candidate,
-        parsed.success ? parsed.data : null,
+        validationIssues.length === 0 && parsed.success ? parsed.data : null,
       );
 
-      if (!parsed.success) {
+      if (validationIssues.length > 0 || !parsed.success) {
         summary.rejected += 1;
-        await transaction.recordErrors(runId, stagingRecordId, parsed.issues);
-        await transaction.markStaging(stagingRecordId, 'rejected', parsed.issues);
+        errors.push(...rowErrors(candidate.rowNumber ?? index + 1, validationIssues));
+        await transaction.recordErrors(runId, stagingRecordId, validationIssues);
+        await transaction.markStaging(stagingRecordId, 'rejected', validationIssues);
         continue;
       }
 
       try {
-        const outcome = await transaction.runInSavepoint(`screening_${index}`, () =>
-          transaction.publishScreening(sourceId, stagingRecordId, parsed.data),
-        );
+        const outcome = await transaction.runInSavepoint(`screening_${index}`, async () => {
+          const publicationSourceId = candidate.source
+            ? await transaction.upsertSource(candidate.source)
+            : sourceId;
+          return transaction.publishScreening(publicationSourceId, stagingRecordId, parsed.data);
+        });
 
         summary[outcome === 'duplicate' ? 'duplicates' : outcome] += 1;
         await transaction.markStaging(
@@ -69,6 +101,7 @@ export async function ingestScreenings(
       } catch (error) {
         const issue = databaseIssue(error);
         summary.rejected += 1;
+        errors.push(...rowErrors(candidate.rowNumber ?? index + 1, [issue]));
         await transaction.recordErrors(runId, stagingRecordId, [issue]);
         await transaction.markStaging(stagingRecordId, 'rejected', [issue]);
       }
@@ -81,6 +114,7 @@ export async function ingestScreenings(
       runId,
       status,
       ...summary,
+      errors,
     };
   });
 }

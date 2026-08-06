@@ -25,14 +25,15 @@ añade `meta` con paginación y tiempo de procesamiento. Los errores usan `error
 
 ## Autenticación y administración
 
-| Método   | Ruta               | Acceso  | Descripción                                |
-| -------- | ------------------ | ------- | ------------------------------------------ |
-| `POST`   | `/auth/login`      | Público | Inicia una sesión mediante correo y clave. |
-| `GET`    | `/auth/me`         | Sesión  | Devuelve la identidad autenticada.         |
-| `POST`   | `/auth/logout`     | Público | Elimina la sesión y su cookie.             |
-| `POST`   | `/admin/posts`     | Admin   | Crea una publicación.                      |
-| `PUT`    | `/admin/posts/:id` | Admin   | Actualiza una publicación.                 |
-| `DELETE` | `/admin/posts/:id` | Admin   | Elimina una publicación.                   |
+| Método   | Ruta                       | Acceso  | Descripción                                |
+| -------- | -------------------------- | ------- | ------------------------------------------ |
+| `POST`   | `/auth/login`              | Público | Inicia una sesión mediante correo y clave. |
+| `GET`    | `/auth/me`                 | Sesión  | Devuelve la identidad autenticada.         |
+| `POST`   | `/auth/logout`             | Público | Elimina la sesión y su cookie.             |
+| `POST`   | `/admin/posts`             | Admin   | Crea una publicación.                      |
+| `PUT`    | `/admin/posts/:id`         | Admin   | Actualiza una publicación.                 |
+| `DELETE` | `/admin/posts/:id`         | Admin   | Elimina una publicación.                   |
+| `POST`   | `/admin/screenings/import` | Admin   | Importa funciones desde un archivo XLSX.   |
 
 La sesión usa un token opaco aleatorio. Solo su hash SHA-256 se persiste en MySQL y el navegador
 lo recibe en una cookie `HttpOnly`, `SameSite=Lax` y `Secure` en producción. Las mutaciones
@@ -42,7 +43,33 @@ recibe `401`; una cuenta sin el rol `admin` recibe `403`.
 El cuerpo de creación y actualización de posts contiene `title`, `body`, `imageUrl`,
 `sourceName`, `sourceUrl` y `keywords`.
 
-## Carga de archivos
+### Importación administrativa de funciones
+
+`POST /admin/screenings/import` recibe el XLSX como cuerpo binario con el tipo
+`application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`. No requiere parámetros
+adicionales: cada fila conserva su `Sala` y su enlace oficial, mientras que el dominio de `URL` se
+usa automáticamente para asociar la función con su fuente. Un mismo archivo puede mezclar salas y
+dominios distintos. El límite es de 10 MB y 5.000 funciones por archivo.
+
+El libro debe contener una hoja `Cartelera`. La fila 1 usa exactamente estos encabezados:
+
+| Columna          | Contenido                                                      |
+| ---------------- | -------------------------------------------------------------- |
+| `Fecha parseada` | Fecha y hora en `YYYY-MM-DD HH:MM:SS` o `YYYY-MM-DDTHH:MM:SS`. |
+| `Fecha texto`    | Fecha alternativa; también admite `DD/MM/YYYY HH:MM`.          |
+| `Pelicula`       | Título de la película.                                         |
+| `Sala`           | Nombre de la sala.                                             |
+| `URL`            | Enlace HTTP o HTTPS de la función.                             |
+
+Al menos una de las dos columnas de fecha debe ser válida. Si ambas son válidas deben representar
+el mismo horario. Los horarios se interpretan en `America/Santiago` y se guardan además en UTC.
+
+La respuesta contiene el identificador del proceso, su estado, los contadores `processed`,
+`inserted`, `updated`, `duplicates` y `rejected`, y `errors`. Cada error informa `rowNumber`,
+`field`, `value`, `code` y `message`. El panel muestra este detalle y permite descargarlo como CSV
+para corregir y volver a cargar las filas rechazadas.
+
+## Carga de archivos por consola
 
 El cargador acepta JSON o CSV con el contrato normalizado:
 

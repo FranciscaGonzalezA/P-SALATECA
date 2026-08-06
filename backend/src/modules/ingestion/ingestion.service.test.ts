@@ -3,6 +3,7 @@ import { ingestScreenings } from './ingestion.service.js';
 import type {
   IngestionRepository,
   IngestionRunStatus,
+  IngestionSource,
   IngestionSummary,
   IngestionTransaction,
   IngestionValidationIssue,
@@ -13,6 +14,8 @@ import type {
 class MemoryIngestionTransaction implements IngestionTransaction {
   readonly staged: Array<{ id: number; status: string }> = [];
   readonly errors: IngestionValidationIssue[] = [];
+  readonly sources: IngestionSource[] = [];
+  readonly publishedSourceIds: number[] = [];
   finished: { runId: number; status: IngestionRunStatus; summary: IngestionSummary } | undefined;
   private publicationIndex = 0;
 
@@ -21,8 +24,9 @@ class MemoryIngestionTransaction implements IngestionTransaction {
     private readonly publicationErrorAt?: number,
   ) {}
 
-  async upsertSource(): Promise<number> {
-    return 10;
+  async upsertSource(source: IngestionSource): Promise<number> {
+    this.sources.push(source);
+    return 10 + this.sources.length - 1;
   }
 
   async createRun(): Promise<number> {
@@ -43,7 +47,8 @@ class MemoryIngestionTransaction implements IngestionTransaction {
     this.errors.push(...issues);
   }
 
-  async publishScreening(): Promise<PublicationOutcome> {
+  async publishScreening(sourceId: number): Promise<PublicationOutcome> {
+    this.publishedSourceIds.push(sourceId);
     if (this.publicationIndex === this.publicationErrorAt) {
       this.publicationIndex += 1;
       throw new Error('fallo controlado');
@@ -123,7 +128,7 @@ describe('ingestScreenings', () => {
       ],
     });
 
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       runId: 20,
       status: 'partially_succeeded',
       processed: 4,
@@ -132,6 +137,9 @@ describe('ingestScreenings', () => {
       rejected: 1,
       duplicates: 1,
     });
+    expect(result.errors).toEqual(
+      expect.arrayContaining([expect.objectContaining({ rowNumber: 4, field: 'venueName' })]),
+    );
     expect(transaction.staged.map((item) => item.status)).toEqual([
       'valid',
       'valid',
@@ -152,6 +160,31 @@ describe('ingestScreenings', () => {
     expect(result.status).toBe('failed');
     expect(result.rejected).toBe(1);
     expect(transaction.finished?.status).toBe('failed');
+  });
+
+  it('publica cada fila con la fuente inferida desde su propia URL', async () => {
+    const transaction = new MemoryIngestionTransaction(['inserted', 'inserted']);
+    const rowSources: IngestionSource[] = [
+      { name: 'cine.cl', type: 'website', baseUrl: 'https://cine.cl' },
+      { name: 'tickets.cl', type: 'website', baseUrl: 'https://tickets.cl' },
+    ];
+
+    const result = await ingestScreenings(new MemoryIngestionRepository(transaction), {
+      source: { name: 'cine.cl', type: 'website', baseUrl: 'https://cine.cl' },
+      records: rowSources.map((source, index) => ({
+        source,
+        rawPayload: normalizedRecord,
+        normalizedPayload: {
+          ...normalizedRecord,
+          sourceUrl: `${source.baseUrl}/funcion/${index + 1}`,
+          duplicateKey: `${normalizedRecord.duplicateKey}-${index}`,
+        },
+      })),
+    });
+
+    expect(result.inserted).toBe(2);
+    expect(transaction.sources).toEqual([rowSources[0], ...rowSources]);
+    expect(transaction.publishedSourceIds).toEqual([11, 12]);
   });
 
   it('aísla un error de persistencia y continúa con el siguiente registro', async () => {

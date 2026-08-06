@@ -64,6 +64,13 @@ duran ocho horas por defecto y se guardan en una cookie `HttpOnly`.
 Para revisar la interfaz sin base de datos ni credenciales, abre `/admin-demo`. Esta ruta utiliza
 datos temporales en memoria y no reemplaza el panel protegido.
 
+El panel permite importar funciones desde un XLSX con hoja `Cartelera` y columnas `Fecha parseada`,
+`Fecha texto`, `Pelicula`, `Sala` y `URL`. La carga es parcial: conserva las filas correctas y
+entrega un log CSV con la fila, el campo, el valor y el motivo de cada rechazo. No solicita datos
+adicionales de la fuente: cada función conserva su sala y el sistema identifica automáticamente la
+fuente desde el dominio de su URL. El formato completo está documentado en
+[docs/api.md](docs/api.md#importación-administrativa-de-funciones).
+
 ## Comandos
 
 ```powershell

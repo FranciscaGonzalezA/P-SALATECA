@@ -2,6 +2,7 @@ import type { AdminPostInputDto, AuthenticatedUserDto, PostSummaryDto } from '@s
 import { useEffect, useState, type FormEvent } from 'react';
 import { createAdminPost, deleteAdminPost, updateAdminPost } from '../api/adminPostsApi';
 import { fetchPost, fetchPosts } from '../api/postsApi';
+import { AdminScreeningsImport } from '../components/AdminScreeningsImport';
 
 interface AdminViewProps {
   user: AuthenticatedUserDto;
@@ -137,6 +138,8 @@ export function AdminView({ user, onLogout }: AdminViewProps) {
           {message}
         </div>
       )}
+
+      <AdminScreeningsImport />
 
       <div className="admin-layout">
         <aside className="admin-post-list" aria-label="Publicaciones existentes">

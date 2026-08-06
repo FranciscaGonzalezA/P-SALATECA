@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { AdminScreeningsImport } from '../components/AdminScreeningsImport';
 
 interface DemoPost {
   id: number;
@@ -23,6 +24,25 @@ const initialPosts: DemoPost[] = [
 ];
 
 const emptyPost = { title: '', body: '', keywords: '' };
+
+const simulateExcelImport = async () => ({
+  runId: 104,
+  status: 'partially_succeeded' as const,
+  processed: 18,
+  inserted: 15,
+  updated: 1,
+  duplicates: 1,
+  rejected: 1,
+  errors: [
+    {
+      rowNumber: 12,
+      field: 'Fecha texto',
+      code: 'invalid_datetime',
+      value: '31/02/2026 20:00',
+      message: 'La fecha debe usar un día válido.',
+    },
+  ],
+});
 
 export function AdminPreviewView() {
   const [posts, setPosts] = useState(initialPosts);
@@ -84,6 +104,8 @@ export function AdminPreviewView() {
           {message}
         </div>
       )}
+
+      <AdminScreeningsImport importer={simulateExcelImport} />
 
       <div className="admin-layout">
         <aside className="admin-post-list" aria-label="Publicaciones de demostración">

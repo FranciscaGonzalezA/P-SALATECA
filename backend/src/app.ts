@@ -6,6 +6,8 @@ import { AuthService } from './modules/auth/auth.service.js';
 import { createAuthRouter } from './modules/auth/auth.routes.js';
 import { MysqlAuthRepository } from './modules/auth/mysqlAuthRepository.js';
 import { createCatalogRouter } from './modules/catalog/catalog.routes.js';
+import { createAdminIngestionRouter } from './modules/ingestion/adminIngestion.routes.js';
+import { MysqlIngestionRepository } from './modules/ingestion/mysqlIngestionRepository.js';
 import { createPostsRouter } from './modules/posts/posts.routes.js';
 import { PostsService } from './modules/posts/posts.service.js';
 import { MysqlPostsRepository } from './modules/posts/mysqlPostsRepository.js';
@@ -34,6 +36,7 @@ export function createApp(): Express {
   app.use('/api/v1', createCatalogRouter());
   app.use('/api/v1', createPostsRouter(postsService));
   app.use('/api/v1', createAdminPostsRouter(authService, postsService));
+  app.use('/api/v1', createAdminIngestionRouter(authService, new MysqlIngestionRepository()));
 
   app.use((_request, response) => {
     response.status(404).json({

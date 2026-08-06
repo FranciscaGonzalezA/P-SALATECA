@@ -104,3 +104,22 @@ export interface AdminPostInputDto {
   sourceUrl: string;
   keywords: string[];
 }
+
+export interface ScreeningImportErrorDto {
+  rowNumber: number;
+  field: string;
+  code: string;
+  message: string;
+  value: string | null;
+}
+
+export interface ScreeningImportResultDto {
+  runId: number;
+  status: 'succeeded' | 'partially_succeeded' | 'failed';
+  processed: number;
+  inserted: number;
+  updated: number;
+  rejected: number;
+  duplicates: number;
+  errors: ScreeningImportErrorDto[];
+}

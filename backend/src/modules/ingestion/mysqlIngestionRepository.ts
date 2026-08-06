@@ -24,6 +24,19 @@ function toJson(value: unknown): string {
   return JSON.stringify(value ?? null);
 }
 
+function stagingSourceUrl(candidate: IngestionCandidate): string {
+  if (
+    typeof candidate.rawPayload === 'object' &&
+    candidate.rawPayload !== null &&
+    'sourceUrl' in candidate.rawPayload &&
+    typeof candidate.rawPayload.sourceUrl === 'string' &&
+    candidate.rawPayload.sourceUrl.length <= 2_048
+  ) {
+    return candidate.rawPayload.sourceUrl;
+  }
+  return 'about:blank';
+}
+
 class MysqlIngestionTransaction implements IngestionTransaction {
   constructor(private readonly connection: PoolConnection) {}
 
@@ -58,14 +71,7 @@ class MysqlIngestionTransaction implements IngestionTransaction {
     candidate: IngestionCandidate,
     normalized: NormalizedScreeningDto | null,
   ): Promise<number> {
-    const normalizedSourceUrl =
-      normalized?.sourceUrl ??
-      (typeof candidate.rawPayload === 'object' &&
-      candidate.rawPayload !== null &&
-      'sourceUrl' in candidate.rawPayload &&
-      typeof candidate.rawPayload.sourceUrl === 'string'
-        ? candidate.rawPayload.sourceUrl
-        : 'about:blank');
+    const normalizedSourceUrl = normalized?.sourceUrl ?? stagingSourceUrl(candidate);
     const sourceRecordKey = normalized?.sourceRecordKey ?? null;
 
     const [result] = await this.connection.execute<ResultSetHeader>(
@@ -107,11 +113,12 @@ class MysqlIngestionTransaction implements IngestionTransaction {
             staging_record_id,
             field_name,
             error_code,
-            error_message
+            error_message,
+            raw_value
           )
-          VALUES (?, ?, ?, ?, ?)
+          VALUES (?, ?, ?, ?, ?, CAST(? AS JSON))
         `,
-        [runId, stagingRecordId, issue.field, issue.code, issue.message],
+        [runId, stagingRecordId, issue.field, issue.code, issue.message, toJson(issue.rawValue)],
       );
     }
   }
