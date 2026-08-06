@@ -233,6 +233,21 @@ function buildWhere(filters: CatalogFilters): { sql: string; values: Array<strin
   };
 }
 
+function buildPagination(page: number, pageSize: number): string {
+  if (!Number.isSafeInteger(page) || page < 1 || !Number.isSafeInteger(pageSize) || pageSize < 1) {
+    throw new RangeError('La paginación de cartelera no es válida.');
+  }
+
+  const offset = (page - 1) * pageSize;
+  if (!Number.isSafeInteger(offset)) {
+    throw new RangeError('El desplazamiento de cartelera no es válido.');
+  }
+
+  // MySQL puede rechazar LIMIT/OFFSET parametrizados en sentencias preparadas.
+  // Estos valores son enteros validados por el esquema HTTP y nuevamente aquí.
+  return `LIMIT ${pageSize} OFFSET ${offset}`;
+}
+
 const catalogSelect = `
   SELECT
     m.id AS movie_id,
@@ -289,6 +304,7 @@ export class MysqlCatalogRepository implements CatalogRepository {
   constructor(private readonly pool: Pool = databasePool) {}
 
   async listCatalog(filters: CatalogFilters): Promise<CatalogPage> {
+    const pagination = buildPagination(filters.page, filters.pageSize);
     const where = buildWhere(filters);
     const joins = `
       FROM screenings s
@@ -305,7 +321,6 @@ export class MysqlCatalogRepository implements CatalogRepository {
       return { items: [], total: 0 };
     }
 
-    const offset = (filters.page - 1) * filters.pageSize;
     const [movieIdRows] = await this.pool.execute<MovieIdRow[]>(
       `
         SELECT m.id
@@ -313,9 +328,9 @@ export class MysqlCatalogRepository implements CatalogRepository {
         WHERE ${where.sql}
         GROUP BY m.id, m.title
         ORDER BY MIN(s.starts_at), m.title
-        LIMIT ? OFFSET ?
+        ${pagination}
       `,
-      [...where.values, filters.pageSize, offset],
+      where.values,
     );
     const movieIds = movieIdRows.map((row) => row.id);
     const placeholders = movieIds.map(() => '?').join(', ');

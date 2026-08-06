@@ -87,8 +87,16 @@ describe('MysqlCatalogRepository', () => {
       'Cristóbal',
       'Cristóbal',
     ]);
-    expect(execute.mock.calls[1]?.[1]).toEqual([...countValues, 6, 6]);
+    expect(execute.mock.calls[1]?.[0]).toContain('LIMIT 6 OFFSET 6');
+    expect(execute.mock.calls[1]?.[1]).toEqual(countValues);
     expect(execute.mock.calls[2]?.[1]).toEqual([7, ...countValues]);
+  });
+
+  it('rechaza paginación insegura antes de construir SQL', async () => {
+    await expect(
+      repository.listCatalog({ page: 1, pageSize: Number.POSITIVE_INFINITY }),
+    ).rejects.toThrow('La paginación de cartelera no es válida.');
+    expect(execute).not.toHaveBeenCalled();
   });
 
   it('evita consultas adicionales cuando no hay resultados', async () => {
