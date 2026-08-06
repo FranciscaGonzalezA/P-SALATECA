@@ -1,17 +1,26 @@
 import cors from 'cors';
 import express, { type Express } from 'express';
 import { env } from './config/env.js';
+import { createAdminPostsRouter } from './modules/posts/adminPosts.routes.js';
+import { AuthService } from './modules/auth/auth.service.js';
+import { createAuthRouter } from './modules/auth/auth.routes.js';
+import { MysqlAuthRepository } from './modules/auth/mysqlAuthRepository.js';
 import { createCatalogRouter } from './modules/catalog/catalog.routes.js';
 import { createPostsRouter } from './modules/posts/posts.routes.js';
+import { PostsService } from './modules/posts/posts.service.js';
+import { MysqlPostsRepository } from './modules/posts/mysqlPostsRepository.js';
 import { healthRouter } from './routes/health.js';
 
 export function createApp(): Express {
   const app = express();
+  const authService = new AuthService(new MysqlAuthRepository());
+  const postsService = new PostsService(new MysqlPostsRepository());
 
   app.disable('x-powered-by');
   app.use(
     cors({
       origin: env.FRONTEND_ORIGIN,
+      credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     }),
   );
@@ -21,8 +30,10 @@ export function createApp(): Express {
     response.json({ name: 'Cine Arte API', version: 'v1' });
   });
   app.use('/api/v1/health', healthRouter);
+  app.use('/api/v1', createAuthRouter(authService));
   app.use('/api/v1', createCatalogRouter());
-  app.use('/api/v1', createPostsRouter());
+  app.use('/api/v1', createPostsRouter(postsService));
+  app.use('/api/v1', createAdminPostsRouter(authService, postsService));
 
   app.use((_request, response) => {
     response.status(404).json({

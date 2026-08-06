@@ -23,6 +23,25 @@ Todas las consultas usan parámetros de MySQL. Las respuestas exitosas usan `dat
 añade `meta` con paginación y tiempo de procesamiento. Los errores usan `error.code`,
 `error.message` y, cuando corresponde, `error.fields`.
 
+## Autenticación y administración
+
+| Método   | Ruta               | Acceso  | Descripción                                |
+| -------- | ------------------ | ------- | ------------------------------------------ |
+| `POST`   | `/auth/login`      | Público | Inicia una sesión mediante correo y clave. |
+| `GET`    | `/auth/me`         | Sesión  | Devuelve la identidad autenticada.         |
+| `POST`   | `/auth/logout`     | Público | Elimina la sesión y su cookie.             |
+| `POST`   | `/admin/posts`     | Admin   | Crea una publicación.                      |
+| `PUT`    | `/admin/posts/:id` | Admin   | Actualiza una publicación.                 |
+| `DELETE` | `/admin/posts/:id` | Admin   | Elimina una publicación.                   |
+
+La sesión usa un token opaco aleatorio. Solo su hash SHA-256 se persiste en MySQL y el navegador
+lo recibe en una cookie `HttpOnly`, `SameSite=Lax` y `Secure` en producción. Las mutaciones
+administrativas validan el origen configurado en `FRONTEND_ORIGIN`. Una solicitud sin sesión
+recibe `401`; una cuenta sin el rol `admin` recibe `403`.
+
+El cuerpo de creación y actualización de posts contiene `title`, `body`, `imageUrl`,
+`sourceName`, `sourceUrl` y `keywords`.
+
 ## Carga de archivos
 
 El cargador acepta JSON o CSV con el contrato normalizado:

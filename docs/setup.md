@@ -7,6 +7,10 @@ real está ignorado por Git.
 
 ## 2. MySQL
 
+Configura `ADMIN_EMAIL` y `ADMIN_PASSWORD` para crear la cuenta administradora inicial. La
+contraseña debe tener al menos doce caracteres. `SESSION_DURATION_HOURS` controla la duración de
+la sesión y utiliza ocho horas por defecto.
+
 Opción recomendada para un entorno reproducible:
 
 ```powershell
@@ -24,8 +28,12 @@ con privilegios limitados a esa base. No uses `root` desde el backend.
 
 ```powershell
 pnpm install
+pnpm db:migrate
 pnpm dev
 ```
+
+Las migraciones deben estar aplicadas antes de arrancar el backend. El panel queda disponible en
+`/admin`.
 
 ## 4. Verificación
 

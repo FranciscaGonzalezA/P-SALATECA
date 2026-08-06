@@ -1,11 +1,12 @@
 import { useEffect, useState, type ReactNode } from 'react';
 
-export type AppRoute = 'home' | 'catalog' | 'posts';
+export type AppRoute = 'home' | 'catalog' | 'posts' | 'admin';
 
 interface SiteChromeProps {
   children: ReactNode;
   currentRoute: AppRoute;
   onNavigate: (route: AppRoute) => void;
+  isAdmin?: boolean;
 }
 
 const navigationItems: Array<{ route: AppRoute; symbol: string; label: string }> = [
@@ -19,7 +20,12 @@ function readFontScale(): number {
   return Number.isFinite(value) ? Math.min(2, Math.max(-1, value)) : 0;
 }
 
-export function SiteChrome({ children, currentRoute, onNavigate }: SiteChromeProps) {
+export function SiteChrome({
+  children,
+  currentRoute,
+  onNavigate,
+  isAdmin = false,
+}: SiteChromeProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [highContrast, setHighContrast] = useState(
     () => localStorage.getItem('salateca-contrast') === 'high',
@@ -40,6 +46,9 @@ export function SiteChrome({ children, currentRoute, onNavigate }: SiteChromePro
     setMenuOpen(false);
     onNavigate(route);
   };
+  const visibleNavigationItems = isAdmin
+    ? [...navigationItems, { route: 'admin' as const, symbol: '⚙', label: 'Administración' }]
+    : navigationItems;
 
   return (
     <div className="site-shell">
@@ -75,7 +84,7 @@ export function SiteChrome({ children, currentRoute, onNavigate }: SiteChromePro
           ×
         </button>
         <p className="menu-eyebrow">Explora Salateca</p>
-        {navigationItems.map((item) => (
+        {visibleNavigationItems.map((item) => (
           <button
             className={currentRoute === item.route ? 'is-current' : ''}
             type="button"
@@ -101,7 +110,7 @@ export function SiteChrome({ children, currentRoute, onNavigate }: SiteChromePro
       )}
 
       <aside className="side-rail" aria-label="Accesos rápidos">
-        {navigationItems.map((item) => (
+        {visibleNavigationItems.map((item) => (
           <button
             className={currentRoute === item.route ? 'is-current' : ''}
             type="button"

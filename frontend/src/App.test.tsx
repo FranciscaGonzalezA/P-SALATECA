@@ -4,7 +4,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
 
 const { fetchCatalog } = vi.hoisted(() => ({ fetchCatalog: vi.fn() }));
+const { fetchCurrentUser, logout } = vi.hoisted(() => ({
+  fetchCurrentUser: vi.fn(),
+  logout: vi.fn(),
+}));
 vi.mock('./api/catalogApi', () => ({ fetchCatalog }));
+vi.mock('./api/authApi', () => ({ fetchCurrentUser, logout }));
 
 vi.mock('./views/HomeView', () => ({
   HomeView: ({ onCatalog, onMovie }: { onCatalog: () => void; onMovie: (id: number) => void }) => (
@@ -47,6 +52,15 @@ vi.mock('./views/PostDetailView', () => ({
     </div>
   ),
 }));
+vi.mock('./views/LoginView', () => ({
+  LoginView: () => <h1>Inicio de sesión simulado</h1>,
+}));
+vi.mock('./views/AdminView', () => ({
+  AdminView: () => <h1>Administración simulada</h1>,
+}));
+vi.mock('./views/AdminPreviewView', () => ({
+  AdminPreviewView: () => <h1>Demostración administrativa</h1>,
+}));
 
 describe('App', () => {
   beforeEach(() => {
@@ -59,6 +73,8 @@ describe('App', () => {
       elapsedMs: 0,
       demo: true,
     });
+    fetchCurrentUser.mockReset().mockResolvedValue(null);
+    logout.mockReset().mockResolvedValue(undefined);
   });
 
   it('navega entre rutas y actualiza la historia del navegador', async () => {
@@ -93,5 +109,22 @@ describe('App', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Volver a posts' }));
     expect(window.location.pathname).toBe('/posts');
     expect(screen.getByRole('heading', { name: 'Posts simulados' })).toBeInTheDocument();
+  });
+
+  it('protege la ruta administrativa cuando no existe sesión', async () => {
+    window.history.replaceState({}, '', '/admin');
+    render(<App />);
+
+    expect(
+      await screen.findByRole('heading', { name: 'Inicio de sesión simulado' }),
+    ).toBeInTheDocument();
+  });
+
+  it('permite abrir directamente la demostración administrativa', () => {
+    window.history.replaceState({}, '', '/admin-demo');
+    render(<App />);
+    expect(
+      screen.getByRole('heading', { name: 'Demostración administrativa' }),
+    ).toBeInTheDocument();
   });
 });

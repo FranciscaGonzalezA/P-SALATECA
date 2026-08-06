@@ -87,3 +87,20 @@ export interface PostDetailDto extends PostSummaryDto {
   createdAt: string;
   updatedAt: string;
 }
+
+export type UserRole = 'user' | 'admin';
+
+export interface AuthenticatedUserDto {
+  id: number;
+  email: string;
+  role: UserRole;
+}
+
+export interface AdminPostInputDto {
+  title: string;
+  body: string;
+  imageUrl: string | null;
+  sourceName: string;
+  sourceUrl: string;
+  keywords: string[];
+}

@@ -39,6 +39,7 @@ Requisitos: Node.js 22 o superior, pnpm 11, MySQL 8.4 o Docker.
 Copy-Item .env.example .env
 pnpm install
 docker compose up -d mysql
+pnpm db:migrate
 pnpm dev
 ```
 
@@ -54,6 +55,14 @@ Servicios locales:
 La interfaz intenta consumir la API. En desarrollo puede utilizar datos de demostración mediante
 `VITE_DEMO_MODE=true`; el modo se indica claramente en pantalla y no reemplaza la validación
 final con MySQL.
+
+El panel editorial está disponible en `http://localhost:5173/admin`. Antes de iniciar el backend,
+define `ADMIN_EMAIL` y `ADMIN_PASSWORD` en `.env`; la contraseña debe contener al menos doce
+caracteres. El backend crea o sincroniza esa cuenta con el rol `admin` al arrancar. Las sesiones
+duran ocho horas por defecto y se guardan en una cookie `HttpOnly`.
+
+Para revisar la interfaz sin base de datos ni credenciales, abre `/admin-demo`. Esta ruta utiliza
+datos temporales en memoria y no reemplaza el panel protegido.
 
 ## Comandos
 

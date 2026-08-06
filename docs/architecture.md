@@ -47,9 +47,18 @@ Frontend React
 - `scraper`: conectores, contrato crudo y normalización por lotes;
 - `backend/modules/ingestion`: validación de entrada, staging y publicación transaccional;
 - `backend/modules/catalog`: rutas, servicio de aplicación y repositorio MySQL;
+- `backend/modules/auth`: contraseñas con `scrypt`, sesiones opacas y autorización por rol;
+- `backend/modules/posts`: lectura pública y edición exclusiva para administradores;
 - `packages/contracts`: respuestas y modelos públicos de la API;
 - `frontend/api`: cliente HTTP y adaptación explícita de datos de demostración;
 - `frontend/components` y `frontend/views`: presentación responsive basada en el prototipo.
+
+## Control de acceso
+
+El MVP utiliza los roles fijos `user` y `admin`. El backend es la autoridad: autentica la cookie,
+recupera la sesión vigente desde MySQL y aplica el rol antes de ejecutar una mutación. El frontend
+oculta el acceso administrativo cuando corresponde, pero esa condición no sustituye la
+autorización de la API.
 
 ## Límites del primer día
 

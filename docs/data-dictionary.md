@@ -29,6 +29,17 @@ milisegundos y los instantes de las funciones se guardan en UTC.
 | ------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
 | `posts` | Publicaciones editoriales importadas desde fuentes externas. | URL de origen única, fuente obligatoria y palabras clave almacenadas como arreglo JSON. |
 
+## Identidad y acceso
+
+| Tabla           | Propósito                                  | Reglas principales                                               |
+| --------------- | ------------------------------------------ | ---------------------------------------------------------------- |
+| `users`         | Identidades autorizadas por la aplicación. | Correo único, hash de contraseña, estado y rol `user` o `admin`. |
+| `user_sessions` | Sesiones opacas con vencimiento.           | Guarda solo SHA-256; se elimina en cascada junto con el usuario. |
+
+Las contraseñas no se almacenan directamente: el backend conserva un hash `scrypt` con una sal
+aleatoria por usuario. El token original de sesión existe únicamente en la cookie `HttpOnly` del
+navegador.
+
 ### Campos de `posts`
 
 | Campo        | Origen en el XLSX  | Regla                                                                   |

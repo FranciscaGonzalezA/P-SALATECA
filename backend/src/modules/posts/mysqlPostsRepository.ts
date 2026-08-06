@@ -1,5 +1,5 @@
-import type { PostDetailDto, PostSummaryDto } from '@salateca/contracts';
-import type { Pool, RowDataPacket } from 'mysql2/promise';
+import type { AdminPostInputDto, PostDetailDto, PostSummaryDto } from '@salateca/contracts';
+import type { Pool, PoolConnection, ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 import { databasePool } from '../../db/pool.js';
 import type { PostsRepository } from './posts.types.js';
 
@@ -13,6 +13,10 @@ interface PostRow extends RowDataPacket {
   source_name: string;
   created_at: string;
   updated_at: string;
+}
+
+interface IdRow extends RowDataPacket {
+  id: number;
 }
 
 function mysqlDateTimeToIso(value: string): string {
@@ -85,5 +89,104 @@ export class MysqlPostsRepository implements PostsRepository {
       createdAt: mysqlDateTimeToIso(row.created_at),
       updatedAt: mysqlDateTimeToIso(row.updated_at),
     };
+  }
+
+  private async resolveSourceId(
+    connection: PoolConnection,
+    input: AdminPostInputDto,
+  ): Promise<number> {
+    const [sourceRows] = await connection.execute<IdRow[]>(
+      'SELECT id FROM sources WHERE base_url = ? LIMIT 1',
+      [input.sourceUrl],
+    );
+    const sourceId = sourceRows[0]?.id;
+    if (sourceId) {
+      await connection.execute(
+        `UPDATE sources
+         SET name = ?, source_type = 'manual', is_active = TRUE
+         WHERE id = ?`,
+        [input.sourceName, sourceId],
+      );
+      return sourceId;
+    }
+
+    const [result] = await connection.execute<ResultSetHeader>(
+      `INSERT INTO sources (name, source_type, base_url)
+       VALUES (?, 'manual', ?)`,
+      [input.sourceName, input.sourceUrl],
+    );
+    return result.insertId;
+  }
+
+  async createPost(input: AdminPostInputDto): Promise<PostDetailDto> {
+    const connection = await this.pool.getConnection();
+    let postId: number;
+    try {
+      await connection.beginTransaction();
+      const sourceId = await this.resolveSourceId(connection, input);
+      const [result] = await connection.execute<ResultSetHeader>(
+        `INSERT INTO posts (source_id, title, body, image_url, source_url, keywords)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          sourceId,
+          input.title,
+          input.body,
+          input.imageUrl,
+          input.sourceUrl,
+          JSON.stringify(input.keywords),
+        ],
+      );
+      postId = result.insertId;
+      await connection.commit();
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+
+    const post = await this.findPost(postId);
+    if (!post) throw new Error('El post recién creado no pudo recuperarse.');
+    return post;
+  }
+
+  async updatePost(postId: number, input: AdminPostInputDto): Promise<PostDetailDto | null> {
+    const connection = await this.pool.getConnection();
+    try {
+      await connection.beginTransaction();
+      const sourceId = await this.resolveSourceId(connection, input);
+      const [result] = await connection.execute<ResultSetHeader>(
+        `UPDATE posts
+         SET source_id = ?, title = ?, body = ?, image_url = ?, source_url = ?, keywords = ?
+         WHERE id = ?`,
+        [
+          sourceId,
+          input.title,
+          input.body,
+          input.imageUrl,
+          input.sourceUrl,
+          JSON.stringify(input.keywords),
+          postId,
+        ],
+      );
+      if (result.affectedRows === 0) {
+        await connection.rollback();
+        return null;
+      }
+      await connection.commit();
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+    return this.findPost(postId);
+  }
+
+  async deletePost(postId: number): Promise<boolean> {
+    const [result] = await this.pool.execute<ResultSetHeader>('DELETE FROM posts WHERE id = ?', [
+      postId,
+    ]);
+    return result.affectedRows > 0;
   }
 }

@@ -62,7 +62,8 @@ body {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -82,7 +83,8 @@ a {
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
-select:focus-visible {
+select:focus-visible,
+textarea:focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 3px;
 }
@@ -1327,6 +1329,193 @@ main {
   line-height: 0.72;
 }
 
+.admin-login,
+.admin-page,
+.admin-loading {
+  padding-top: 7rem;
+}
+
+.admin-login {
+  display: grid;
+  min-height: 75vh;
+  place-items: center;
+}
+
+.admin-login-card {
+  display: grid;
+  width: min(100%, 520px);
+  gap: 1.25rem;
+  padding: clamp(2rem, 5vw, 4rem);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.admin-login-card h1,
+.admin-heading h1 {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(3rem, 7vw, 6rem);
+  font-weight: 400;
+  letter-spacing: -0.05em;
+}
+
+.admin-login-card > p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.admin-login-card label,
+.admin-post-form label {
+  display: grid;
+  gap: 0.5rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.admin-login-card input,
+.admin-post-form input,
+.admin-post-form textarea {
+  width: 100%;
+  padding: 0.85rem;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  background: var(--paper);
+  font-weight: 400;
+  letter-spacing: normal;
+}
+
+.admin-login-card button,
+.admin-post-form > button,
+.admin-new-button {
+  padding: 0.9rem 1.2rem;
+  color: #fff;
+  border: 0;
+  background: var(--blue);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.admin-login-card .admin-preview-button {
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  background: transparent;
+}
+
+.admin-demo-banner {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding: 1rem 1.25rem;
+  color: #171615;
+  border: 1px solid #c99b21;
+  background: #f5d87e;
+}
+
+.admin-demo-banner span {
+  font-size: 0.82rem;
+}
+
+.admin-login-card button:disabled,
+.admin-post-form > button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.admin-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.admin-heading p:last-child {
+  color: var(--muted);
+}
+
+.admin-message {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border-left: 4px solid var(--teal);
+  background: var(--surface);
+}
+
+.admin-message.is-error {
+  border-left-color: var(--pink);
+}
+
+.admin-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.7fr) minmax(0, 1.6fr);
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: start;
+}
+
+.admin-post-list {
+  display: grid;
+  border-top: 1px solid var(--line);
+}
+
+.admin-post-list article {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+}
+
+.admin-post-list article.is-current {
+  background: var(--surface);
+}
+
+.admin-post-list article button {
+  padding: 1rem;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.admin-post-list article .admin-delete {
+  color: var(--pink);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.admin-new-button {
+  margin-bottom: 1rem;
+}
+
+.admin-post-form {
+  display: grid;
+  gap: 1.25rem;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.admin-post-form h2 {
+  margin: 0 0 0.75rem;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 2.5rem;
+  font-weight: 400;
+}
+
+.admin-post-form textarea {
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.admin-form-row {
+  display: grid;
+  grid-template-columns: 0.7fr 1.3fr;
+  gap: 1rem;
+}
+
 .accessibility-bar {
   display: flex;
   align-items: center;
@@ -1518,12 +1707,22 @@ main {
   .newsletter-section,
   .detail-hero,
   .post-reading-layout,
-  .site-footer {
+  .site-footer,
+  .admin-layout {
     grid-template-columns: 1fr;
   }
 
   .post-source-note {
     position: static;
+  }
+
+  .admin-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-demo-banner {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .newsletter-section,

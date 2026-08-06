@@ -28,6 +28,9 @@ function createRepository(): PostsRepository {
       },
     ]),
     findPost: vi.fn().mockResolvedValue(post),
+    createPost: vi.fn().mockResolvedValue(post),
+    updatePost: vi.fn().mockResolvedValue(post),
+    deletePost: vi.fn().mockResolvedValue(true),
   };
 }
 
