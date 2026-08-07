@@ -20,6 +20,10 @@ export class PostsService {
     return this.repository.updatePost(postId, input);
   }
 
+  movePost(postId: number, direction: 'up' | 'down') {
+    return this.repository.movePost(postId, direction);
+  }
+
   deletePost(postId: number) {
     return this.repository.deletePost(postId);
   }

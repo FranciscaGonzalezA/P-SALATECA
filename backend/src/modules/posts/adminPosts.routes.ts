@@ -15,6 +15,10 @@ const adminPostSchema = z.object({
   keywords: z.array(z.string().trim().min(1).max(80)).max(20),
 });
 
+const movePostSchema = z.object({
+  direction: z.enum(['up', 'down']),
+});
+
 function parseId(value: string | undefined): number | null {
   const parsed = postIdSchema.safeParse(value);
   return parsed.success ? parsed.data : null;
@@ -57,6 +61,21 @@ export function createAdminPostsRouter(
     }
     const body: ApiResponse<PostDetailDto> = { data: post };
     response.json(body);
+  });
+
+  router.patch('/admin/posts/:id/order', async (request, response) => {
+    const postId = parseId(request.params.id);
+    const parsed = movePostSchema.safeParse(request.body);
+    if (!postId || !parsed.success) return invalidRequest(response);
+
+    const moved = await postsService.movePost(postId, parsed.data.direction);
+    if (moved === null) {
+      response.status(404).json({
+        error: { code: 'post_not_found', message: 'La publicación no existe.' },
+      });
+      return;
+    }
+    response.json({ data: { moved } });
   });
 
   router.delete('/admin/posts/:id', async (request, response) => {

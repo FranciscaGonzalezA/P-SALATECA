@@ -42,6 +42,7 @@ describe('rutas administrativas de posts', () => {
       findPost: vi.fn(),
       createPost: vi.fn().mockResolvedValue(post),
       updatePost: vi.fn().mockResolvedValue(post),
+      movePost: vi.fn().mockResolvedValue(true),
       deletePost: vi.fn().mockResolvedValue(true),
     };
     app = express();
@@ -67,7 +68,7 @@ describe('rutas administrativas de posts', () => {
     expect(forbidden.status).toBe(403);
   });
 
-  it('permite crear, actualizar y eliminar posts al administrador', async () => {
+  it('permite crear, actualizar, reordenar y eliminar posts al administrador', async () => {
     const create = await request(app)
       .post('/admin/posts')
       .set('Cookie', 'salateca_session=token')
@@ -80,6 +81,14 @@ describe('rutas administrativas de posts', () => {
       .set('Cookie', 'salateca_session=token')
       .send(input);
     expect(update.status).toBe(200);
+
+    const move = await request(app)
+      .patch('/admin/posts/10/order')
+      .set('Cookie', 'salateca_session=token')
+      .send({ direction: 'up' });
+    expect(move.status).toBe(200);
+    expect(move.body).toEqual({ data: { moved: true } });
+    expect(postsRepository.movePost).toHaveBeenCalledWith(10, 'up');
 
     const remove = await request(app)
       .delete('/admin/posts/10')
@@ -100,5 +109,20 @@ describe('rutas administrativas de posts', () => {
       .set('Cookie', 'salateca_session=token')
       .send({ ...input, title: '' });
     expect(invalid.status).toBe(400);
+
+    const invalidMove = await request(app)
+      .patch('/admin/posts/10/order')
+      .set('Cookie', 'salateca_session=token')
+      .send({ direction: 'left' });
+    expect(invalidMove.status).toBe(400);
+  });
+
+  it('distingue un post inexistente al reordenar', async () => {
+    vi.mocked(postsRepository.movePost).mockResolvedValueOnce(null);
+    const response = await request(app)
+      .patch('/admin/posts/999/order')
+      .set('Cookie', 'salateca_session=token')
+      .send({ direction: 'down' });
+    expect(response.status).toBe(404);
   });
 });

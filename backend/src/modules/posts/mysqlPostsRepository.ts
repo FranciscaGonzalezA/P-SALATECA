@@ -19,6 +19,10 @@ interface IdRow extends RowDataPacket {
   id: number;
 }
 
+interface OrderRow extends IdRow {
+  display_order: number;
+}
+
 function mysqlDateTimeToIso(value: string): string {
   const normalized = value.includes('T') ? value : value.replace(' ', 'T');
   return new Date(`${normalized.replace(/Z$/, '')}Z`).toISOString();
@@ -67,7 +71,9 @@ export class MysqlPostsRepository implements PostsRepository {
   constructor(private readonly pool: Pool = databasePool) {}
 
   async listPosts(): Promise<PostSummaryDto[]> {
-    const [rows] = await this.pool.execute<PostRow[]>(`${postsSelect} ORDER BY p.id`);
+    const [rows] = await this.pool.execute<PostRow[]>(
+      `${postsSelect} ORDER BY p.display_order, p.id`,
+    );
     return rows.map(mapSummary);
   }
 
@@ -125,8 +131,10 @@ export class MysqlPostsRepository implements PostsRepository {
       await connection.beginTransaction();
       const sourceId = await this.resolveSourceId(connection, input);
       const [result] = await connection.execute<ResultSetHeader>(
-        `INSERT INTO posts (source_id, title, body, image_url, source_url, keywords)
-         VALUES (?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO posts
+           (source_id, title, body, image_url, source_url, keywords, display_order)
+         SELECT ?, ?, ?, ?, ?, ?, COALESCE(MAX(display_order), 0) + 1
+         FROM posts`,
         [
           sourceId,
           input.title,
@@ -181,6 +189,64 @@ export class MysqlPostsRepository implements PostsRepository {
       connection.release();
     }
     return this.findPost(postId);
+  }
+
+  async movePost(postId: number, direction: 'up' | 'down'): Promise<boolean | null> {
+    const connection = await this.pool.getConnection();
+    try {
+      await connection.beginTransaction();
+      const [currentRows] = await connection.execute<OrderRow[]>(
+        'SELECT id, display_order FROM posts WHERE id = ? FOR UPDATE',
+        [postId],
+      );
+      const current = currentRows[0];
+      if (!current) {
+        await connection.rollback();
+        return null;
+      }
+
+      const comparison = direction === 'up' ? '<' : '>';
+      const order = direction === 'up' ? 'DESC' : 'ASC';
+      const [neighborRows] = await connection.execute<OrderRow[]>(
+        `SELECT id, display_order
+         FROM posts
+         WHERE display_order ${comparison} ?
+         ORDER BY display_order ${order}, id ${order}
+         LIMIT 1
+         FOR UPDATE`,
+        [current.display_order],
+      );
+      const neighbor = neighborRows[0];
+      if (!neighbor) {
+        await connection.commit();
+        return false;
+      }
+
+      await connection.execute(
+        `UPDATE posts
+         SET display_order = CASE
+           WHEN id = ? THEN ?
+           WHEN id = ? THEN ?
+           ELSE display_order
+         END
+         WHERE id IN (?, ?)`,
+        [
+          current.id,
+          neighbor.display_order,
+          neighbor.id,
+          current.display_order,
+          current.id,
+          neighbor.id,
+        ],
+      );
+      await connection.commit();
+      return true;
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
   }
 
   async deletePost(postId: number): Promise<boolean> {

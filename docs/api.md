@@ -34,6 +34,7 @@ añade `meta` con paginación y tiempo de procesamiento. Los errores usan `error
 | `POST`   | `/auth/logout`             | Público | Elimina la sesión y su cookie.             |
 | `POST`   | `/admin/posts`             | Admin   | Crea una publicación.                      |
 | `PUT`    | `/admin/posts/:id`         | Admin   | Actualiza una publicación.                 |
+| `PATCH`  | `/admin/posts/:id/order`   | Admin   | Mueve una publicación arriba o abajo.      |
 | `DELETE` | `/admin/posts/:id`         | Admin   | Elimina una publicación.                   |
 | `POST`   | `/admin/screenings/import` | Admin   | Importa funciones desde un archivo XLSX.   |
 

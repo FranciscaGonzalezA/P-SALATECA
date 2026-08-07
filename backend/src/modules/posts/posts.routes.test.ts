@@ -30,6 +30,7 @@ function createRepository(): PostsRepository {
     findPost: vi.fn().mockResolvedValue(post),
     createPost: vi.fn().mockResolvedValue(post),
     updatePost: vi.fn().mockResolvedValue(post),
+    movePost: vi.fn().mockResolvedValue(true),
     deletePost: vi.fn().mockResolvedValue(true),
   };
 }

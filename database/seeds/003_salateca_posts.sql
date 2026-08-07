@@ -10,7 +10,8 @@ INSERT INTO posts (
   body,
   image_url,
   source_url,
-  keywords
+  keywords,
+  display_order
 )
 SELECT
   sources.id,
@@ -32,7 +33,8 @@ Indicios que se hacen fundamentales cuando pareciera que colectivamente, la bús
 Maira Escobar Riveros',
   'https://salatecadecine.cl/wp-content/uploads/2026/05/image-819x1024.png',
   'https://salatecadecine.cl/resena-la-vida-que-vendra-dir-karin-cuyul/',
-  JSON_ARRAY('cine chileno', 'documental', 'memoria', 'movimientos sociales', 'esperanza colectiva', 'archivos audiovisuales', 'Chile', 'Karin Cuyul', 'procesos sociales')
+  JSON_ARRAY('cine chileno', 'documental', 'memoria', 'movimientos sociales', 'esperanza colectiva', 'archivos audiovisuales', 'Chile', 'Karin Cuyul', 'procesos sociales'),
+  1
 FROM sources
 WHERE sources.base_url = 'https://salatecadecine.cl'
 ON DUPLICATE KEY UPDATE
@@ -48,7 +50,8 @@ INSERT INTO posts (
   body,
   image_url,
   source_url,
-  keywords
+  keywords,
+  display_order
 )
 SELECT
   sources.id,
@@ -80,7 +83,8 @@ Entonces esa fue mi experiencia. Quedé incómoda, adolorida e impotente; esa es
 Eleonor Figueroa, salatecóloga.',
   'https://salatecadecine.cl/wp-content/uploads/2026/01/Al-sur-del-invierno-esta-la-nieve-1-930x620.jpg',
   'https://salatecadecine.cl/resena-al-sur-del-invierno-esta-la-nieve/',
-  JSON_ARRAY('documental observacional', 'Patagonia chilena', 'invierno', 'muerte', 'naturaleza', 'Magallanes', 'Sebastián Vidal', 'territorio austral', 'paisaje')
+  JSON_ARRAY('documental observacional', 'Patagonia chilena', 'invierno', 'muerte', 'naturaleza', 'Magallanes', 'Sebastián Vidal', 'territorio austral', 'paisaje'),
+  2
 FROM sources
 WHERE sources.base_url = 'https://salatecadecine.cl'
 ON DUPLICATE KEY UPDATE
@@ -96,7 +100,8 @@ INSERT INTO posts (
   body,
   image_url,
   source_url,
-  keywords
+  keywords,
+  display_order
 )
 SELECT
   sources.id,
@@ -116,7 +121,8 @@ Te invitamos a mirarlo y a descargarlo abajo!!
 Cartelera en datos — Descarga',
   NULL,
   'https://salatecadecine.cl/salateca-wrapped/',
-  JSON_ARRAY('cartelera de cine', 'cine independiente', 'Santiago', 'programación cinematográfica', 'análisis estadístico', 'representación de género', 'diversidad', 'Salateca de Cine', 'primer semestre 2024')
+  JSON_ARRAY('cartelera de cine', 'cine independiente', 'Santiago', 'programación cinematográfica', 'análisis estadístico', 'representación de género', 'diversidad', 'Salateca de Cine', 'primer semestre 2024'),
+  3
 FROM sources
 WHERE sources.base_url = 'https://salatecadecine.cl'
 ON DUPLICATE KEY UPDATE
@@ -132,7 +138,8 @@ INSERT INTO posts (
   body,
   image_url,
   source_url,
-  keywords
+  keywords,
+  display_order
 )
 SELECT
   sources.id,
@@ -176,7 +183,8 @@ Aunque en este lugar también se oyeron voces como las de Víctor Jara, quien en
 Así, ya con diez años pasados de aquella recuperación gracias a un adjudicado Proyecto Fondart por parte del Círculo de Periodistas, este lugar se mueve en representaciones teatrales tanto como en conciertos, musicales y cine, con disposición para 213 personas.',
   'https://salatecadecine.cl/wp-content/uploads/2024/08/banner-cine-insurgente-pagina-web.png',
   'https://salatecadecine.cl/cine-insurgente-no-son-30-pesos-chile-genealogia-de-una-insurreccion/',
-  JSON_ARRAY('estallido social', 'memoria histórica', 'derechos humanos', 'FPMR', 'dictadura chilena', 'cine documental', 'resistencia', 'Teatro Camilo Henríquez', 'Fernando Krichmar', 'Cine Insurgente')
+  JSON_ARRAY('estallido social', 'memoria histórica', 'derechos humanos', 'FPMR', 'dictadura chilena', 'cine documental', 'resistencia', 'Teatro Camilo Henríquez', 'Fernando Krichmar', 'Cine Insurgente'),
+  4
 FROM sources
 WHERE sources.base_url = 'https://salatecadecine.cl'
 ON DUPLICATE KEY UPDATE
