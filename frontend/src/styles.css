@@ -592,29 +592,55 @@ main {
 
 .movie-card {
   display: grid;
-  overflow: hidden;
+  height: 100%;
   min-width: 0;
   color: inherit;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  box-shadow: 0 20px 50px rgb(50 35 25 / 17%);
+  background: transparent;
+  perspective: 1000px;
   cursor: pointer;
   text-decoration: none;
-  transition:
-    border-color 180ms ease,
-    box-shadow 180ms ease,
-    transform 180ms ease;
+  transition: transform 180ms ease;
 }
 
 .movie-card:hover {
-  border-color: var(--ink);
-  box-shadow: 0 24px 55px rgb(50 35 25 / 23%);
   transform: translateY(-0.2rem);
 }
 
 .movie-card:focus-visible {
   outline: 3px solid var(--pink);
   outline-offset: 3px;
+}
+
+.movie-card-inner {
+  position: relative;
+  display: grid;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 520ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.movie-card.is-flipped .movie-card-inner {
+  transform: rotateY(180deg);
+}
+
+.movie-card-face {
+  grid-area: 1 / 1;
+  overflow: hidden;
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: 0 20px 50px rgb(50 35 25 / 17%);
+  backface-visibility: hidden;
+}
+
+.movie-card-front {
+  display: flex;
+  flex-direction: column;
+}
+
+.movie-card:hover .movie-card-face {
+  border-color: var(--ink);
+  box-shadow: 0 24px 55px rgb(50 35 25 / 23%);
 }
 
 .movie-poster,
@@ -725,8 +751,7 @@ main {
 }
 
 .movie-card:hover .movie-card-overlay,
-.movie-card:focus-visible .movie-card-overlay,
-.movie-card:focus-within .movie-card-overlay {
+.movie-card:focus-visible .movie-card-overlay {
   opacity: 1;
   transform: translateY(0);
 }
@@ -747,6 +772,64 @@ main {
   color: #fff;
 }
 
+.movie-card-back {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(1rem, 1.8vw, 1.5rem);
+  background:
+    radial-gradient(circle at 100% 0%, rgb(242 73 130 / 16%), transparent 38%),
+    var(--surface);
+  transform: rotateY(180deg);
+}
+
+.movie-card-back-kicker {
+  margin: 0 0 0.75rem;
+  color: var(--muted);
+  font-size: 0.65rem;
+  font-weight: 850;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.movie-card-back h3 {
+  margin: 0 0 1rem;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.45rem, 2.5vw, 2rem);
+  font-weight: 400;
+  line-height: 0.98;
+}
+
+.movie-card-synopsis {
+  margin: 1.4rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.movie-card-synopsis > span {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.movie-card-synopsis p {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0.55rem 0 0;
+  color: var(--muted);
+  font-size: clamp(0.74rem, 1.2vw, 0.86rem);
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 7;
+}
+
+.movie-card-back-footer {
+  display: grid;
+  gap: 0.55rem;
+}
+
 .movie-card-cta {
   font-size: 0.72rem;
   font-weight: 850;
@@ -754,8 +837,14 @@ main {
   text-transform: uppercase;
 }
 
+.movie-card-reset-hint {
+  color: var(--muted);
+  font-size: 0.64rem;
+}
+
 .movie-card-content {
   display: flex;
+  flex: 1;
   flex-direction: column;
   align-items: flex-start;
   padding: 1rem 1.1rem 1.15rem;
@@ -1414,6 +1503,53 @@ main {
   animation: loading 1.3s infinite;
 }
 
+@media (min-width: 821px) {
+  .posts-page {
+    padding-top: 4rem;
+  }
+
+  .posts-heading {
+    max-width: 860px;
+    margin-bottom: clamp(2.5rem, 4vw, 4rem);
+  }
+
+  .posts-heading h1 {
+    font-size: clamp(3.75rem, 7vw, 6.5rem);
+    line-height: 0.88;
+  }
+
+  .posts-heading > p:last-child {
+    max-width: 640px;
+    margin-top: 1.4rem;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .posts-list button {
+    grid-template-columns: 4rem minmax(0, 1fr) 3rem;
+    gap: 1.25rem;
+    padding: clamp(1.15rem, 2vw, 1.75rem) 0.75rem;
+  }
+
+  .post-list-copy {
+    gap: 0.45rem;
+  }
+
+  .post-list-copy strong {
+    max-width: 900px;
+    font-size: clamp(1.55rem, 2.65vw, 2.65rem);
+    line-height: 1.06;
+  }
+
+  .post-list-arrow {
+    font-size: 1.65rem;
+  }
+
+  .posts-loading div {
+    height: 6.5rem;
+  }
+}
+
 .post-detail-heading {
   max-width: 1080px;
   margin-bottom: 3rem;
@@ -1573,20 +1709,33 @@ main {
 
 .admin-login-card {
   display: grid;
-  width: min(100%, 520px);
+  width: min(100%, 46rem);
+  min-width: 0;
   gap: 1.25rem;
   padding: clamp(2rem, 5vw, 4rem);
   border: 1px solid var(--line);
   background: var(--surface);
 }
 
-.admin-login-card h1,
+.admin-login-card h1 {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(3rem, 7vw, 5.25rem);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+}
+
 .admin-heading h1 {
   margin: 0;
   font-family: Georgia, 'Times New Roman', serif;
   font-size: clamp(3rem, 7vw, 6rem);
   font-weight: 400;
   letter-spacing: -0.05em;
+}
+
+.admin-login-card > * {
+  min-width: 0;
 }
 
 .admin-login-card > p {
@@ -1626,6 +1775,10 @@ main {
   background: var(--blue);
   font-weight: 800;
   cursor: pointer;
+}
+
+.admin-login-card button {
+  width: 100%;
 }
 
 .admin-login-card .admin-preview-button {
@@ -1673,6 +1826,11 @@ main {
   padding: 1rem;
   border-left: 4px solid var(--teal);
   background: var(--surface);
+}
+
+.admin-login-card .admin-message {
+  width: 100%;
+  margin-bottom: 0;
 }
 
 .admin-message.is-error {

@@ -5,18 +5,31 @@ import { demoMovies } from '../data/demoCatalog';
 import { MovieCard } from './MovieCard';
 
 describe('MovieCard', () => {
-  it('presenta metadatos, próxima función y abre la película correcta', async () => {
+  it('gira con clic derecho y abre la película correcta con clic izquierdo', async () => {
     const onOpen = vi.fn();
     render(<MovieCard movie={demoMovies[0]!} onOpen={onOpen} />);
 
     expect(screen.getByRole('heading', { name: 'La Casa Lobo' })).toBeInTheDocument();
     expect(screen.getByText(/75 min/)).toBeInTheDocument();
     expect(screen.getByText('2026-08-01 · 18:00')).toBeInTheDocument();
-    expect(screen.getByText('Haz clic para más información →')).toBeInTheDocument();
+    expect(screen.getByText('Sinopsis')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Una joven escapa de una colonia alemana y se refugia en una casa donde la realidad comienza a transformarse.',
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText('Haz clic para más información →')).toHaveLength(2);
 
     const card = screen.getByRole('link', { name: 'Ver La Casa Lobo y sus funciones' });
     expect(card).toHaveAttribute('href', '/peliculas/1');
-    expect(screen.queryByText(/Ver película y funciones/)).not.toBeInTheDocument();
+    expect(card).not.toHaveClass('is-flipped');
+
+    await userEvent.pointer({ keys: '[MouseRight]', target: card });
+    expect(card).toHaveClass('is-flipped');
+    expect(onOpen).not.toHaveBeenCalled();
+
+    await userEvent.pointer({ keys: '[MouseRight]', target: card });
+    expect(card).not.toHaveClass('is-flipped');
 
     await userEvent.click(card);
     expect(onOpen).toHaveBeenCalledWith(1);
