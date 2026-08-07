@@ -596,6 +596,22 @@ main {
   border: 1px solid var(--line);
   background: var(--surface);
   box-shadow: 0 20px 50px rgb(50 35 25 / 17%);
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.movie-card:hover {
+  border-color: var(--ink);
+  box-shadow: 0 24px 55px rgb(50 35 25 / 23%);
+  transform: translateY(-0.2rem);
+}
+
+.movie-card:focus-visible {
+  outline: 3px solid var(--pink);
+  outline-offset: 3px;
 }
 
 .movie-poster,
@@ -2106,11 +2122,6 @@ main {
 
   .next-screening strong {
     font-size: 0.78rem;
-  }
-
-  .movie-card .text-link {
-    gap: 0.25rem;
-    font-size: 0.72rem;
   }
 
   .results-bar {

@@ -55,7 +55,7 @@ describe('CatalogView', () => {
     );
 
     const movieButtons = await screen.findAllByRole('button', {
-      name: /Ver película y funciones/,
+      name: /Ver .+ y sus funciones/,
     });
     await userEvent.click(movieButtons[0]!);
     expect(onMovie).toHaveBeenCalledWith(1);

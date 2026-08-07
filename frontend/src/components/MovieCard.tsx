@@ -1,4 +1,5 @@
 import type { MovieSummaryDto } from '@salateca/contracts';
+import type { KeyboardEvent } from 'react';
 
 interface MovieCardProps {
   movie: MovieSummaryDto;
@@ -8,9 +9,24 @@ interface MovieCardProps {
 export function MovieCard({ movie, onOpen }: MovieCardProps) {
   const nextScreening = movie.screenings[0];
   const posterClass = `movie-poster poster-tone-${movie.id % 5}`;
+  const openMovie = () => onOpen(movie.id);
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      openMovie();
+    }
+  };
 
   return (
-    <article className="movie-card">
+    <article
+      className="movie-card"
+      role="button"
+      tabIndex={0}
+      aria-label={`Ver ${movie.title} y sus funciones`}
+      onClick={openMovie}
+      onKeyDown={handleKeyDown}
+    >
       <div className={posterClass}>
         {movie.posterUrl ? (
           <img src={movie.posterUrl} alt={`Afiche de ${movie.title}`} loading="lazy" />
@@ -44,9 +60,6 @@ export function MovieCard({ movie, onOpen }: MovieCardProps) {
         ) : (
           <p className="next-screening">Sin funciones próximas.</p>
         )}
-        <button type="button" className="text-link" onClick={() => onOpen(movie.id)}>
-          Ver película y funciones <span aria-hidden="true">→</span>
-        </button>
       </div>
     </article>
   );

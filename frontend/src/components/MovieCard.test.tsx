@@ -13,7 +13,15 @@ describe('MovieCard', () => {
     expect(screen.getByText(/75 min/)).toBeInTheDocument();
     expect(screen.getByText('2026-08-01 · 18:00')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('button', { name: /Ver película y funciones/ }));
+    const card = screen.getByRole('button', { name: 'Ver La casa lobo y sus funciones' });
+    expect(screen.queryByText(/Ver película y funciones/)).not.toBeInTheDocument();
+
+    await userEvent.click(card);
+    expect(onOpen).toHaveBeenCalledWith(1);
+
+    onOpen.mockClear();
+    card.focus();
+    await userEvent.keyboard('{Enter}');
     expect(onOpen).toHaveBeenCalledWith(1);
   });
 
