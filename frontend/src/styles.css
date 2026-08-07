@@ -611,6 +611,11 @@ main {
   isolation: isolate;
 }
 
+.movie-poster {
+  min-height: unset;
+  aspect-ratio: 2 / 3;
+}
+
 .movie-poster::before,
 .detail-poster::before {
   position: absolute;
@@ -630,6 +635,10 @@ main {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.movie-poster img {
+  object-fit: contain;
 }
 
 .poster-tone-0 {
@@ -1985,10 +1994,6 @@ main {
   .movie-grid,
   .loading-grid {
     grid-template-columns: 1fr;
-  }
-
-  .movie-poster {
-    min-height: 390px;
   }
 
   .filter-panel {
