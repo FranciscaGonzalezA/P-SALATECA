@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
@@ -87,10 +87,11 @@ describe('App', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Abrir película' }));
     expect(window.location.pathname).toBe('/peliculas/7');
+    expect(screen.getByRole('dialog', { name: 'Detalle de la película' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Película 7' })).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: 'Volver' }));
-    expect(window.location.pathname).toBe('/cartelera');
+    await waitFor(() => expect(window.location.pathname).toBe('/cartelera'));
   });
 
   it('interpreta rutas directas y eventos popstate', async () => {

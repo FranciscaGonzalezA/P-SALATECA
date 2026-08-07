@@ -12,6 +12,7 @@ describe('MovieCard', () => {
     expect(screen.getByRole('heading', { name: 'La Casa Lobo' })).toBeInTheDocument();
     expect(screen.getByText(/75 min/)).toBeInTheDocument();
     expect(screen.getByText('2026-08-01 · 18:00')).toBeInTheDocument();
+    expect(screen.getByText('Haz clic para más información →')).toBeInTheDocument();
 
     const card = screen.getByRole('button', { name: 'Ver La Casa Lobo y sus funciones' });
     expect(screen.queryByText(/Ver película y funciones/)).not.toBeInTheDocument();

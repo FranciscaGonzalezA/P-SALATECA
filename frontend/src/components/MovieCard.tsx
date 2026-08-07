@@ -40,13 +40,35 @@ export function MovieCard({ movie, onOpen }: MovieCardProps) {
         {movie.posterUrl ? (
           <img src={movie.posterUrl} alt={`Afiche de ${displayTitle}`} loading="lazy" />
         ) : (
-          <>
+          <div className="poster-placeholder" aria-hidden="true">
             <span className="poster-kicker">Salateca presenta</span>
             <span className="poster-title">{displayTitle}</span>
             <span className="poster-year">{movie.releaseYear ?? 'Cine independiente'}</span>
-          </>
+          </div>
         )}
+
+        <div className="movie-card-overlay" aria-hidden="true">
+          <div>
+            <p className="movie-meta">
+              {movie.director ?? 'Director por confirmar'}
+              {movie.durationMinutes ? ` · ${movie.durationMinutes} min` : ''}
+            </p>
+            {nextScreening ? (
+              <div className="next-screening">
+                <span>Próxima función</span>
+                <strong>
+                  {nextScreening.date} · {nextScreening.time}
+                </strong>
+                <span>{nextScreening.venue.name}</span>
+              </div>
+            ) : (
+              <p className="next-screening">Sin funciones próximas.</p>
+            )}
+          </div>
+          <span className="movie-card-cta">Haz clic para más información →</span>
+        </div>
       </div>
+
       <div className="movie-card-content">
         <div className="tag-list" aria-label="Géneros">
           {movie.genres.slice(0, 3).map((genre) => (
@@ -54,21 +76,6 @@ export function MovieCard({ movie, onOpen }: MovieCardProps) {
           ))}
         </div>
         <h3>{displayTitle}</h3>
-        <p className="movie-meta">
-          {movie.director ?? 'Director por confirmar'}
-          {movie.durationMinutes ? ` · ${movie.durationMinutes} min` : ''}
-        </p>
-        {nextScreening ? (
-          <div className="next-screening">
-            <span>Próxima función</span>
-            <strong>
-              {nextScreening.date} · {nextScreening.time}
-            </strong>
-            <span>{nextScreening.venue.name}</span>
-          </div>
-        ) : (
-          <p className="next-screening">Sin funciones próximas.</p>
-        )}
       </div>
     </article>
   );

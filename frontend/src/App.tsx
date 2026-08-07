@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { AuthenticatedUserDto } from '@salateca/contracts';
 import { fetchCurrentUser, logout } from './api/authApi';
 import { fetchCatalog } from './api/catalogApi';
 import { SiteChrome, type AppRoute } from './components/SiteChrome';
+import { MovieDetailModal } from './components/MovieDetailModal';
 import { CatalogView } from './views/CatalogView';
 import { HomeView } from './views/HomeView';
 import { MovieDetailView } from './views/MovieDetailView';
@@ -16,6 +17,24 @@ interface RouteState {
   page: AppRoute | 'movie' | 'post' | 'admin-demo';
   movieId?: number | undefined;
   postId?: number | undefined;
+}
+
+type MovieOrigin = Extract<AppRoute, 'home' | 'catalog'>;
+
+function routePath(nextRoute: RouteState): string {
+  return nextRoute.page === 'home'
+    ? '/'
+    : nextRoute.page === 'catalog'
+      ? '/cartelera'
+      : nextRoute.page === 'posts'
+        ? '/posts'
+        : nextRoute.page === 'admin'
+          ? '/admin'
+          : nextRoute.page === 'admin-demo'
+            ? '/admin-demo'
+            : nextRoute.page === 'post'
+              ? `/posts/${nextRoute.postId}`
+              : `/peliculas/${nextRoute.movieId}`;
 }
 
 function routeFromLocation(): RouteState {
@@ -41,12 +60,23 @@ function routeFromLocation(): RouteState {
 
 function App() {
   const [route, setRoute] = useState<RouteState>(routeFromLocation);
+  const [movieOrigin, setMovieOrigin] = useState<MovieOrigin>(() => {
+    const storedOrigin = window.history.state?.movieOrigin;
+    return storedOrigin === 'home' ? 'home' : 'catalog';
+  });
   const [featured, setFeatured] = useState<Awaited<ReturnType<typeof fetchCatalog>>['items']>([]);
   const [currentUser, setCurrentUser] = useState<AuthenticatedUserDto | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
-    const onPopState = () => setRoute(routeFromLocation());
+    const onPopState = () => {
+      const nextRoute = routeFromLocation();
+      const storedOrigin = window.history.state?.movieOrigin;
+      if (nextRoute.page === 'movie' && (storedOrigin === 'home' || storedOrigin === 'catalog')) {
+        setMovieOrigin(storedOrigin);
+      }
+      setRoute(nextRoute);
+    };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
@@ -67,28 +97,35 @@ function App() {
   }, []);
 
   const navigate = (nextRoute: RouteState) => {
-    const path =
-      nextRoute.page === 'home'
-        ? '/'
-        : nextRoute.page === 'catalog'
-          ? '/cartelera'
-          : nextRoute.page === 'posts'
-            ? '/posts'
-            : nextRoute.page === 'admin'
-              ? '/admin'
-              : nextRoute.page === 'admin-demo'
-                ? '/admin-demo'
-                : nextRoute.page === 'post'
-                  ? `/posts/${nextRoute.postId}`
-                  : `/peliculas/${nextRoute.movieId}`;
-    window.history.pushState({}, '', path);
+    window.history.pushState({}, '', routePath(nextRoute));
     setRoute(nextRoute);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const openMovie = useCallback((movieId: number, origin: MovieOrigin) => {
+    setMovieOrigin(origin);
+    window.history.pushState(
+      { salatecaMovieModal: true, movieOrigin: origin },
+      '',
+      `/peliculas/${movieId}`,
+    );
+    setRoute({ page: 'movie', movieId });
+  }, []);
+
+  const closeMovie = useCallback(() => {
+    if (window.history.state?.salatecaMovieModal) {
+      window.history.back();
+      return;
+    }
+
+    const returnRoute: RouteState = { page: movieOrigin };
+    window.history.replaceState({}, '', routePath(returnRoute));
+    setRoute(returnRoute);
+  }, [movieOrigin]);
+
   const chromeRoute: AppRoute =
     route.page === 'movie'
-      ? 'catalog'
+      ? movieOrigin
       : route.page === 'post'
         ? 'posts'
         : route.page === 'admin-demo'
@@ -106,18 +143,20 @@ function App() {
       onNavigate={(page) => navigate({ page })}
       isAdmin={currentUser?.role === 'admin'}
     >
-      {route.page === 'home' && (
+      {(route.page === 'home' || (route.page === 'movie' && movieOrigin === 'home')) && (
         <HomeView
           featured={featured}
           onCatalog={() => navigate({ page: 'catalog' })}
-          onMovie={(movieId) => navigate({ page: 'movie', movieId })}
+          onMovie={(movieId) => openMovie(movieId, 'home')}
         />
       )}
-      {route.page === 'catalog' && (
-        <CatalogView onMovie={(movieId) => navigate({ page: 'movie', movieId })} />
+      {(route.page === 'catalog' || (route.page === 'movie' && movieOrigin === 'catalog')) && (
+        <CatalogView onMovie={(movieId) => openMovie(movieId, 'catalog')} />
       )}
       {route.page === 'movie' && route.movieId && (
-        <MovieDetailView movieId={route.movieId} onBack={() => navigate({ page: 'catalog' })} />
+        <MovieDetailModal onClose={closeMovie}>
+          <MovieDetailView movieId={route.movieId} onBack={closeMovie} />
+        </MovieDetailModal>
       )}
       {route.page === 'posts' && (
         <PostsView onPost={(postId) => navigate({ page: 'post', postId })} />
