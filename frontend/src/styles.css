@@ -859,8 +859,7 @@ main {
   justify-content: space-between;
   padding: clamp(1rem, 1.8vw, 1.5rem);
   background:
-    radial-gradient(circle at 100% 0%, rgb(242 73 130 / 16%), transparent 38%),
-    var(--surface);
+    radial-gradient(circle at 100% 0%, rgb(242 73 130 / 16%), transparent 38%), var(--surface);
   transform: rotateY(180deg);
 }
 
