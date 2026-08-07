@@ -194,7 +194,16 @@ export function CatalogView({ onMovie }: CatalogViewProps) {
       {loading ? (
         <div className="loading-grid" aria-label="Cargando cartelera">
           {Array.from({ length: 6 }, (_, index) => (
-            <div className="loading-card" key={index} />
+            <div className="loading-card" aria-hidden="true" key={index}>
+              <div className="loading-poster" />
+              <div className="loading-card-content">
+                <div className="loading-tags">
+                  <span />
+                  <span />
+                </div>
+                <span className="loading-title" />
+              </div>
+            </div>
           ))}
         </div>
       ) : error ? (

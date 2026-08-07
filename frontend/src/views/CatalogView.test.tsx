@@ -31,6 +31,16 @@ describe('CatalogView', () => {
     fetchVenues.mockReset().mockResolvedValue(demoVenues);
   });
 
+  it('representa las tarjetas actuales mientras carga la cartelera', () => {
+    fetchCatalog.mockReset().mockReturnValue(new Promise(() => undefined));
+    const { container } = render(<CatalogView onMovie={() => undefined} />);
+
+    expect(screen.getByLabelText('Cargando cartelera')).toBeInTheDocument();
+    expect(container.querySelectorAll('.loading-card')).toHaveLength(6);
+    expect(container.querySelectorAll('.loading-poster')).toHaveLength(6);
+    expect(container.querySelectorAll('.loading-card-content')).toHaveLength(6);
+  });
+
   it('carga resultados y traduce filtros a una nueva consulta', async () => {
     const onMovie = vi.fn();
     render(<CatalogView onMovie={onMovie} />);

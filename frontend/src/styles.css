@@ -1053,12 +1053,55 @@ main {
 
 .loading-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 15.75rem));
   gap: 1.25rem;
+  justify-content: space-between;
 }
 
 .loading-card {
-  height: 560px;
+  overflow: hidden;
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: 0 20px 50px rgb(50 35 25 / 17%);
+}
+
+.loading-poster {
+  aspect-ratio: 2 / 3;
+}
+
+.loading-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1rem 1.1rem 1.15rem;
+}
+
+.loading-tags {
+  display: flex;
+  width: 100%;
+  gap: 0.35rem;
+}
+
+.loading-tags span {
+  width: 3.4rem;
+  height: 1.15rem;
+  border-radius: 0.2rem;
+}
+
+.loading-tags span:last-child {
+  width: 4.6rem;
+}
+
+.loading-title {
+  width: 72%;
+  height: 1.4rem;
+  margin-top: 0.8rem;
+}
+
+.loading-poster,
+.loading-tags span,
+.loading-title {
   background:
     linear-gradient(100deg, transparent 35%, rgb(255 255 255 / 60%) 50%, transparent 65%), #ded8cf;
   background-size: 200% 100%;
@@ -2493,6 +2536,28 @@ main {
 
   .movie-card-content {
     padding: 0.75rem;
+  }
+
+  .loading-card-content {
+    padding: 0.75rem;
+  }
+
+  .loading-tags {
+    gap: 0.2rem;
+  }
+
+  .loading-tags span {
+    width: 2.6rem;
+    height: 0.9rem;
+  }
+
+  .loading-tags span:last-child {
+    width: 3.4rem;
+  }
+
+  .loading-title {
+    height: 1.05rem;
+    margin-top: 0.7rem;
   }
 
   .movie-card-overlay {
