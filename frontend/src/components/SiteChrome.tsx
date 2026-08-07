@@ -27,6 +27,7 @@ export function SiteChrome({
   isAdmin = false,
 }: SiteChromeProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [railExpanded, setRailExpanded] = useState(false);
   const [highContrast, setHighContrast] = useState(
     () => localStorage.getItem('salateca-contrast') === 'high',
   );
@@ -51,7 +52,7 @@ export function SiteChrome({
     : navigationItems;
 
   return (
-    <div className="site-shell">
+    <div className={`site-shell ${railExpanded ? 'is-rail-expanded' : ''}`}>
       <a className="skip-link" href="#main-content">
         Saltar al contenido
       </a>
@@ -109,24 +110,58 @@ export function SiteChrome({
         />
       )}
 
-      <aside className="side-rail" aria-label="Accesos rápidos">
+      <aside
+        className={`side-rail ${railExpanded ? 'is-expanded' : ''}`}
+        aria-label="Accesos rápidos"
+      >
+        <button
+          className="side-rail-toggle"
+          type="button"
+          aria-expanded={railExpanded}
+          aria-label={railExpanded ? 'Contraer barra lateral' : 'Expandir barra lateral'}
+          title={railExpanded ? 'Contraer barra lateral' : 'Expandir barra lateral'}
+          onClick={() => setRailExpanded((current) => !current)}
+        >
+          <span aria-hidden="true">›</span>
+        </button>
         {visibleNavigationItems.map((item) => (
           <button
-            className={currentRoute === item.route ? 'is-current' : ''}
+            className={`side-rail-item ${currentRoute === item.route ? 'is-current' : ''}`}
             type="button"
             onClick={() => navigate(item.route)}
             aria-label={item.label}
-            title={item.label}
+            title={railExpanded ? undefined : item.label}
             key={item.route}
           >
-            <span aria-hidden="true">{item.symbol}</span>
+            <span className="side-rail-icon" aria-hidden="true">
+              {item.symbol}
+            </span>
+            <span className="side-rail-label" aria-hidden={!railExpanded}>
+              {item.label}
+            </span>
           </button>
         ))}
-        <a href="#destacados" aria-label="Destacados" title="Destacados">
-          <span aria-hidden="true">◆</span>
+        <a
+          className="side-rail-item"
+          href="#destacados"
+          aria-label="Destacados"
+          title={railExpanded ? undefined : 'Destacados'}
+        >
+          <span className="side-rail-icon" aria-hidden="true">◆</span>
+          <span className="side-rail-label" aria-hidden={!railExpanded}>
+            Destacados
+          </span>
         </a>
-        <a href="#contacto" aria-label="Contacto" title="Contacto">
-          <span aria-hidden="true">✉</span>
+        <a
+          className="side-rail-item"
+          href="#contacto"
+          aria-label="Contacto"
+          title={railExpanded ? undefined : 'Contacto'}
+        >
+          <span className="side-rail-icon" aria-hidden="true">✉</span>
+          <span className="side-rail-label" aria-hidden={!railExpanded}>
+            Contacto
+          </span>
         </a>
       </aside>
 

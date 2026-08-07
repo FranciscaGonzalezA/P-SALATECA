@@ -83,4 +83,28 @@ describe('SiteChrome', () => {
     await userEvent.click(backdrop!);
     expect(navigation).toHaveAttribute('aria-hidden', 'true');
   });
+
+  it('expande la barra lateral para mostrar etiquetas y conserva los tooltips al contraerla', async () => {
+    render(
+      <SiteChrome currentRoute="home" onNavigate={() => undefined}>
+        Contenido
+      </SiteChrome>,
+    );
+
+    const shortcuts = screen.getByRole('complementary', { name: 'Accesos rápidos' });
+    const homeShortcut = within(shortcuts).getByRole('button', { name: 'Inicio' });
+    const expand = within(shortcuts).getByRole('button', { name: 'Expandir barra lateral' });
+
+    expect(homeShortcut).toHaveAttribute('title', 'Inicio');
+    expect(expand).toHaveAttribute('aria-expanded', 'false');
+
+    await userEvent.click(expand);
+
+    expect(shortcuts).toHaveClass('is-expanded');
+    expect(homeShortcut).not.toHaveAttribute('title');
+    expect(within(shortcuts).getByText('Inicio')).toBeVisible();
+    expect(
+      within(shortcuts).getByRole('button', { name: 'Contraer barra lateral' }),
+    ).toHaveAttribute('aria-expanded', 'true');
+  });
 });
