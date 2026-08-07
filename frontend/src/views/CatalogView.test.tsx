@@ -63,9 +63,22 @@ describe('CatalogView', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Limpiar filtros' }));
     await waitFor(() =>
       expect(fetchCatalog).toHaveBeenLastCalledWith(
-        { page: 1, pageSize: 6 },
+        { page: 1, pageSize: 20 },
         expect.any(AbortSignal),
       ),
+    );
+  });
+
+  it('permite desplegar y contraer los filtros', async () => {
+    render(<CatalogView onMovie={() => undefined} />);
+
+    const toggle = screen.getByRole('button', { name: 'Mostrar filtros' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+
+    await userEvent.click(toggle);
+    expect(screen.getByRole('button', { name: 'Ocultar filtros' })).toHaveAttribute(
+      'aria-expanded',
+      'true',
     );
   });
 

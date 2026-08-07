@@ -14,6 +14,7 @@ const initialQuery: CatalogQuery = {
 
 export function CatalogView({ onMovie }: CatalogViewProps) {
   const [query, setQuery] = useState(initialQuery);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [movies, setMovies] = useState<MovieSummaryDto[]>([]);
   const [venues, setVenues] = useState<VenueDto[]>([]);
   const [genres, setGenres] = useState<GenreDto[]>([]);
@@ -72,7 +73,12 @@ export function CatalogView({ onMovie }: CatalogViewProps) {
     setLoading(true);
     setError(null);
     setQuery(initialQuery);
+    setFiltersOpen(false);
   };
+
+  const activeFilterCount = [query.search, query.date, query.time, query.venue, query.genre].filter(
+    Boolean,
+  ).length;
 
   return (
     <section className="catalog-page page-section">
@@ -90,7 +96,27 @@ export function CatalogView({ onMovie }: CatalogViewProps) {
         </div>
       )}
 
-      <form className="filter-panel" onSubmit={(event) => event.preventDefault()}>
+      <button
+        type="button"
+        className="filter-toggle"
+        aria-controls="catalog-filters"
+        aria-expanded={filtersOpen}
+        aria-label={filtersOpen ? 'Ocultar filtros' : 'Mostrar filtros'}
+        onClick={() => setFiltersOpen((current) => !current)}
+      >
+        <span>Filtros</span>
+        {activeFilterCount > 0 && (
+          <span className="filter-count" aria-label={`${activeFilterCount} filtros activos`}>
+            {activeFilterCount}
+          </span>
+        )}
+      </button>
+
+      <form
+        id="catalog-filters"
+        className={`filter-panel${filtersOpen ? ' is-open' : ''}`}
+        onSubmit={(event) => event.preventDefault()}
+      >
         <div className="search-field">
           <label htmlFor="catalog-search">Buscar película o dirección</label>
           <input
