@@ -9,7 +9,7 @@ interface CatalogViewProps {
 
 const initialQuery: CatalogQuery = {
   page: 1,
-  pageSize: 6,
+  pageSize: 20,
 };
 
 export function CatalogView({ onMovie }: CatalogViewProps) {
