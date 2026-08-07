@@ -1,10 +1,11 @@
-INSERT INTO venues (name, canonical_name, address, municipality, website_url)
+INSERT INTO venues (name, canonical_name, address, municipality, region_code, website_url)
 VALUES
   (
     'Cineteca Nacional de Chile',
     'cineteca-nacional-de-chile',
     'Plaza de la Ciudadanía 26',
     'Santiago',
+    'CL-RM',
     'https://www.cclm.cl/cineteca-nacional-de-chile/'
   ),
   (
@@ -12,13 +13,15 @@ VALUES
     'cine-arte-normandie',
     'Tarapacá 1181',
     'Santiago',
+    'CL-RM',
     'https://normandie.cl/'
   ),
-  ('Sala K', 'sala-k', 'Marín 321', 'Providencia', NULL)
+  ('Sala K', 'sala-k', 'Marín 321', 'Providencia', 'CL-RM', NULL)
 ON DUPLICATE KEY UPDATE
   name = VALUES(name),
   address = VALUES(address),
   municipality = VALUES(municipality),
+  region_code = VALUES(region_code),
   website_url = VALUES(website_url);
 
 INSERT INTO movies (

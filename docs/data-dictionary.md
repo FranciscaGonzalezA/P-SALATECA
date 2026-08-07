@@ -19,7 +19,7 @@ milisegundos y los instantes de las funciones se guardan en UTC.
 | `movies`         | Datos estandarizados de películas.         | Clave canónica indexada y `tmdb_id` único cuando existe.                                                      |
 | `genres`         | Catálogo controlado de géneros.            | Nombre y slug únicos.                                                                                         |
 | `movie_genres`   | Relación muchos-a-muchos.                  | Clave primaria compuesta e índice inverso por género.                                                         |
-| `venues`         | Salas y espacios culturales.               | Nombre canónico único.                                                                                        |
+| `venues`         | Salas y espacios culturales.               | Nombre canónico único y región explícita; solo `CL-RM` se publica.                                            |
 | `screenings`     | Funciones publicadas.                      | Película, sala, fuente, fecha/hora y URL oficial obligatorias; identidad única por película, sala e instante. |
 | `content_assets` | Recursos visuales o textuales de terceros. | Registra origen, titular, condición de uso y permiso de almacenamiento local.                                 |
 

@@ -188,6 +188,7 @@ function buildWhere(filters: CatalogFilters): { sql: string; values: Array<strin
     `s.status = 'scheduled'`,
     `m.content_type = 'movie'`,
     `s.screening_date >= CURRENT_DATE()`,
+    `v.region_code = 'CL-RM'`,
   ];
   const values: Array<string | number> = [];
 
@@ -301,6 +302,11 @@ const catalogSelect = `
     ON s.movie_id = m.id
     AND s.status = 'scheduled'
     AND s.screening_date >= CURRENT_DATE()
+    AND EXISTS (
+      SELECT 1
+      FROM venues scoped_venue
+      WHERE scoped_venue.id = s.venue_id AND scoped_venue.region_code = 'CL-RM'
+    )
   LEFT JOIN venues v ON v.id = s.venue_id
   LEFT JOIN sources src ON src.id = s.source_id
 `;
@@ -407,6 +413,7 @@ export class MysqlCatalogRepository implements CatalogRepository {
           municipality,
           website_url
         FROM venues
+        WHERE region_code = 'CL-RM'
         ORDER BY name
       `,
     );

@@ -79,6 +79,7 @@ describe('MysqlCatalogRepository', () => {
     const [countSql, countValues] = execute.mock.calls[0] as [string, unknown[]];
     expect(countSql).toContain("m.content_type = 'movie'");
     expect(countSql).toContain('s.screening_date >= CURRENT_DATE()');
+    expect(countSql).toContain("v.region_code = 'CL-RM'");
     expect(countSql).toContain('m.director LIKE');
     expect(countValues).toEqual([
       '2026-08-01',
@@ -119,6 +120,7 @@ describe('MysqlCatalogRepository', () => {
 
     expect(execute.mock.calls[0]?.[0]).toContain("m.content_type = 'movie'");
     expect(execute.mock.calls[0]?.[0]).toContain('s.screening_date >= CURRENT_DATE()');
+    expect(execute.mock.calls[0]?.[0]).toContain("scoped_venue.region_code = 'CL-RM'");
 
     expect(movie).toMatchObject({
       id: 7,
@@ -175,6 +177,7 @@ describe('MysqlCatalogRepository', () => {
 
     await expect(repository.listMovieScreenings(7)).resolves.toHaveLength(1);
     expect(execute.mock.calls[0]?.[0]).toContain('s.screening_date >= CURRENT_DATE()');
+    expect(execute.mock.calls[0]?.[0]).toContain("scoped_venue.region_code = 'CL-RM'");
     await expect(repository.listVenues()).resolves.toEqual([
       {
         id: 2,
@@ -185,6 +188,7 @@ describe('MysqlCatalogRepository', () => {
         websiteUrl: null,
       },
     ]);
+    expect(execute.mock.calls[1]?.[0]).toContain("WHERE region_code = 'CL-RM'");
     await expect(repository.listGenres()).resolves.toEqual([
       { id: 1, name: 'Animación', slug: 'animacion' },
     ]);

@@ -11,7 +11,7 @@ interface CatalogViewProps {
 
 const initialQuery: CatalogQuery = {
   page: 1,
-  pageSize: 20,
+  pageSize: 30,
 };
 
 export function CatalogView({ onMovie }: CatalogViewProps) {
@@ -87,10 +87,11 @@ export function CatalogView({ onMovie }: CatalogViewProps) {
   return (
     <section className="catalog-page page-section">
       <header className="catalog-heading">
-        <p className="eyebrow">Programación independiente</p>
+        <p className="eyebrow">Región Metropolitana · Programación independiente</p>
         <h1>Cartelera semanal</h1>
         <p>
-          Filtra por fecha, sala, horario o género y confirma cada función en su fuente oficial.
+          Filtra por fecha, sala, horario o género y confirma cada función metropolitana en su
+          fuente oficial.
         </p>
       </header>
 

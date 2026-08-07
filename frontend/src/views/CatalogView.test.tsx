@@ -65,7 +65,7 @@ describe('CatalogView', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Limpiar filtros' }));
     await waitFor(() =>
       expect(fetchCatalog).toHaveBeenLastCalledWith(
-        { page: 1, pageSize: 20 },
+        { page: 1, pageSize: 30 },
         expect.any(AbortSignal),
       ),
     );

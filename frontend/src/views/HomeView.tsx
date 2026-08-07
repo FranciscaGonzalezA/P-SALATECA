@@ -43,15 +43,15 @@ export function HomeView({ featured, onCatalog, onMovie }: HomeViewProps) {
         <div className="editorial-grid">
           <article className="feature-story">
             <div className="feature-art" aria-hidden="true">
-              <span>ÑUBLE</span>
-              <small>Festival de cine nacional</small>
+              <span>RM</span>
+              <small>Cine independiente metropolitano</small>
             </div>
             <div>
               <span className="story-label">Destacado</span>
-              <h3>El cine chileno también se construye desde sus territorios.</h3>
+              <h3>El cine independiente se encuentra en la Región Metropolitana.</h3>
               <p>
-                Una selección editorial para seguir festivales, retrospectivas y nuevas miradas
-                fuera del circuito comercial.
+                Una selección editorial para seguir salas, retrospectivas y nuevas miradas dentro
+                del circuito cultural metropolitano.
               </p>
             </div>
           </article>

@@ -18,6 +18,8 @@ MySQL ni importa código del backend.
 
 `/cartelera` acepta `fecha`, `horario`, `sala`, `genero`, `buscar`, `pagina` y `limite`. Los
 filtros se pueden combinar. `limite` permite entre 1 y 50 resultados y utiliza 12 por defecto.
+La cartelera, las funciones de cada película y el catálogo de `/salas` exponen únicamente salas
+verificadas de la Región Metropolitana (`region_code = 'CL-RM'`).
 
 Todas las consultas usan parámetros de MySQL. Las respuestas exitosas usan `data`; la cartelera
 añade `meta` con paginación y tiempo de procesamiento. Los errores usan `error.code`,

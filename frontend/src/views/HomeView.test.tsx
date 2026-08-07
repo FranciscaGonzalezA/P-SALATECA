@@ -10,6 +10,8 @@ describe('HomeView', () => {
     const onMovie = vi.fn();
     render(<HomeView featured={demoMovies} onCatalog={onCatalog} onMovie={onMovie} />);
 
+    expect(screen.getByText('RM')).toBeInTheDocument();
+    expect(screen.queryByText('ÑUBLE')).not.toBeInTheDocument();
     expect(screen.getAllByRole('link', { name: /Ver .+ y sus funciones/ })).toHaveLength(3);
     await userEvent.click(screen.getByRole('button', { name: 'Descubrir la cartelera' }));
     await userEvent.click(screen.getAllByRole('link', { name: /Ver .+ y sus funciones/ })[0]!);
