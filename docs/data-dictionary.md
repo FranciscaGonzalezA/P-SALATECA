@@ -23,6 +23,14 @@ milisegundos y los instantes de las funciones se guardan en UTC.
 | `screenings`     | Funciones publicadas.                      | Película, sala, fuente, fecha/hora y URL oficial obligatorias; identidad única por película, sala e instante. |
 | `content_assets` | Recursos visuales o textuales de terceros. | Registra origen, titular, condición de uso y permiso de almacenamiento local.                                 |
 
+### Metadata de películas
+
+La integración de TMDB completa `original_title`, `release_year`, `duration_minutes`, `director`,
+`synopsis` y `tmdb_id` solo cuando el valor local es nulo. `metadata_source` y
+`metadata_synced_at` registran la procedencia y el último enriquecimiento exitoso. Los géneros se
+relacionan mediante `movie_genres`; los afiches se guardan en `content_assets` como enlaces
+externos con `rights_status = 'link_only'` y sin almacenamiento local.
+
 ## Contenido editorial
 
 | Tabla   | Propósito                                                    | Reglas principales                                                                      |

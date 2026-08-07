@@ -5,6 +5,15 @@
 Copia `.env.example` como `.env` y reemplaza todos los valores `replace_with_*`. El archivo
 real está ignorado por Git.
 
+Para completar automáticamente las fichas importadas configura `TMDB_READ_ACCESS_TOKEN` o
+`TMDB_API_KEY`; si están ambas, el backend utiliza el token de lectura. `TMDB_LANGUAGE` controla
+el idioma solicitado y `TMDB_REQUEST_TIMEOUT_MS` limita cada llamada. Sin credenciales, la carga
+Excel continúa y la respuesta indica `metadata.disabled = true`.
+
+El pie del sitio conserva el aviso de atribución exigido por TMDB. No lo elimines mientras la
+aplicación utilice sus datos o imágenes; revisa además sus condiciones si el proyecto pasa a tener
+un uso comercial.
+
 ## 2. MySQL
 
 Configura `ADMIN_EMAIL` y `ADMIN_PASSWORD` para crear la cuenta administradora inicial. La

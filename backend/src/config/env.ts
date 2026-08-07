@@ -4,6 +4,11 @@ import { z } from 'zod';
 
 config({ path: resolve(process.cwd(), '../.env') });
 
+const optionalEnvironmentValue = z.preprocess(
+  (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+  z.string().trim().min(1).optional(),
+);
+
 const envSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -18,6 +23,11 @@ const envSchema = z
     ADMIN_EMAIL: z.string().email().optional(),
     ADMIN_PASSWORD: z.string().min(12).optional(),
     SESSION_DURATION_HOURS: z.coerce.number().int().min(1).max(168).default(8),
+    TMDB_API_KEY: optionalEnvironmentValue,
+    TMDB_READ_ACCESS_TOKEN: optionalEnvironmentValue,
+    TMDB_API_TOKEN: optionalEnvironmentValue,
+    TMDB_LANGUAGE: z.string().trim().min(2).default('es-CL'),
+    TMDB_REQUEST_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(60_000).default(10_000),
   })
   .superRefine((value, context) => {
     if (Boolean(value.ADMIN_EMAIL) !== Boolean(value.ADMIN_PASSWORD)) {

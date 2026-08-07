@@ -33,6 +33,16 @@ const simulateExcelImport = async () => ({
   updated: 1,
   duplicates: 1,
   rejected: 1,
+  metadata: {
+    provider: 'tmdb' as const,
+    requested: 12,
+    enriched: 9,
+    alreadyComplete: 2,
+    notFound: 0,
+    ambiguous: 1,
+    failed: 0,
+    disabled: false,
+  },
   errors: [
     {
       rowNumber: 12,

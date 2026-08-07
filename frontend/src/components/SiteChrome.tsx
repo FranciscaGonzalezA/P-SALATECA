@@ -179,6 +179,13 @@ export function SiteChrome({
         <div>
           <p className="footer-title">Información</p>
           <p>Los horarios se confirman en el sitio oficial de cada sala.</p>
+          <p className="tmdb-attribution">
+            <a href="https://www.themoviedb.org" target="_blank" rel="noreferrer">
+              TMDB
+            </a>{' '}
+            aporta metadata e imágenes. This product uses the TMDB API but is not endorsed or
+            certified by TMDB.
+          </p>
           <p>© 2026 Salateca</p>
         </div>
       </footer>

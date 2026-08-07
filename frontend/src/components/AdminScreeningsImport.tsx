@@ -133,6 +133,38 @@ export function AdminScreeningsImport({
             </div>
           </dl>
 
+          {result.metadata.disabled ? (
+            <p className="admin-import-metadata-note">
+              La metadata no se consultó porque TMDB no está configurado.
+            </p>
+          ) : (
+            <div className="admin-import-metadata">
+              <h4>Metadata de películas</h4>
+              <dl className="admin-import-summary">
+                <div>
+                  <dt>Títulos consultados</dt>
+                  <dd>{result.metadata.requested}</dd>
+                </div>
+                <div>
+                  <dt>Fichas completadas</dt>
+                  <dd>{result.metadata.enriched}</dd>
+                </div>
+                <div>
+                  <dt>Ya completas</dt>
+                  <dd>{result.metadata.alreadyComplete}</dd>
+                </div>
+                <div>
+                  <dt>Sin coincidencia</dt>
+                  <dd>{result.metadata.notFound}</dd>
+                </div>
+                <div>
+                  <dt>Ambiguas o fallidas</dt>
+                  <dd>{result.metadata.ambiguous + result.metadata.failed}</dd>
+                </div>
+              </dl>
+            </div>
+          )}
+
           {result.errors.length > 0 && (
             <div className="admin-import-log">
               <table>

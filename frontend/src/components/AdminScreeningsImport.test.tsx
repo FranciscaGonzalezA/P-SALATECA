@@ -12,6 +12,16 @@ const partialResult = {
   updated: 0,
   rejected: 1,
   duplicates: 0,
+  metadata: {
+    provider: 'tmdb' as const,
+    requested: 1,
+    enriched: 1,
+    alreadyComplete: 0,
+    notFound: 0,
+    ambiguous: 0,
+    failed: 0,
+    disabled: false,
+  },
   errors: [
     {
       rowNumber: 3,
@@ -44,6 +54,7 @@ describe('AdminScreeningsImport', () => {
       expect(importer).toHaveBeenCalledWith(expect.objectContaining({ name: 'cartelera.xlsx' })),
     );
     expect(await screen.findByText('Completada con observaciones')).toBeInTheDocument();
+    expect(screen.getByText('Fichas completadas')).toBeInTheDocument();
     expect(screen.getByText('ejemplo.cl')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Descargar log CSV' })).toBeInTheDocument();
   });

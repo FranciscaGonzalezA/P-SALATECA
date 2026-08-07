@@ -69,6 +69,19 @@ La respuesta contiene el identificador del proceso, su estado, los contadores `p
 `field`, `value`, `code` y `message`. El panel muestra este detalle y permite descargarlo como CSV
 para corregir y volver a cargar las filas rechazadas.
 
+La propiedad `metadata` resume el enriquecimiento posterior de los títulos únicos mediante TMDB:
+`requested`, `enriched`, `alreadyComplete`, `notFound`, `ambiguous`, `failed` y `disabled`. Solo se
+aceptan coincidencias exactas después de normalizar mayúsculas, acentos y puntuación. Si existen
+varias películas con el mismo título, se selecciona la primera película según el orden de relevancia
+devuelto por `/search/movie`. Los valores existentes en `movies` nunca se reemplazan; únicamente se
+completan campos nulos, géneros faltantes y un enlace externo al afiche.
+
+La búsqueda también normaliza espacios Unicode, comillas y guiones tipográficos; separa años
+anexados, indicadores de edición —como `doblada` o `versión extendida`—, títulos alternativos entre
+paréntesis y etiquetas de programación posteriores a `/`, como `Ciclo` o `Cine`. Si el nombre
+devuelto por TMDB es diferente, primero se revisan sus títulos alternativos oficiales. Si ninguna
+variante coincide exactamente, se utiliza la primera película de la búsqueda de TMDB.
+
 ## Carga de archivos por consola
 
 El cargador acepta JSON o CSV con el contrato normalizado:

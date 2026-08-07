@@ -47,6 +47,7 @@ Frontend React
 - `scraper`: conectores, contrato crudo y normalización por lotes;
 - `backend/modules/ingestion`: validación de entrada, staging y publicación transaccional;
 - `backend/modules/catalog`: rutas, servicio de aplicación y repositorio MySQL;
+- `backend/modules/metadata`: búsqueda segura en TMDB y persistencia de fichas incompletas;
 - `backend/modules/auth`: contraseñas con `scrypt`, sesiones opacas y autorización por rol;
 - `backend/modules/posts`: lectura pública y edición exclusiva para administradores;
 - `packages/contracts`: respuestas y modelos públicos de la API;
@@ -64,4 +65,5 @@ autorización de la API.
 
 Esta base no implementa scraping productivo de Instagram ni descarga material protegido. Esas
 integraciones requieren revisar términos de uso, permisos y disponibilidad de una API oficial.
-TMDB se prepara como futura fuente de metadatos; su token nunca se almacena en Git.
+TMDB se utiliza como fuente de metadatos posterior a la importación; sus credenciales nunca se
+almacenan en Git.

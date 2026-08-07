@@ -6,6 +6,7 @@ import { AuthService } from '../auth/auth.service.js';
 import type { AuthRepository } from '../auth/auth.types.js';
 import { createAdminIngestionRouter } from './adminIngestion.routes.js';
 import type { IngestionRepository, IngestionTransaction } from './ingestion.types.js';
+import type { MovieMetadataEnricher } from '../metadata/metadata.types.js';
 
 const xlsxMimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
@@ -42,6 +43,7 @@ async function validWorkbook(): Promise<Buffer> {
 describe('ruta administrativa de importación Excel', () => {
   let authRepository: AuthRepository;
   let app: express.Express;
+  let metadataEnricher: MovieMetadataEnricher;
 
   beforeEach(() => {
     authRepository = {
@@ -53,8 +55,26 @@ describe('ruta administrativa de importación Excel', () => {
       deleteSession: vi.fn(),
       upsertAdmin: vi.fn(),
     };
+    metadataEnricher = {
+      enrichMovies: vi.fn().mockResolvedValue({
+        provider: 'tmdb',
+        requested: 1,
+        enriched: 1,
+        alreadyComplete: 0,
+        notFound: 0,
+        ambiguous: 0,
+        failed: 0,
+        disabled: false,
+      }),
+    };
     app = express();
-    app.use(createAdminIngestionRouter(new AuthService(authRepository), new MemoryRepository()));
+    app.use(
+      createAdminIngestionRouter(
+        new AuthService(authRepository),
+        new MemoryRepository(),
+        metadataEnricher,
+      ),
+    );
   });
 
   it('exige autenticación de administrador', async () => {
@@ -77,7 +97,11 @@ describe('ruta administrativa de importación Excel', () => {
       inserted: 1,
       rejected: 0,
       errors: [],
+      metadata: { provider: 'tmdb', requested: 1, enriched: 1 },
     });
+    expect(metadataEnricher.enrichMovies).toHaveBeenCalledWith([
+      { title: 'La casa lobo', canonicalTitle: 'la-casa-lobo' },
+    ]);
   });
 
   it('informa un archivo que no es XLSX', async () => {

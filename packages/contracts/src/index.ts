@@ -113,6 +113,17 @@ export interface ScreeningImportErrorDto {
   value: string | null;
 }
 
+export interface MovieMetadataEnrichmentDto {
+  provider: 'tmdb';
+  requested: number;
+  enriched: number;
+  alreadyComplete: number;
+  notFound: number;
+  ambiguous: number;
+  failed: number;
+  disabled: boolean;
+}
+
 export interface ScreeningImportResultDto {
   runId: number;
   status: 'succeeded' | 'partially_succeeded' | 'failed';
@@ -122,4 +133,5 @@ export interface ScreeningImportResultDto {
   rejected: number;
   duplicates: number;
   errors: ScreeningImportErrorDto[];
+  metadata: MovieMetadataEnrichmentDto;
 }

@@ -71,6 +71,15 @@ adicionales de la fuente: cada función conserva su sala y el sistema identifica
 fuente desde el dominio de su URL. El formato completo está documentado en
 [docs/api.md](docs/api.md#importación-administrativa-de-funciones).
 
+Después de publicar las funciones, el backend consulta los títulos únicos en TMDB y completa los
+campos vacíos de la película, sus géneros y el enlace al afiche. Configura
+`TMDB_READ_ACCESS_TOKEN` (preferido) o `TMDB_API_KEY` en `.env`. Una coincidencia ambigua o un fallo
+de TMDB no revierte las funciones que ya fueron importadas.
+
+La comparación de títulos ignora mayúsculas, tildes, puntuación y diferencias tipográficas. También
+reconoce años, títulos alternativos y etiquetas de edición o programación. Cuando más de una
+película coincide, utiliza la primera según el orden de relevancia entregado por TMDB.
+
 ## Comandos
 
 ```powershell

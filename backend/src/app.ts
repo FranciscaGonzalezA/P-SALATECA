@@ -8,6 +8,9 @@ import { MysqlAuthRepository } from './modules/auth/mysqlAuthRepository.js';
 import { createCatalogRouter } from './modules/catalog/catalog.routes.js';
 import { createAdminIngestionRouter } from './modules/ingestion/adminIngestion.routes.js';
 import { MysqlIngestionRepository } from './modules/ingestion/mysqlIngestionRepository.js';
+import { MovieMetadataService } from './modules/metadata/movieMetadata.service.js';
+import { MysqlMovieMetadataRepository } from './modules/metadata/mysqlMovieMetadataRepository.js';
+import { TmdbClient } from './modules/metadata/tmdbClient.js';
 import { createPostsRouter } from './modules/posts/posts.routes.js';
 import { PostsService } from './modules/posts/posts.service.js';
 import { MysqlPostsRepository } from './modules/posts/mysqlPostsRepository.js';
@@ -17,6 +20,22 @@ export function createApp(): Express {
   const app = express();
   const authService = new AuthService(new MysqlAuthRepository());
   const postsService = new PostsService(new MysqlPostsRepository());
+  const tmdbReadAccessToken = usableTmdbCredential(
+    env.TMDB_READ_ACCESS_TOKEN ?? env.TMDB_API_TOKEN,
+  );
+  const tmdbApiKey = usableTmdbCredential(env.TMDB_API_KEY);
+  const metadataService =
+    tmdbReadAccessToken || tmdbApiKey
+      ? new MovieMetadataService(
+          new MysqlMovieMetadataRepository(),
+          new TmdbClient({
+            readAccessToken: tmdbReadAccessToken,
+            apiKey: tmdbApiKey,
+            language: env.TMDB_LANGUAGE,
+            timeoutMs: env.TMDB_REQUEST_TIMEOUT_MS,
+          }),
+        )
+      : undefined;
 
   app.disable('x-powered-by');
   app.use(
@@ -36,7 +55,10 @@ export function createApp(): Express {
   app.use('/api/v1', createCatalogRouter());
   app.use('/api/v1', createPostsRouter(postsService));
   app.use('/api/v1', createAdminPostsRouter(authService, postsService));
-  app.use('/api/v1', createAdminIngestionRouter(authService, new MysqlIngestionRepository()));
+  app.use(
+    '/api/v1',
+    createAdminIngestionRouter(authService, new MysqlIngestionRepository(), metadataService),
+  );
 
   app.use((_request, response) => {
     response.status(404).json({
@@ -92,4 +114,8 @@ export function createApp(): Express {
   );
 
   return app;
+}
+
+function usableTmdbCredential(value: string | undefined): string | undefined {
+  return value && !value.startsWith('replace_with_') ? value : undefined;
 }
