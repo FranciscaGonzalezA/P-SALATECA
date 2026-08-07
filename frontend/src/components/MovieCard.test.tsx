@@ -9,11 +9,11 @@ describe('MovieCard', () => {
     const onOpen = vi.fn();
     render(<MovieCard movie={demoMovies[0]!} onOpen={onOpen} />);
 
-    expect(screen.getByRole('heading', { name: 'La casa lobo' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'La Casa Lobo' })).toBeInTheDocument();
     expect(screen.getByText(/75 min/)).toBeInTheDocument();
     expect(screen.getByText('2026-08-01 · 18:00')).toBeInTheDocument();
 
-    const card = screen.getByRole('button', { name: 'Ver La casa lobo y sus funciones' });
+    const card = screen.getByRole('button', { name: 'Ver La Casa Lobo y sus funciones' });
     expect(screen.queryByText(/Ver película y funciones/)).not.toBeInTheDocument();
 
     await userEvent.click(card);
@@ -33,7 +33,7 @@ describe('MovieCard', () => {
       />,
     );
 
-    expect(screen.getByRole('img', { name: 'Afiche de La casa lobo' })).toHaveAttribute(
+    expect(screen.getByRole('img', { name: 'Afiche de La Casa Lobo' })).toHaveAttribute(
       'loading',
       'lazy',
     );

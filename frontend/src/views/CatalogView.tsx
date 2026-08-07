@@ -2,6 +2,7 @@ import type { GenreDto, MovieSummaryDto, VenueDto } from '@salateca/contracts';
 import { useEffect, useState } from 'react';
 import { fetchCatalog, fetchGenres, fetchVenues, type CatalogQuery } from '../api/catalogApi';
 import { MovieCard } from '../components/MovieCard';
+import { buildPaginationItems } from '../utils/pagination';
 
 interface CatalogViewProps {
   onMovie: (movieId: number) => void;
@@ -79,6 +80,7 @@ export function CatalogView({ onMovie }: CatalogViewProps) {
   const activeFilterCount = [query.search, query.date, query.time, query.venue, query.genre].filter(
     Boolean,
   ).length;
+  const paginationItems = buildPaginationItems(query.page, totalPages);
 
   return (
     <section className="catalog-page page-section">
@@ -216,19 +218,40 @@ export function CatalogView({ onMovie }: CatalogViewProps) {
       )}
 
       {totalPages > 1 && (
-        <nav className="pagination" aria-label="Páginas de cartelera">
+        <nav className="pagination" aria-label="Paginación de la cartelera">
           <button
             type="button"
+            className="pagination-direction is-previous"
             disabled={query.page === 1}
             onClick={() => updateQuery({ page: query.page - 1 })}
           >
             ← Anterior
           </button>
-          <span>
-            Página {query.page} de {totalPages}
-          </span>
+          <div className="pagination-pages">
+            {paginationItems.map((item) =>
+              typeof item === 'number' ? (
+                <button
+                  type="button"
+                  className={`pagination-page${item === query.page ? ' is-current' : ''}`}
+                  aria-label={
+                    item === query.page ? `Página ${item}, actual` : `Ir a la página ${item}`
+                  }
+                  aria-current={item === query.page ? 'page' : undefined}
+                  onClick={() => item !== query.page && updateQuery({ page: item })}
+                  key={item}
+                >
+                  {item}
+                </button>
+              ) : (
+                <span className="pagination-ellipsis" aria-hidden="true" key={item}>
+                  …
+                </span>
+              ),
+            )}
+          </div>
           <button
             type="button"
+            className="pagination-direction is-next"
             disabled={query.page >= totalPages}
             onClick={() => updateQuery({ page: query.page + 1 })}
           >

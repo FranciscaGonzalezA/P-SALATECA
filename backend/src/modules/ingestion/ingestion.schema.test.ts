@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { parseNormalizedScreening } from './ingestion.schema.js';
 
 const validScreening = {
-  movieTitle: 'La casa lobo',
+  movieTitle: 'La CASA Lobo',
   venueName: 'Cineteca Nacional',
   movieKey: 'la-casa-lobo',
   venueKey: 'cineteca-nacional',
@@ -29,6 +29,7 @@ describe('parseNormalizedScreening', () => {
       success: true,
       data: {
         ...validScreening,
+        movieTitle: 'la casa lobo',
         sourceRecordKey: 'source-1',
         language: 'Español',
         format: '2D',

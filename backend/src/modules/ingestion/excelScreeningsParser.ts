@@ -6,6 +6,7 @@ import type {
   IngestionValidationIssue,
   NormalizedScreeningDto,
 } from './ingestion.types.js';
+import { classifyScreeningTitle } from './movieTitleClassifier.js';
 
 const requiredHeaders = ['Fecha parseada', 'Fecha texto', 'Pelicula', 'Sala', 'URL'] as const;
 const maxRows = 5_000;
@@ -325,12 +326,24 @@ export async function parseExcelScreenings(
     }
 
     const issues: IngestionValidationIssue[] = [];
-    const movieTitle = cleanText(values.Pelicula);
+    const suppliedMovieTitle = cleanText(values.Pelicula);
+    const titleClassification = classifyScreeningTitle(suppliedMovieTitle);
+    const movieTitle =
+      titleClassification.kind === 'movie' ? titleClassification.title : suppliedMovieTitle;
     const venueName = cleanText(values.Sala);
     const sourceUrl = cleanText(values.URL);
     const parsedSourceUrl = parseHttpUrl(sourceUrl);
     if (!movieTitle) {
       issues.push(issue('Pelicula', 'required', 'La película es obligatoria.', values.Pelicula));
+    } else if (titleClassification.kind === 'activity') {
+      issues.push(
+        issue(
+          'Pelicula',
+          'non_movie_activity',
+          'La fila corresponde a una actividad y no a una película.',
+          values.Pelicula,
+        ),
+      );
     } else if (movieTitle.length > 255) {
       issues.push(
         issue('Pelicula', 'too_long', 'La película no puede superar 255 caracteres.', movieTitle),

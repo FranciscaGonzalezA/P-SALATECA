@@ -7,7 +7,11 @@ const canonicalKeySchema = z
   .regex(/^[\p{Letter}\p{Number}]+(?:-[\p{Letter}\p{Number}]+)*$/u);
 
 export const normalizedScreeningSchema = z.object({
-  movieTitle: z.string().trim().min(1),
+  movieTitle: z
+    .string()
+    .trim()
+    .min(1)
+    .transform((title) => title.toLocaleLowerCase('es-CL')),
   venueName: z.string().trim().min(1),
   movieKey: canonicalKeySchema,
   venueKey: canonicalKeySchema,

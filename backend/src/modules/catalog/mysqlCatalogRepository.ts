@@ -184,7 +184,7 @@ function mapMovies(rows: readonly CatalogRow[]): MovieSummaryDto[] {
 }
 
 function buildWhere(filters: CatalogFilters): { sql: string; values: Array<string | number> } {
-  const conditions = [`s.status = 'scheduled'`];
+  const conditions = [`s.status = 'scheduled'`, `m.content_type = 'movie'`];
   const values: Array<string | number> = [];
 
   if (filters.date) {
@@ -357,7 +357,7 @@ export class MysqlCatalogRepository implements CatalogRepository {
     const [rows] = await this.pool.execute<CatalogRow[]>(
       `
         ${catalogSelect}
-        WHERE m.id = ?
+        WHERE m.id = ? AND m.content_type = 'movie'
         ORDER BY s.screening_date, s.screening_time, g.name
       `,
       [movieId],
@@ -380,6 +380,7 @@ export class MysqlCatalogRepository implements CatalogRepository {
         ${catalogSelect}
         WHERE
           m.id = ?
+          AND m.content_type = 'movie'
           AND s.status = 'scheduled'
           AND (s.screening_date IS NULL OR s.screening_date >= CURRENT_DATE())
         ORDER BY s.screening_date, s.screening_time

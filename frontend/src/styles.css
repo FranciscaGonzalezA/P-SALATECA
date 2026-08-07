@@ -654,7 +654,7 @@ main {
 }
 
 .movie-poster img {
-  object-fit: contain;
+  object-fit: cover; /* previamente contain */
 }
 
 .poster-tone-0 {
@@ -950,18 +950,70 @@ main {
 }
 
 .pagination {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(7rem, 1fr) auto minmax(7rem, 1fr);
   align-items: center;
-  justify-content: center;
-  gap: 1.5rem;
+  gap: clamp(1rem, 3vw, 2rem);
   margin-top: 3rem;
 }
 
 .pagination button {
-  padding: 0.75rem 1rem;
   border: 1px solid var(--line);
   background: var(--surface);
   cursor: pointer;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.pagination button:hover:not(:disabled),
+.pagination button:focus-visible {
+  border-color: var(--blue);
+}
+
+.pagination-direction {
+  min-height: 2.75rem;
+  padding: 0.75rem 1rem;
+  white-space: nowrap;
+}
+
+.pagination-direction.is-previous {
+  justify-self: end;
+}
+
+.pagination-direction.is-next {
+  justify-self: start;
+}
+
+.pagination-pages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.pagination-page {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.5rem;
+  font-weight: 800;
+}
+
+.pagination-page.is-current {
+  color: #fff;
+  border-color: var(--blue);
+  background: var(--blue);
+  cursor: default;
+}
+
+.pagination-ellipsis {
+  display: inline-grid;
+  min-width: 1.5rem;
+  min-height: 2.75rem;
+  place-items: center;
+  color: var(--muted);
+  font-weight: 800;
 }
 
 .pagination button:disabled {
@@ -2021,6 +2073,39 @@ main {
   .page-section {
     width: min(100% - 2rem, 1240px);
     padding: 4rem 0;
+  }
+
+  .pagination {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .pagination-pages {
+    grid-row: 1;
+    grid-column: 1 / -1;
+    gap: 0.25rem;
+  }
+
+  .pagination-page {
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+  }
+
+  .pagination-ellipsis {
+    min-width: 1.25rem;
+    min-height: 2.5rem;
+  }
+
+  .pagination-direction.is-previous {
+    grid-row: 2;
+    grid-column: 1;
+    justify-self: stretch;
+  }
+
+  .pagination-direction.is-next {
+    grid-row: 2;
+    grid-column: 2;
+    justify-self: stretch;
   }
 
   .site-header {

@@ -80,6 +80,10 @@ La comparación de títulos ignora mayúsculas, tildes, puntuación y diferencia
 reconoce años, títulos alternativos y etiquetas de edición o programación. Cuando más de una
 película coincide, utiliza la primera según el orden de relevancia entregado por TMDB.
 
+La importación rechaza actividades sin una película concreta —como paneles, charlas, clínicas o
+premiaciones— y la API pública filtra las actividades históricas. Las funciones acompañadas por un
+cineforo conservan la película y eliminan el sufijo editorial del título.
+
 ## Comandos
 
 ```powershell

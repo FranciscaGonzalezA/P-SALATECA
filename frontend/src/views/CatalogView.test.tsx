@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { demoGenres, demoMovies, demoVenues } from '../data/demoCatalog';
+import { buildPaginationItems } from '../utils/pagination';
 import { CatalogView } from './CatalogView';
 
 const { fetchCatalog, fetchGenres, fetchVenues } = vi.hoisted(() => ({
@@ -109,6 +110,39 @@ describe('CatalogView', () => {
     );
   });
 
+  it('muestra hasta cinco páginas clickeables y usa elipsis al navegar', async () => {
+    fetchCatalog.mockResolvedValue({
+      items: demoMovies.slice(0, 2),
+      total: 200,
+      totalPages: 10,
+      elapsedMs: 0,
+      demo: false,
+    });
+    render(<CatalogView onMovie={() => undefined} />);
+
+    expect(await screen.findByRole('button', { name: 'Página 1, actual' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+    expect(screen.getByRole('button', { name: 'Ir a la página 10' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Ir a la página 5' })).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Ir a la página 4' }));
+    await waitFor(() =>
+      expect(fetchCatalog).toHaveBeenLastCalledWith(
+        expect.objectContaining({ page: 4 }),
+        expect.any(AbortSignal),
+      ),
+    );
+
+    expect(await screen.findByRole('button', { name: 'Página 4, actual' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+    expect(screen.getByRole('button', { name: 'Ir a la página 5' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Ir a la página 2' })).not.toBeInTheDocument();
+  });
+
   it('presenta estados vacío y de error con recuperación', async () => {
     fetchCatalog.mockResolvedValueOnce({
       items: [],
@@ -126,5 +160,14 @@ describe('CatalogView', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('API no disponible');
     await userEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
     expect(fetchCatalog).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('buildPaginationItems', () => {
+  it('conserva los extremos y limita a cinco números visibles', () => {
+    expect(buildPaginationItems(1, 4)).toEqual([1, 2, 3, 4]);
+    expect(buildPaginationItems(1, 10)).toEqual([1, 2, 3, 4, 'end-ellipsis', 10]);
+    expect(buildPaginationItems(5, 10)).toEqual([1, 'start-ellipsis', 4, 5, 6, 'end-ellipsis', 10]);
+    expect(buildPaginationItems(10, 10)).toEqual([1, 'start-ellipsis', 7, 8, 9, 10]);
   });
 });

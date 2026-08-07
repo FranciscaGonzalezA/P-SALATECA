@@ -64,6 +64,11 @@ El libro debe contener una hoja `Cartelera`. La fila 1 usa exactamente estos enc
 Al menos una de las dos columnas de fecha debe ser válida. Si ambas son válidas deben representar
 el mismo horario. Los horarios se interpretan en `America/Santiago` y se guardan además en UTC.
 
+`Pelicula` debe identificar una obra audiovisual concreta. Actividades como paneles, charlas,
+clínicas, premiaciones o funciones sin título se rechazan con `non_movie_activity` y no aparecen en
+la cartelera. Sufijos como `+ cineforo`, indicadores de doblaje y prefijos editoriales reconocidos
+se eliminan antes de construir la clave canónica de la película.
+
 La respuesta contiene el identificador del proceso, su estado, los contadores `processed`,
 `inserted`, `updated`, `duplicates` y `rejected`, y `errors`. Cada error informa `rowNumber`,
 `field`, `value`, `code` y `message`. El panel muestra este detalle y permite descargarlo como CSV

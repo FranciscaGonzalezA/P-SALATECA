@@ -77,6 +77,7 @@ describe('MysqlCatalogRepository', () => {
     expect(result.items[0]?.screenings).toHaveLength(1);
 
     const [countSql, countValues] = execute.mock.calls[0] as [string, unknown[]];
+    expect(countSql).toContain("m.content_type = 'movie'");
     expect(countSql).toContain('m.director LIKE');
     expect(countValues).toEqual([
       '2026-08-01',
@@ -114,6 +115,8 @@ describe('MysqlCatalogRepository', () => {
     execute.mockResolvedValueOnce([[baseRow]]);
 
     const movie = await repository.findMovie(7);
+
+    expect(execute.mock.calls[0]?.[0]).toContain("m.content_type = 'movie'");
 
     expect(movie).toMatchObject({
       id: 7,

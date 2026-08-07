@@ -141,4 +141,22 @@ describe('parseExcelScreenings', () => {
       }),
     );
   });
+
+  it('rechaza actividades y limpia complementos editoriales del título', async () => {
+    const records = await parseExcelScreenings(
+      await workbookBuffer([
+        ['2026-07-01 15:30:00', '', 'Paneles temáticos', 'Sala', 'https://example.com/1'],
+        ['2026-07-02 15:30:00', '', 'Yo y la que fui + cineforo', 'Sala', 'https://example.com/2'],
+      ]),
+    );
+
+    expect(records[0]?.validationIssues).toContainEqual(
+      expect.objectContaining({ field: 'Pelicula', code: 'non_movie_activity' }),
+    );
+    expect(records[1]?.validationIssues).toBeUndefined();
+    expect(records[1]?.normalizedPayload).toMatchObject({
+      movieTitle: 'Yo y la que fui',
+      movieKey: 'yo-y-la-que-fui',
+    });
+  });
 });

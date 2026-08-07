@@ -6,9 +6,18 @@ interface MovieCardProps {
   onOpen: (movieId: number) => void;
 }
 
+function toTitleCase(title: string): string {
+  return title
+    .toLocaleLowerCase('es-CL')
+    .replace(/(^|[\s([{¿¡'"-])(\p{L})/gu, (_, prefix: string, letter: string) => {
+      return `${prefix}${letter.toLocaleUpperCase('es-CL')}`;
+    });
+}
+
 export function MovieCard({ movie, onOpen }: MovieCardProps) {
   const nextScreening = movie.screenings[0];
   const posterClass = `movie-poster poster-tone-${movie.id % 5}`;
+  const displayTitle = toTitleCase(movie.title);
   const openMovie = () => onOpen(movie.id);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
@@ -23,17 +32,17 @@ export function MovieCard({ movie, onOpen }: MovieCardProps) {
       className="movie-card"
       role="button"
       tabIndex={0}
-      aria-label={`Ver ${movie.title} y sus funciones`}
+      aria-label={`Ver ${displayTitle} y sus funciones`}
       onClick={openMovie}
       onKeyDown={handleKeyDown}
     >
       <div className={posterClass}>
         {movie.posterUrl ? (
-          <img src={movie.posterUrl} alt={`Afiche de ${movie.title}`} loading="lazy" />
+          <img src={movie.posterUrl} alt={`Afiche de ${displayTitle}`} loading="lazy" />
         ) : (
           <>
             <span className="poster-kicker">Salateca presenta</span>
-            <span className="poster-title">{movie.title}</span>
+            <span className="poster-title">{displayTitle}</span>
             <span className="poster-year">{movie.releaseYear ?? 'Cine independiente'}</span>
           </>
         )}
@@ -44,9 +53,9 @@ export function MovieCard({ movie, onOpen }: MovieCardProps) {
             <span key={genre.id}>{genre.name}</span>
           ))}
         </div>
-        <h3>{movie.title}</h3>
+        <h3>{displayTitle}</h3>
         <p className="movie-meta">
-          {movie.director ?? 'Dirección por confirmar'}
+          {movie.director ?? 'Director por confirmar'}
           {movie.durationMinutes ? ` · ${movie.durationMinutes} min` : ''}
         </p>
         {nextScreening ? (

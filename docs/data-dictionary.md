@@ -25,6 +25,9 @@ milisegundos y los instantes de las funciones se guardan en UTC.
 
 ### Metadata de películas
 
+`content_type` distingue películas publicables de actividades conservadas para trazabilidad. Solo
+las filas con `content_type = 'movie'` se exponen mediante la cartelera y las fichas públicas.
+
 La integración de TMDB completa `original_title`, `release_year`, `duration_minutes`, `director`,
 `synopsis` y `tmdb_id` solo cuando el valor local es nulo. `metadata_source` y
 `metadata_synced_at` registran la procedencia y el último enriquecimiento exitoso. Los géneros se

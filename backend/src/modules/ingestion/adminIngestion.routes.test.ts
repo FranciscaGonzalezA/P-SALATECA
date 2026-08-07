@@ -100,7 +100,7 @@ describe('ruta administrativa de importación Excel', () => {
       metadata: { provider: 'tmdb', requested: 1, enriched: 1 },
     });
     expect(metadataEnricher.enrichMovies).toHaveBeenCalledWith([
-      { title: 'La casa lobo', canonicalTitle: 'la-casa-lobo' },
+      { title: 'la casa lobo', canonicalTitle: 'la-casa-lobo' },
     ]);
   });
 
