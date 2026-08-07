@@ -8,6 +8,7 @@ import type {
   VenueDto,
 } from '@salateca/contracts';
 import { demoGenres, demoMovies, demoVenues, filterDemoMovies } from '../data/demoCatalog';
+import { localDateValue } from '../utils/localDate';
 
 export interface CatalogQuery {
   date?: string | undefined;
@@ -134,7 +135,14 @@ export async function fetchMovie(
     ) {
       throw error;
     }
-    return { movie, demo: true };
+    const today = localDateValue();
+    return {
+      movie: {
+        ...movie,
+        screenings: movie.screenings.filter((screening) => screening.date >= today),
+      },
+      demo: true,
+    };
   }
 }
 

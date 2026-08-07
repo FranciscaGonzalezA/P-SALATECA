@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { demoGenres, demoMovies, demoVenues } from '../data/demoCatalog';
 import { buildPaginationItems } from '../utils/pagination';
+import { localDateValue } from '../utils/localDate';
 import { CatalogView } from './CatalogView';
 
 const { fetchCatalog, fetchGenres, fetchVenues } = vi.hoisted(() => ({
@@ -81,6 +82,7 @@ describe('CatalogView', () => {
       'aria-expanded',
       'true',
     );
+    expect(screen.getByLabelText('Fecha')).toHaveAttribute('min', localDateValue());
   });
 
   it('muestra origen demo y permite avanzar de página', async () => {

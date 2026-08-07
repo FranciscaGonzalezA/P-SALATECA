@@ -9,6 +9,7 @@ import {
 } from './catalogApi';
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllGlobals();
 });
 
@@ -93,6 +94,8 @@ describe('cliente de catálogo', () => {
   });
 
   it('usa datos demo frente a indisponibilidad durante desarrollo', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 7, 1, 12));
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('sin conexión')));
 
     const catalog = await fetchCatalog({ search: 'Patricio', page: 1, pageSize: 2 });

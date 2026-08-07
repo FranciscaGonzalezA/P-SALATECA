@@ -1,7 +1,16 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { demoMovies, filterDemoMovies } from './demoCatalog';
 
 describe('filterDemoMovies', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 7, 1, 12));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('combina fecha, hora, sala y género sin dejar funciones incompatibles', () => {
     const result = filterDemoMovies({
       date: '2026-08-01',
@@ -39,5 +48,15 @@ describe('filterDemoMovies', () => {
       items: [],
       total: 0,
     });
+  });
+
+  it('omite funciones anteriores al día en que se consulta la cartelera', () => {
+    vi.setSystemTime(new Date(2026, 7, 3, 12));
+
+    const result = filterDemoMovies({ page: 1, pageSize: 10 });
+
+    expect(
+      result.items.flatMap((movie) => movie.screenings).every((item) => item.date >= '2026-08-03'),
+    ).toBe(true);
   });
 });

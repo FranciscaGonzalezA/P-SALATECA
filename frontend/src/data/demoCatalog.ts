@@ -6,6 +6,7 @@ import type {
   SourceDto,
   VenueDto,
 } from '@salateca/contracts';
+import { localDateValue } from '../utils/localDate';
 
 export const demoGenres: GenreDto[] = [
   { id: 1, name: 'Drama', slug: 'drama' },
@@ -180,11 +181,13 @@ export function filterDemoMovies(filters: DemoCatalogFilters): {
   total: number;
 } {
   const search = filters.search?.toLocaleLowerCase('es-CL');
+  const today = localDateValue();
   const items = demoMovies
     .map((movie) => ({
       ...movie,
       screenings: movie.screenings.filter(
         (item) =>
+          item.date >= today &&
           (!filters.date || item.date === filters.date) &&
           (!filters.time || item.time === filters.time) &&
           (!filters.venue || item.venue.slug === filters.venue),

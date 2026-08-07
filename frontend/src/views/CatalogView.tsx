@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { fetchCatalog, fetchGenres, fetchVenues, type CatalogQuery } from '../api/catalogApi';
 import { MovieCard } from '../components/MovieCard';
 import { buildPaginationItems } from '../utils/pagination';
+import { localDateValue } from '../utils/localDate';
 
 interface CatalogViewProps {
   onMovie: (movieId: number) => void;
@@ -14,6 +15,7 @@ const initialQuery: CatalogQuery = {
 };
 
 export function CatalogView({ onMovie }: CatalogViewProps) {
+  const today = localDateValue();
   const [query, setQuery] = useState(initialQuery);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [movies, setMovies] = useState<MovieSummaryDto[]>([]);
@@ -134,6 +136,7 @@ export function CatalogView({ onMovie }: CatalogViewProps) {
           <input
             id="catalog-date"
             type="date"
+            min={today}
             value={query.date ?? ''}
             onChange={(event) => updateQuery({ date: event.target.value || undefined })}
           />

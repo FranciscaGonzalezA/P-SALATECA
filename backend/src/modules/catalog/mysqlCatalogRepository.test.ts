@@ -78,6 +78,7 @@ describe('MysqlCatalogRepository', () => {
 
     const [countSql, countValues] = execute.mock.calls[0] as [string, unknown[]];
     expect(countSql).toContain("m.content_type = 'movie'");
+    expect(countSql).toContain('s.screening_date >= CURRENT_DATE()');
     expect(countSql).toContain('m.director LIKE');
     expect(countValues).toEqual([
       '2026-08-01',
@@ -117,6 +118,7 @@ describe('MysqlCatalogRepository', () => {
     const movie = await repository.findMovie(7);
 
     expect(execute.mock.calls[0]?.[0]).toContain("m.content_type = 'movie'");
+    expect(execute.mock.calls[0]?.[0]).toContain('s.screening_date >= CURRENT_DATE()');
 
     expect(movie).toMatchObject({
       id: 7,
@@ -172,6 +174,7 @@ describe('MysqlCatalogRepository', () => {
       .mockResolvedValueOnce([[{ id: 1, name: 'Animación', slug: 'animacion' }]]);
 
     await expect(repository.listMovieScreenings(7)).resolves.toHaveLength(1);
+    expect(execute.mock.calls[0]?.[0]).toContain('s.screening_date >= CURRENT_DATE()');
     await expect(repository.listVenues()).resolves.toEqual([
       {
         id: 2,

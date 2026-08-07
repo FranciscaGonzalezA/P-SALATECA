@@ -184,14 +184,16 @@ function mapMovies(rows: readonly CatalogRow[]): MovieSummaryDto[] {
 }
 
 function buildWhere(filters: CatalogFilters): { sql: string; values: Array<string | number> } {
-  const conditions = [`s.status = 'scheduled'`, `m.content_type = 'movie'`];
+  const conditions = [
+    `s.status = 'scheduled'`,
+    `m.content_type = 'movie'`,
+    `s.screening_date >= CURRENT_DATE()`,
+  ];
   const values: Array<string | number> = [];
 
   if (filters.date) {
     conditions.push('s.screening_date = ?');
     values.push(filters.date);
-  } else {
-    conditions.push('(s.screening_date IS NULL OR s.screening_date >= CURRENT_DATE())');
   }
 
   if (filters.time) {
@@ -295,7 +297,10 @@ const catalogSelect = `
       ORDER BY asset.captured_at DESC, asset.id DESC
       LIMIT 1
     )
-  LEFT JOIN screenings s ON s.movie_id = m.id AND s.status = 'scheduled'
+  LEFT JOIN screenings s
+    ON s.movie_id = m.id
+    AND s.status = 'scheduled'
+    AND s.screening_date >= CURRENT_DATE()
   LEFT JOIN venues v ON v.id = s.venue_id
   LEFT JOIN sources src ON src.id = s.source_id
 `;
@@ -382,7 +387,7 @@ export class MysqlCatalogRepository implements CatalogRepository {
           m.id = ?
           AND m.content_type = 'movie'
           AND s.status = 'scheduled'
-          AND (s.screening_date IS NULL OR s.screening_date >= CURRENT_DATE())
+          AND s.screening_date >= CURRENT_DATE()
         ORDER BY s.screening_date, s.screening_time
       `,
       [movieId],
