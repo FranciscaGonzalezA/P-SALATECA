@@ -1,6 +1,11 @@
 import type { AdminPostInputDto, AuthenticatedUserDto, PostSummaryDto } from '@salateca/contracts';
 import { useEffect, useState, type FormEvent } from 'react';
-import { createAdminPost, deleteAdminPost, updateAdminPost } from '../api/adminPostsApi';
+import {
+  createAdminPost,
+  deleteAdminPost,
+  moveAdminPost,
+  updateAdminPost,
+} from '../api/adminPostsApi';
 import { fetchPost, fetchPosts } from '../api/postsApi';
 import { AdminScreeningsImport } from '../components/AdminScreeningsImport';
 
@@ -25,6 +30,7 @@ export function AdminView({ user, onLogout }: AdminViewProps) {
   const [keywordsText, setKeywordsText] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [movingId, setMovingId] = useState<number | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -115,6 +121,27 @@ export function AdminView({ user, onLogout }: AdminViewProps) {
     }
   };
 
+  const move = async (postId: number, direction: 'up' | 'down') => {
+    setMovingId(postId);
+    setError(null);
+    setMessage(null);
+    try {
+      const moved = await moveAdminPost(postId, direction);
+      if (moved) {
+        setMessage(`Publicación movida hacia ${direction === 'up' ? 'arriba' : 'abajo'}.`);
+        await loadPosts();
+      }
+    } catch (requestError) {
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : 'No fue posible reordenar la publicación.',
+      );
+    } finally {
+      setMovingId(null);
+    }
+  };
+
   return (
     <section className="admin-page page-section">
       <header className="admin-heading">
@@ -149,18 +176,44 @@ export function AdminView({ user, onLogout }: AdminViewProps) {
           {loading ? (
             <p>Cargando publicaciones…</p>
           ) : (
-            posts.map((post) => (
+            posts.map((post, index) => (
               <article key={post.id} className={editingId === post.id ? 'is-current' : ''}>
-                <button type="button" onClick={() => void startEditing(post.id)}>
-                  {post.title}
-                </button>
                 <button
                   type="button"
-                  className="admin-delete"
-                  onClick={() => void remove(post.id, post.title)}
+                  className="admin-post-title"
+                  onClick={() => void startEditing(post.id)}
                 >
-                  Eliminar
+                  {post.title}
                 </button>
+                <div className="admin-post-actions">
+                  <button
+                    type="button"
+                    className="admin-move"
+                    aria-label={`Subir ${post.title}`}
+                    title="Subir publicación"
+                    disabled={index === 0 || movingId !== null}
+                    onClick={() => void move(post.id, 'up')}
+                  >
+                    ↑
+                  </button>
+                  <button
+                    type="button"
+                    className="admin-move"
+                    aria-label={`Bajar ${post.title}`}
+                    title="Bajar publicación"
+                    disabled={index === posts.length - 1 || movingId !== null}
+                    onClick={() => void move(post.id, 'down')}
+                  >
+                    ↓
+                  </button>
+                  <button
+                    type="button"
+                    className="admin-delete"
+                    onClick={() => void remove(post.id, post.title)}
+                  >
+                    Eliminar
+                  </button>
+                </div>
               </article>
             ))
           )}

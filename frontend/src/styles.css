@@ -2172,6 +2172,29 @@ main {
   cursor: pointer;
 }
 
+.admin-post-list article .admin-post-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-post-actions {
+  display: flex;
+  align-items: center;
+}
+
+.admin-post-list article .admin-move {
+  padding-inline: 0.55rem;
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.admin-post-list article .admin-move:disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
 .admin-post-list article .admin-delete {
   color: var(--pink);
   font-size: 0.7rem;

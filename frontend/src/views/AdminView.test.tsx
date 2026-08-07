@@ -8,12 +8,14 @@ const api = vi.hoisted(() => ({
   fetchPost: vi.fn(),
   createAdminPost: vi.fn(),
   updateAdminPost: vi.fn(),
+  moveAdminPost: vi.fn(),
   deleteAdminPost: vi.fn(),
 }));
 vi.mock('../api/postsApi', () => ({ fetchPosts: api.fetchPosts, fetchPost: api.fetchPost }));
 vi.mock('../api/adminPostsApi', () => ({
   createAdminPost: api.createAdminPost,
   updateAdminPost: api.updateAdminPost,
+  moveAdminPost: api.moveAdminPost,
   deleteAdminPost: api.deleteAdminPost,
 }));
 
@@ -39,6 +41,7 @@ describe('AdminView', () => {
     api.fetchPost.mockResolvedValue(post);
     api.createAdminPost.mockResolvedValue(post);
     api.updateAdminPost.mockResolvedValue(post);
+    api.moveAdminPost.mockResolvedValue(true);
     api.deleteAdminPost.mockResolvedValue(undefined);
   });
 
@@ -84,5 +87,28 @@ describe('AdminView', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Eliminar' }));
     expect(api.deleteAdminPost).toHaveBeenCalledWith(4);
     expect(await screen.findByRole('status')).toHaveTextContent('eliminada');
+  });
+
+  it('permite subir y bajar publicaciones y deshabilita los extremos', async () => {
+    const secondPost = { id: 5, title: 'Segundo post', imageUrl: null, keywords: [] };
+    api.fetchPosts
+      .mockResolvedValueOnce([
+        { id: post.id, title: post.title, imageUrl: null, keywords: ['cine'] },
+        secondPost,
+      ])
+      .mockResolvedValueOnce([
+        secondPost,
+        { id: post.id, title: post.title, imageUrl: null, keywords: ['cine'] },
+      ]);
+
+    render(<AdminView user={user} onLogout={vi.fn()} />);
+    expect(await screen.findByRole('button', { name: `Subir ${post.title}` })).toBeDisabled();
+    expect(screen.getByRole('button', { name: `Bajar ${secondPost.title}` })).toBeDisabled();
+
+    await userEvent.click(screen.getByRole('button', { name: `Subir ${secondPost.title}` }));
+
+    expect(api.moveAdminPost).toHaveBeenCalledWith(5, 'up');
+    expect(await screen.findByRole('status')).toHaveTextContent('movida hacia arriba');
+    expect(screen.getByRole('button', { name: `Subir ${secondPost.title}` })).toBeDisabled();
   });
 });
