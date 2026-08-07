@@ -123,9 +123,13 @@ function App() {
     setRoute(returnRoute);
   }, [movieOrigin]);
 
+  const isMovieModal = route.page === 'movie' && Boolean(window.history.state?.salatecaMovieModal);
+
   const chromeRoute: AppRoute =
     route.page === 'movie'
-      ? movieOrigin
+      ? isMovieModal
+        ? movieOrigin
+        : 'catalog'
       : route.page === 'post'
         ? 'posts'
         : route.page === 'admin-demo'
@@ -143,20 +147,23 @@ function App() {
       onNavigate={(page) => navigate({ page })}
       isAdmin={currentUser?.role === 'admin'}
     >
-      {(route.page === 'home' || (route.page === 'movie' && movieOrigin === 'home')) && (
+      {(route.page === 'home' || (isMovieModal && movieOrigin === 'home')) && (
         <HomeView
           featured={featured}
           onCatalog={() => navigate({ page: 'catalog' })}
           onMovie={(movieId) => openMovie(movieId, 'home')}
         />
       )}
-      {(route.page === 'catalog' || (route.page === 'movie' && movieOrigin === 'catalog')) && (
+      {(route.page === 'catalog' || (isMovieModal && movieOrigin === 'catalog')) && (
         <CatalogView onMovie={(movieId) => openMovie(movieId, 'catalog')} />
       )}
-      {route.page === 'movie' && route.movieId && (
+      {route.page === 'movie' && route.movieId && isMovieModal && (
         <MovieDetailModal onClose={closeMovie}>
           <MovieDetailView movieId={route.movieId} onBack={closeMovie} />
         </MovieDetailModal>
+      )}
+      {route.page === 'movie' && route.movieId && !isMovieModal && (
+        <MovieDetailView movieId={route.movieId} onBack={() => navigate({ page: 'catalog' })} />
       )}
       {route.page === 'posts' && (
         <PostsView onPost={(postId) => navigate({ page: 'post', postId })} />

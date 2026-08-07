@@ -1,5 +1,5 @@
 import type { MovieSummaryDto } from '@salateca/contracts';
-import type { KeyboardEvent } from 'react';
+import type { MouseEvent } from 'react';
 
 interface MovieCardProps {
   movie: MovieSummaryDto;
@@ -20,21 +20,25 @@ export function MovieCard({ movie, onOpen }: MovieCardProps) {
   const displayTitle = toTitleCase(movie.title);
   const openMovie = () => onOpen(movie.id);
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
-    if (event.key === 'Enter' || event.key === ' ') {
+  const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (
+      event.button === 0 &&
+      !event.ctrlKey &&
+      !event.metaKey &&
+      !event.shiftKey &&
+      !event.altKey
+    ) {
       event.preventDefault();
       openMovie();
     }
   };
 
   return (
-    <article
+    <a
+      href={`/peliculas/${movie.id}`}
       className="movie-card"
-      role="button"
-      tabIndex={0}
       aria-label={`Ver ${displayTitle} y sus funciones`}
-      onClick={openMovie}
-      onKeyDown={handleKeyDown}
+      onClick={handleClick}
     >
       <div className={posterClass}>
         {movie.posterUrl ? (
@@ -77,6 +81,6 @@ export function MovieCard({ movie, onOpen }: MovieCardProps) {
         </div>
         <h3>{displayTitle}</h3>
       </div>
-    </article>
+    </a>
   );
 }

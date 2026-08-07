@@ -98,6 +98,7 @@ describe('App', () => {
     window.history.replaceState({}, '', '/peliculas/7');
     render(<App />);
     expect(screen.getByRole('heading', { name: 'Película 7' })).toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 
     window.history.replaceState({}, '', '/cartelera');
     window.dispatchEvent(new PopStateEvent('popstate'));

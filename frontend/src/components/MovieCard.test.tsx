@@ -14,7 +14,8 @@ describe('MovieCard', () => {
     expect(screen.getByText('2026-08-01 · 18:00')).toBeInTheDocument();
     expect(screen.getByText('Haz clic para más información →')).toBeInTheDocument();
 
-    const card = screen.getByRole('button', { name: 'Ver La Casa Lobo y sus funciones' });
+    const card = screen.getByRole('link', { name: 'Ver La Casa Lobo y sus funciones' });
+    expect(card).toHaveAttribute('href', '/peliculas/1');
     expect(screen.queryByText(/Ver película y funciones/)).not.toBeInTheDocument();
 
     await userEvent.click(card);

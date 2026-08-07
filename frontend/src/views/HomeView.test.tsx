@@ -10,9 +10,9 @@ describe('HomeView', () => {
     const onMovie = vi.fn();
     render(<HomeView featured={demoMovies} onCatalog={onCatalog} onMovie={onMovie} />);
 
-    expect(screen.getAllByRole('button', { name: /Ver .+ y sus funciones/ })).toHaveLength(3);
+    expect(screen.getAllByRole('link', { name: /Ver .+ y sus funciones/ })).toHaveLength(3);
     await userEvent.click(screen.getByRole('button', { name: 'Descubrir la cartelera' }));
-    await userEvent.click(screen.getAllByRole('button', { name: /Ver .+ y sus funciones/ })[0]!);
+    await userEvent.click(screen.getAllByRole('link', { name: /Ver .+ y sus funciones/ })[0]!);
 
     expect(onCatalog).toHaveBeenCalledOnce();
     expect(onMovie).toHaveBeenCalledWith(1);
