@@ -3,7 +3,7 @@
 Docker es opcional y no reemplaza el flujo local con `pnpm`. La configuración publica los servicios
 solo en `127.0.0.1` y utiliza puertos distintos de los valores locales:
 
-- MySQL: `3307`
+- MySQL: `3308`
 - API: `3001`
 - Aplicación web: `5174`
 
@@ -32,7 +32,7 @@ docker compose ps
 ```
 
 El desarrollo local continúa igual; para conectarlo a MySQL de Docker usa
-`MYSQL_HOST=127.0.0.1` y `MYSQL_PORT=3307` en `.env`, y luego ejecuta `pnpm db:migrate`. El
+`MYSQL_HOST=127.0.0.1` y `MYSQL_PORT=3308` en `.env`, y luego ejecuta `pnpm db:migrate`. El
 contenedor MySQL no aplica migraciones por su cuenta para evitar que compita con el migrador del
 backend.
 
