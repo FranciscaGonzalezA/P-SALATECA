@@ -13,6 +13,12 @@ describe('MovieCard', () => {
     expect(screen.getByText(/75 min/)).toBeInTheDocument();
     expect(screen.getByText('2026-08-01 · 18:00')).toBeInTheDocument();
     expect(screen.getByText('Sinopsis')).toBeInTheDocument();
+    expect(screen.getByText('Clic derecho para volver')).toHaveClass(
+      'movie-card-reset-hint-desktop',
+    );
+    expect(screen.getByText('Mantén presionado para volver')).toHaveClass(
+      'movie-card-reset-hint-mobile',
+    );
     expect(
       screen.getByText(
         'Una joven escapa de una colonia alemana y se refugia en una casa donde la realidad comienza a transformarse.',

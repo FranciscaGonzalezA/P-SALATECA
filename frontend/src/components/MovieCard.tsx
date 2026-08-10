@@ -110,7 +110,12 @@ export function MovieCard({ movie, onOpen }: MovieCardProps) {
           </div>
           <div className="movie-card-back-footer">
             <span className="movie-card-cta">Haz clic para más información →</span>
-            <span className="movie-card-reset-hint">Clic derecho para volver</span>
+            <span className="movie-card-reset-hint movie-card-reset-hint-desktop">
+              Clic derecho para volver
+            </span>
+            <span className="movie-card-reset-hint movie-card-reset-hint-mobile">
+              Mantén presionado para volver
+            </span>
           </div>
         </div>
       </div>

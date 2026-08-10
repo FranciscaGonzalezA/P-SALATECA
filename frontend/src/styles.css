@@ -922,6 +922,10 @@ main {
   font-size: 0.64rem;
 }
 
+.movie-card-reset-hint-mobile {
+  display: none;
+}
+
 .movie-card-content {
   display: flex;
   flex: 1;
@@ -2323,6 +2327,14 @@ main {
   .site-header {
     grid-template-columns: 1fr auto 1fr;
     padding: 0 1rem;
+  }
+
+  .movie-card-reset-hint-desktop {
+    display: none;
+  }
+
+  .movie-card-reset-hint-mobile {
+    display: inline;
   }
 
   .menu-button {
