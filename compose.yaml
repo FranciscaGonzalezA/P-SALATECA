@@ -43,6 +43,7 @@ services:
       TMDB_READ_ACCESS_TOKEN: ${TMDB_READ_ACCESS_TOKEN:-}
       TMDB_LANGUAGE: ${TMDB_LANGUAGE:-es-CL}
       TMDB_REQUEST_TIMEOUT_MS: ${TMDB_REQUEST_TIMEOUT_MS:-10000}
+      SCRAPER_INGEST_TOKEN: ${SCRAPER_INGEST_TOKEN:-}
     ports:
       - '127.0.0.1:${DOCKER_BACKEND_PORT:-3001}:3000'
     depends_on:
@@ -81,6 +82,29 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+
+  scraper:
+    profiles: ['scraping']
+    build:
+      context: .
+      dockerfile: scraper/Dockerfile
+    restart: unless-stopped
+    init: true
+    environment:
+      SCRAPER_USER_AGENT: ${SCRAPER_USER_AGENT:-CineArtePlatform/0.1 (contact@example.com)}
+      SCRAPER_REQUEST_TIMEOUT_MS: ${SCRAPER_REQUEST_TIMEOUT_MS:-10000}
+      SCRAPER_REQUEST_RETRIES: ${SCRAPER_REQUEST_RETRIES:-2}
+      SCRAPER_BACKEND_URL: http://backend:3000/api/v1
+      SCRAPER_INGEST_TOKEN: ${SCRAPER_INGEST_TOKEN:-}
+      SCRAPER_MIN_SUCCESSFUL_SOURCES: ${SCRAPER_MIN_SUCCESSFUL_SOURCES:-3}
+      SCRAPER_MIN_ACCEPTED_RECORDS: ${SCRAPER_MIN_ACCEPTED_RECORDS:-1}
+      SCRAPER_SCHEDULE_DAY: ${SCRAPER_SCHEDULE_DAY:-wednesday}
+      SCRAPER_SCHEDULE_TIME: ${SCRAPER_SCHEDULE_TIME:-09:00}
+      SCRAPER_SCHEDULE_TIMEZONE: ${SCRAPER_SCHEDULE_TIMEZONE:-America/Santiago}
+      SCRAPER_RUN_ON_START: ${SCRAPER_RUN_ON_START:-false}
+    depends_on:
+      backend:
+        condition: service_healthy
 
 volumes:
   mysql_data:

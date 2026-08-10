@@ -6,7 +6,10 @@ loadDotenv({ path: resolve(process.cwd(), '.env') });
 loadDotenv({ path: resolve(process.cwd(), '../.env') });
 
 const optionalSecret = z.preprocess(
-  (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+  (value) =>
+    typeof value === 'string' && (value.trim() === '' || value.startsWith('replace_with_'))
+      ? undefined
+      : value,
   z.string().min(32).optional(),
 );
 

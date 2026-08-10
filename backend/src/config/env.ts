@@ -29,7 +29,10 @@ const envSchema = z
     TMDB_LANGUAGE: z.string().trim().min(2).default('es-CL'),
     TMDB_REQUEST_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(60_000).default(10_000),
     SCRAPER_INGEST_TOKEN: z.preprocess(
-      (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+      (value) =>
+        typeof value === 'string' && (value.trim() === '' || value.startsWith('replace_with_'))
+          ? undefined
+          : value,
       z.string().min(32).optional(),
     ),
   })
