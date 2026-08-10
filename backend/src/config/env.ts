@@ -28,6 +28,10 @@ const envSchema = z
     TMDB_API_TOKEN: optionalEnvironmentValue,
     TMDB_LANGUAGE: z.string().trim().min(2).default('es-CL'),
     TMDB_REQUEST_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(60_000).default(10_000),
+    SCRAPER_INGEST_TOKEN: z.preprocess(
+      (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+      z.string().min(32).optional(),
+    ),
   })
   .superRefine((value, context) => {
     if (Boolean(value.ADMIN_EMAIL) !== Boolean(value.ADMIN_PASSWORD)) {

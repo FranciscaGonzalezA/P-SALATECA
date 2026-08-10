@@ -7,6 +7,7 @@ import { createAuthRouter } from './modules/auth/auth.routes.js';
 import { MysqlAuthRepository } from './modules/auth/mysqlAuthRepository.js';
 import { createCatalogRouter } from './modules/catalog/catalog.routes.js';
 import { createAdminIngestionRouter } from './modules/ingestion/adminIngestion.routes.js';
+import { createScraperIngestionRouter } from './modules/ingestion/scraperIngestion.routes.js';
 import { MysqlIngestionRepository } from './modules/ingestion/mysqlIngestionRepository.js';
 import { MovieMetadataService } from './modules/metadata/movieMetadata.service.js';
 import { MysqlMovieMetadataRepository } from './modules/metadata/mysqlMovieMetadataRepository.js';
@@ -58,6 +59,10 @@ export function createApp(): Express {
   app.use(
     '/api/v1',
     createAdminIngestionRouter(authService, new MysqlIngestionRepository(), metadataService),
+  );
+  app.use(
+    '/api/v1',
+    createScraperIngestionRouter(new MysqlIngestionRepository(), env.SCRAPER_INGEST_TOKEN),
   );
 
   app.use((_request, response) => {
