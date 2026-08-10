@@ -99,11 +99,14 @@ pnpm format:check   # comprueba formato
 pnpm db:migrate     # aplica migraciones pendientes
 pnpm db:seed        # carga datos de desarrollo
 pnpm db:ingest -- archivo.json --source-name "Fuente" --source-type manual --base-url "https://example.com"
+pnpm scraper:run     # recolecta; añade -- --publish para ingresar al staging
+pnpm scraper:schedule # mantiene activa la programación semanal configurada
 ```
 
 Consulta [docs/setup.md](docs/setup.md), [docs/architecture.md](docs/architecture.md),
 [docs/api.md](docs/api.md), [docs/normalization.md](docs/normalization.md) y
-[docs/data-dictionary.md](docs/data-dictionary.md) antes de implementar nuevas historias. La
+[docs/data-dictionary.md](docs/data-dictionary.md). La extracción manual y semanal se documenta en
+[docs/scraper.md](docs/scraper.md). Consulta estos documentos antes de implementar nuevas historias. La
 estrategia, procedimientos y evidencia de calidad están en
 [docs/qa-strategy.md](docs/qa-strategy.md) y
 [docs/qa-report-2026-07-28.md](docs/qa-report-2026-07-28.md).

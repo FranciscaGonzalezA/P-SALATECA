@@ -44,6 +44,13 @@ docker compose --profile app up -d
 docker compose ps
 ```
 
+Para activar además el scraper semanal, configura `SCRAPER_INGEST_TOKEN` y agrega el perfil
+`scraping`:
+
+```powershell
+docker compose --profile app --profile scraping up -d --build
+```
+
 Visita `http://localhost:5174` y confirma que `http://localhost:3001/api/v1/health` responde con
 `status: ok`. La imagen del backend aplica las migraciones pendientes antes de iniciar la API.
 

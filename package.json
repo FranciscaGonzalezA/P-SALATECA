@@ -9,6 +9,8 @@
     "dev:frontend": "pnpm --filter frontend dev",
     "dev:backend": "pnpm --filter backend dev",
     "dev:scraper": "pnpm --filter scraper dev",
+    "scraper:run": "pnpm --filter scraper scrape",
+    "scraper:schedule": "pnpm --filter scraper schedule",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",
