@@ -107,3 +107,6 @@ Consulta [docs/setup.md](docs/setup.md), [docs/architecture.md](docs/architectur
 estrategia, procedimientos y evidencia de calidad están en
 [docs/qa-strategy.md](docs/qa-strategy.md) y
 [docs/qa-report-2026-07-28.md](docs/qa-report-2026-07-28.md).
+
+La puesta en marcha gradual y aislada de todos los servicios con Docker se documenta en
+[docs/docker.md](docs/docker.md).

@@ -53,3 +53,6 @@ pnpm qa:audit
 
 `pnpm quality` comprueba formato, lint, cobertura con umbrales y compilación. Para integración con
 MySQL, carga y revisión exploratoria sigue [qa-strategy.md](qa-strategy.md).
+
+Para ejecutar MySQL de forma aislada o activar gradualmente toda la aplicación en contenedores,
+consulta [docker.md](docker.md).
