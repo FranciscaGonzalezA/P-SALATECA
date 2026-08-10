@@ -72,7 +72,11 @@ describe('conectores de cartelera', () => {
     );
     const records = await connector.collect();
     expect(records).toHaveLength(19);
-    expect(records.every((record) => ![1, 2].includes(new Date(`${record.screeningDate}T00:00:00Z`).getUTCDay()))).toBe(true);
+    expect(
+      records.every(
+        (record) => ![1, 2].includes(new Date(`${record.screeningDate}T00:00:00Z`).getUTCDay()),
+      ),
+    ).toBe(true);
   });
 
   it('Sala K conserva resultados aunque cada detalle se consulte por separado', async () => {
@@ -110,6 +114,11 @@ describe('conectores de cartelera', () => {
               location: { name: 'Sala de cine' },
             },
             { '@type': 'Event', name: 'Paneles temáticos', startDate: '2026-08-12T12:00:00-04:00' },
+            {
+              '@type': 'Event',
+              name: 'FUNCIÓN DE CLAUSURA | Ciclo',
+              startDate: '2026-08-12T20:00:00-04:00',
+            },
           ],
         })}</script>`,
       }),

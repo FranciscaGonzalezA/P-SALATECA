@@ -24,8 +24,12 @@ function venueFromText(text: string): string {
     'Casa de la Cultura - Maipú',
     'Casa de la Cultura',
   ];
-  const match = venues.find((venue) => text.toLocaleLowerCase('es-CL').includes(venue.toLocaleLowerCase('es-CL')));
-  return match === 'U. MAYOR CAMPUS EL CLAUSTRO' ? 'Campus El Claustro, U. Mayor' : (match ?? 'Sala K');
+  const match = venues.find((venue) =>
+    text.toLocaleLowerCase('es-CL').includes(venue.toLocaleLowerCase('es-CL')),
+  );
+  return match === 'U. MAYOR CAMPUS EL CLAUSTRO'
+    ? 'Campus El Claustro, U. Mayor'
+    : (match ?? 'Sala K');
 }
 
 export class SalaKConnector implements SourceConnector {
@@ -73,7 +77,7 @@ export class SalaKConnector implements SourceConnector {
     const capturedAt = this.now();
     return extractNamedDateTimes(dateText, capturedAt).map(({ date, time }) => ({
       movieTitle,
-      venueName: venueFromText(dateText),
+      venueName: venueFromText(text),
       screeningDate: date,
       screeningTime: time,
       sourceTimezone: 'America/Santiago',
