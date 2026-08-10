@@ -35,6 +35,35 @@ export interface VenueDto {
   websiteUrl: string | null;
 }
 
+export type ChileRegionCode =
+  | 'CL-AP'
+  | 'CL-TA'
+  | 'CL-AN'
+  | 'CL-AT'
+  | 'CL-CO'
+  | 'CL-VS'
+  | 'CL-RM'
+  | 'CL-LI'
+  | 'CL-ML'
+  | 'CL-NB'
+  | 'CL-BI'
+  | 'CL-AR'
+  | 'CL-LR'
+  | 'CL-LL'
+  | 'CL-AI'
+  | 'CL-MA';
+
+export interface AdminPendingVenueDto extends VenueDto {
+  regionCode: null;
+  screeningCount: number;
+  upcomingScreeningCount: number;
+}
+
+export interface AdminVenueValidationDto {
+  id: number;
+  regionCode: ChileRegionCode;
+}
+
 export interface SourceDto {
   id: number;
   name: string;

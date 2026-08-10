@@ -16,11 +16,15 @@ import { createPostsRouter } from './modules/posts/posts.routes.js';
 import { PostsService } from './modules/posts/posts.service.js';
 import { MysqlPostsRepository } from './modules/posts/mysqlPostsRepository.js';
 import { healthRouter } from './routes/health.js';
+import { createAdminVenuesRouter } from './modules/venues/adminVenues.routes.js';
+import { AdminVenuesService } from './modules/venues/adminVenues.service.js';
+import { MysqlAdminVenuesRepository } from './modules/venues/mysqlAdminVenuesRepository.js';
 
 export function createApp(): Express {
   const app = express();
   const authService = new AuthService(new MysqlAuthRepository());
   const postsService = new PostsService(new MysqlPostsRepository());
+  const venuesService = new AdminVenuesService(new MysqlAdminVenuesRepository());
   const tmdbReadAccessToken = usableTmdbCredential(
     env.TMDB_READ_ACCESS_TOKEN ?? env.TMDB_API_TOKEN,
   );
@@ -56,6 +60,7 @@ export function createApp(): Express {
   app.use('/api/v1', createCatalogRouter());
   app.use('/api/v1', createPostsRouter(postsService));
   app.use('/api/v1', createAdminPostsRouter(authService, postsService));
+  app.use('/api/v1', createAdminVenuesRouter(authService, venuesService));
   app.use(
     '/api/v1',
     createAdminIngestionRouter(authService, new MysqlIngestionRepository(), metadataService),

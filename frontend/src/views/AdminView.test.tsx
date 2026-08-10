@@ -10,6 +10,8 @@ const api = vi.hoisted(() => ({
   updateAdminPost: vi.fn(),
   moveAdminPost: vi.fn(),
   deleteAdminPost: vi.fn(),
+  fetchPendingVenues: vi.fn(),
+  validateVenueRegion: vi.fn(),
 }));
 vi.mock('../api/postsApi', () => ({ fetchPosts: api.fetchPosts, fetchPost: api.fetchPost }));
 vi.mock('../api/adminPostsApi', () => ({
@@ -17,6 +19,10 @@ vi.mock('../api/adminPostsApi', () => ({
   updateAdminPost: api.updateAdminPost,
   moveAdminPost: api.moveAdminPost,
   deleteAdminPost: api.deleteAdminPost,
+}));
+vi.mock('../api/adminVenuesApi', () => ({
+  fetchPendingVenues: api.fetchPendingVenues,
+  validateVenueRegion: api.validateVenueRegion,
 }));
 
 const user = { id: 1, email: 'admin@salateca.cl', role: 'admin' as const };
@@ -43,6 +49,8 @@ describe('AdminView', () => {
     api.updateAdminPost.mockResolvedValue(post);
     api.moveAdminPost.mockResolvedValue(true);
     api.deleteAdminPost.mockResolvedValue(undefined);
+    api.fetchPendingVenues.mockResolvedValue([]);
+    api.validateVenueRegion.mockResolvedValue({ id: 1, regionCode: 'CL-RM' });
   });
 
   it('crea una publicación y permite cerrar sesión', async () => {

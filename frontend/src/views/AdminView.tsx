@@ -8,6 +8,7 @@ import {
 } from '../api/adminPostsApi';
 import { fetchPost, fetchPosts } from '../api/postsApi';
 import { AdminScreeningsImport } from '../components/AdminScreeningsImport';
+import { AdminVenueValidation } from '../components/AdminVenueValidation';
 
 interface AdminViewProps {
   user: AuthenticatedUserDto;
@@ -167,6 +168,7 @@ export function AdminView({ user, onLogout }: AdminViewProps) {
       )}
 
       <AdminScreeningsImport />
+      <AdminVenueValidation />
 
       <div className="admin-layout">
         <aside className="admin-post-list" aria-label="Publicaciones existentes">

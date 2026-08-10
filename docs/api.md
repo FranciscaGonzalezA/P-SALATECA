@@ -40,6 +40,8 @@ añade `meta` con paginación y tiempo de procesamiento. Los errores usan `error
 | `PATCH`  | `/admin/posts/:id/order`   | Admin   | Mueve una publicación arriba o abajo.      |
 | `DELETE` | `/admin/posts/:id`         | Admin   | Elimina una publicación.                   |
 | `POST`   | `/admin/screenings/import` | Admin   | Importa funciones desde un archivo XLSX.   |
+| `GET`    | `/admin/venues/pending`    | Admin   | Lista salas sin código de región.          |
+| `PATCH`  | `/admin/venues/:id/region` | Admin   | Valida manualmente la región de una sala.  |
 
 La automatización utiliza además `POST /internal/scraper/ingest`. Es un endpoint de servicio, no
 una ruta para navegadores: exige `Authorization: Bearer <SCRAPER_INGEST_TOKEN>` y permanece
@@ -53,6 +55,15 @@ recibe `401`; una cuenta sin el rol `admin` recibe `403`.
 
 El cuerpo de creación y actualización de posts contiene `title`, `body`, `imageUrl`,
 `sourceName`, `sourceUrl` y `keywords`.
+
+### Validación administrativa de salas
+
+`GET /admin/venues/pending` devuelve las salas cuyo `region_code` es nulo o vacío, junto con su
+dirección, comuna y cantidad de funciones. `PATCH /admin/venues/:id/region` recibe
+`{ "regionCode": "CL-RM" }` y acepta los códigos ISO 3166-2 de las 16 regiones de Chile. La
+actualización solo se aplica si la sala continúa pendiente, evitando que una sesión administrativa
+desactualizada sobrescriba una clasificación previa. Una sala confirmada como `CL-RM` entra en el
+catálogo público; las clasificadas en otra región permanecen fuera del alcance metropolitano.
 
 ### Importación administrativa de funciones
 
