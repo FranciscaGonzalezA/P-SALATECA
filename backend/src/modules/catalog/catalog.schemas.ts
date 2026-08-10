@@ -39,6 +39,7 @@ export const catalogFiltersSchema = z.object({
   sala: optionalText(z.string().trim().min(1).max(180)),
   genero: optionalText(z.string().trim().min(1).max(80)),
   buscar: optionalText(z.string().trim().min(1).max(120)),
+  orden: z.enum(['proximas', 'destacados']).optional(),
   pagina: z.coerce.number().int().min(1).default(1),
   limite: z.coerce.number().int().min(1).max(50).default(12),
 });

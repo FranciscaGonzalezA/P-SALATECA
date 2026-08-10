@@ -16,7 +16,7 @@ milisegundos y los instantes de las funciones se guardan en UTC.
 
 | Tabla            | Propósito                                  | Reglas principales                                                                                            |
 | ---------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| `movies`         | Datos estandarizados de películas.         | Clave canónica indexada y `tmdb_id` único cuando existe.                                                      |
+| `movies`         | Datos estandarizados de películas.         | Identidad única por título canónico y año; `tmdb_id` también es único cuando existe.                          |
 | `genres`         | Catálogo controlado de géneros.            | Nombre y slug únicos.                                                                                         |
 | `movie_genres`   | Relación muchos-a-muchos.                  | Clave primaria compuesta e índice inverso por género.                                                         |
 | `venues`         | Salas y espacios culturales.               | Nombre canónico único y región explícita; solo `CL-RM` se publica.                                            |
@@ -29,7 +29,9 @@ milisegundos y los instantes de las funciones se guardan en UTC.
 las filas con `content_type = 'movie'` se exponen mediante la cartelera y las fichas públicas.
 
 La integración de TMDB completa `original_title`, `release_year`, `duration_minutes`, `director`,
-`synopsis` y `tmdb_id` solo cuando el valor local es nulo. `metadata_source` y
+`synopsis` y `tmdb_id` solo cuando el valor local es nulo. También conserva `tmdb_vote_average`,
+`tmdb_vote_count` y `tmdb_popularity` para ordenar los destacados; estas señales se pueden
+actualizar en enriquecimientos posteriores. `metadata_source` y
 `metadata_synced_at` registran la procedencia y el último enriquecimiento exitoso. Los géneros se
 relacionan mediante `movie_genres`; los afiches se guardan en `content_assets` como enlaces
 externos con `rights_status = 'link_only'` y sin almacenamiento local.

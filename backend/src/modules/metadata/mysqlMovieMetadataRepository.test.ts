@@ -31,6 +31,9 @@ describe('MysqlMovieMetadataRepository', () => {
           duration_minutes: null,
           director: null,
           synopsis: null,
+          tmdb_vote_average: null,
+          tmdb_vote_count: null,
+          tmdb_popularity: null,
           metadata_synced_at: null,
           has_poster: 0,
           has_genres: 0,
@@ -47,6 +50,37 @@ describe('MysqlMovieMetadataRepository', () => {
     expect(pool.execute).toHaveBeenCalledWith(expect.stringContaining('m.canonical_title = ?'), [
       'la-casa-lobo',
     ]);
+  });
+
+  it('convierte la fecha MySQL de sincronización en Date', async () => {
+    const { pool } = poolWithConnection();
+    vi.mocked(pool.execute).mockResolvedValueOnce([
+      [
+        {
+          id: 4,
+          title: 'La casa lobo',
+          tmdb_id: 1,
+          original_title: null,
+          release_year: null,
+          duration_minutes: null,
+          director: null,
+          synopsis: null,
+          tmdb_vote_average: 7.5,
+          tmdb_vote_count: 100,
+          tmdb_popularity: 10,
+          metadata_synced_at: '2026-08-10 12:00:00.000',
+          has_poster: 0,
+          has_genres: 0,
+        },
+      ],
+      [],
+    ] as never);
+
+    const result = await new MysqlMovieMetadataRepository(pool).findByCanonicalTitle(
+      'la-casa-lobo',
+    );
+
+    expect(result?.metadataSyncedAt).toEqual(new Date('2026-08-10T12:00:00.000Z'));
   });
 
   it('guarda campos faltantes, géneros y afiche dentro de una transacción', async () => {
@@ -66,6 +100,9 @@ describe('MysqlMovieMetadataRepository', () => {
       durationMinutes: 90,
       director: 'Directora',
       synopsis: 'Sinopsis',
+      tmdbVoteAverage: 7.8,
+      tmdbVoteCount: 250,
+      tmdbPopularity: 12.5,
       genres: ['Drama'],
       posterUrl: 'https://image.tmdb.org/t/p/w780/poster.jpg',
     });
@@ -92,6 +129,9 @@ describe('MysqlMovieMetadataRepository', () => {
       durationMinutes: null,
       director: null,
       synopsis: null,
+      tmdbVoteAverage: 7,
+      tmdbVoteCount: 100,
+      tmdbPopularity: 8,
       genres: [],
       posterUrl: null,
     });

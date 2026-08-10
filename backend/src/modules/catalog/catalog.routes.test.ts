@@ -14,6 +14,9 @@ const movie = {
   director: 'Cristóbal León y Joaquín Cociña',
   synopsis: null,
   posterUrl: null,
+  tmdbRating: 7.5,
+  tmdbVoteCount: 200,
+  tmdbPopularity: 15,
   genres: [{ id: 1, name: 'Animación', slug: 'animacion' }],
   screenings: [],
   updatedAt: '2026-07-27T12:00:00.000Z',
@@ -59,8 +62,19 @@ describe('createCatalogRouter', () => {
       venue: 'sala-k',
       genre: 'animacion',
       search: 'lobo',
+      sort: 'upcoming',
       page: 2,
       pageSize: 6,
+    });
+  });
+
+  it('traduce el orden público de destacados al criterio interno', async () => {
+    await request(app).get('/cartelera?orden=destacados&limite=3');
+
+    expect(repository.listCatalog).toHaveBeenCalledWith({
+      sort: 'featured',
+      page: 1,
+      pageSize: 3,
     });
   });
 

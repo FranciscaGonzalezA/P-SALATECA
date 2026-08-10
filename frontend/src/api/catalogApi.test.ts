@@ -14,6 +14,14 @@ afterEach(() => {
 });
 
 describe('buildCatalogUrl', () => {
+  it('solicita el ranking de destacados de forma explícita', () => {
+    const url = new URL(
+      buildCatalogUrl({ sort: 'featured', page: 1, pageSize: 3 }, 'https://api.example.com/api/v1'),
+    );
+
+    expect(url.searchParams.get('orden')).toBe('destacados');
+  });
+
   it('serializa filtros combinados sin concatenar valores manualmente', () => {
     const url = new URL(
       buildCatalogUrl(

@@ -35,6 +35,17 @@ describe('MovieDetailView', () => {
     expect(await screen.findByText('No hay funciones próximas publicadas.')).toBeInTheDocument();
   });
 
+  it('muestra la valoración de TMDB junto con su cantidad de votos', async () => {
+    fetchMovie.mockResolvedValue({
+      movie: { ...demoMovies[0], tmdbRating: 7.6, tmdbVoteCount: 1234 },
+      demo: false,
+    });
+    render(<MovieDetailView movieId={1} onBack={() => undefined} />);
+
+    expect(await screen.findByText('Valoración TMDB')).toBeInTheDocument();
+    expect(screen.getByText(/7\.6\/10/)).toHaveTextContent('1.234 votos');
+  });
+
   it('presenta un error recuperable si el detalle falla', async () => {
     fetchMovie.mockRejectedValue(new Error('Película eliminada'));
     render(<MovieDetailView movieId={404} onBack={() => undefined} />);

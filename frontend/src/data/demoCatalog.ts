@@ -84,6 +84,9 @@ export const demoMovies: MovieDetailDto[] = [
     synopsis:
       'Una joven escapa de una colonia alemana y se refugia en una casa donde la realidad comienza a transformarse.',
     posterUrl: null,
+    tmdbRating: null,
+    tmdbVoteCount: null,
+    tmdbPopularity: null,
     genres: [demoGenres[2]!, demoGenres[3]!],
     screenings: [
       screening(1, '2026-08-01', '18:00', demoVenues[0]!),
@@ -101,6 +104,9 @@ export const demoMovies: MovieDetailDto[] = [
     synopsis:
       'Un investigador privado contrata a un hombre mayor para observar desde dentro la vida cotidiana de una residencia.',
     posterUrl: null,
+    tmdbRating: null,
+    tmdbVoteCount: null,
+    tmdbPopularity: null,
     genres: [demoGenres[1]!, demoGenres[3]!],
     screenings: [
       screening(3, '2026-08-01', '19:30', demoVenues[1]!),
@@ -118,6 +124,9 @@ export const demoMovies: MovieDetailDto[] = [
     synopsis:
       'En el desierto de Atacama, astrónomos y familiares de detenidos desaparecidos buscan respuestas mirando hacia el pasado.',
     posterUrl: null,
+    tmdbRating: null,
+    tmdbVoteCount: null,
+    tmdbPopularity: null,
     genres: [demoGenres[1]!, demoGenres[3]!],
     screenings: [screening(5, '2026-08-02', '17:00', demoVenues[2]!)],
     updatedAt: '2026-07-27T12:00:00.000Z',
@@ -132,6 +141,9 @@ export const demoMovies: MovieDetailDto[] = [
     synopsis:
       'Marina enfrenta el duelo y los prejuicios después de la muerte repentina de su pareja.',
     posterUrl: null,
+    tmdbRating: null,
+    tmdbVoteCount: null,
+    tmdbPopularity: null,
     genres: [demoGenres[0]!, demoGenres[3]!],
     screenings: [screening(6, '2026-08-03', '18:30', demoVenues[1]!)],
     updatedAt: '2026-07-27T12:00:00.000Z',
@@ -146,6 +158,9 @@ export const demoMovies: MovieDetailDto[] = [
     synopsis:
       'Tres jinetes atraviesan Tierra del Fuego para delimitar las tierras de un poderoso terrateniente.',
     posterUrl: null,
+    tmdbRating: null,
+    tmdbVoteCount: null,
+    tmdbPopularity: null,
     genres: [demoGenres[0]!, demoGenres[3]!],
     screenings: [screening(7, '2026-08-04', '21:00', demoVenues[0]!)],
     updatedAt: '2026-07-27T12:00:00.000Z',
@@ -160,6 +175,9 @@ export const demoMovies: MovieDetailDto[] = [
     synopsis:
       'El océano y la memoria de Chile se conectan a través de relatos indígenas y episodios de su historia reciente.',
     posterUrl: null,
+    tmdbRating: null,
+    tmdbVoteCount: null,
+    tmdbPopularity: null,
     genres: [demoGenres[1]!, demoGenres[3]!],
     screenings: [screening(8, '2026-08-03', '20:15', demoVenues[2]!)],
     updatedAt: '2026-07-27T12:00:00.000Z',
@@ -172,6 +190,7 @@ export interface DemoCatalogFilters {
   venue?: string | undefined;
   genre?: string | undefined;
   search?: string | undefined;
+  sort?: 'upcoming' | 'featured' | undefined;
   page: number;
   pageSize: number;
 }

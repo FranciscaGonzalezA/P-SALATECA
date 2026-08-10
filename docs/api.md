@@ -16,8 +16,11 @@ MySQL ni importa código del backend.
 | `GET`  | `/posts/:id`               | Contenido completo de una publicación. |
 | `GET`  | `/health`                  | Conectividad de API y base de datos.   |
 
-`/cartelera` acepta `fecha`, `horario`, `sala`, `genero`, `buscar`, `pagina` y `limite`. Los
+`/cartelera` acepta `fecha`, `horario`, `sala`, `genero`, `buscar`, `orden`, `pagina` y `limite`. Los
 filtros se pueden combinar. `limite` permite entre 1 y 50 resultados y utiliza 12 por defecto.
+`orden` admite `proximas` (comportamiento predeterminado) y `destacados`. Este último pondera la
+valoración de TMDB por su cantidad de votos usando 50 votos de confianza y una media de referencia
+de 5,0; la popularidad de TMDB se utiliza como desempate y la próxima función como criterio final.
 La cartelera, las funciones de cada película y el catálogo de `/salas` exponen únicamente salas
 verificadas de la Región Metropolitana (`region_code = 'CL-RM'`).
 
@@ -37,6 +40,11 @@ añade `meta` con paginación y tiempo de procesamiento. Los errores usan `error
 | `PATCH`  | `/admin/posts/:id/order`   | Admin   | Mueve una publicación arriba o abajo.      |
 | `DELETE` | `/admin/posts/:id`         | Admin   | Elimina una publicación.                   |
 | `POST`   | `/admin/screenings/import` | Admin   | Importa funciones desde un archivo XLSX.   |
+
+La automatización utiliza además `POST /internal/scraper/ingest`. Es un endpoint de servicio, no
+una ruta para navegadores: exige `Authorization: Bearer <SCRAPER_INGEST_TOKEN>` y permanece
+deshabilitado si el secreto no está configurado. Recibe lotes por fuente de hasta 5.000 registros
+y los procesa mediante el mismo staging, validación transaccional y bitácora de la carga manual.
 
 La sesión usa un token opaco aleatorio. Solo su hash SHA-256 se persiste en MySQL y el navegador
 lo recibe en una cookie `HttpOnly`, `SameSite=Lax` y `Secure` en producción. Las mutaciones
@@ -81,8 +89,10 @@ La propiedad `metadata` resume el enriquecimiento posterior de los títulos úni
 `requested`, `enriched`, `alreadyComplete`, `notFound`, `ambiguous`, `failed` y `disabled`. Solo se
 aceptan coincidencias exactas después de normalizar mayúsculas, acentos y puntuación. Si existen
 varias películas con el mismo título, se selecciona la primera película según el orden de relevancia
-devuelto por `/search/movie`. Los valores existentes en `movies` nunca se reemplazan; únicamente se
-completan campos nulos, géneros faltantes y un enlace externo al afiche.
+devuelto por `/search/movie`. Los valores descriptivos existentes en `movies` nunca se reemplazan;
+únicamente se completan campos nulos, géneros faltantes y un enlace externo al afiche. La
+valoración, cantidad de votos y popularidad sí se refrescan después de siete días para que el
+ranking no quede obsoleto.
 
 La búsqueda también normaliza espacios Unicode, comillas y guiones tipográficos; separa años
 anexados, indicadores de edición —como `doblada` o `versión extendida`—, títulos alternativos entre

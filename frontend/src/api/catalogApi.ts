@@ -16,6 +16,7 @@ export interface CatalogQuery {
   venue?: string | undefined;
   genre?: string | undefined;
   search?: string | undefined;
+  sort?: 'upcoming' | 'featured' | undefined;
   page: number;
   pageSize: number;
 }
@@ -51,6 +52,7 @@ export function buildCatalogUrl(query: CatalogQuery, baseUrl = apiBaseUrl): stri
     ['sala', query.venue],
     ['genero', query.genre],
     ['buscar', query.search],
+    ['orden', query.sort === 'featured' ? 'destacados' : undefined],
     ['pagina', query.page],
     ['limite', query.pageSize],
   ];

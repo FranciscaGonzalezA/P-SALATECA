@@ -87,6 +87,17 @@ export function MovieDetailView({ movieId, onBack }: MovieDetailViewProps) {
               <dt>Dirección</dt>
               <dd>{movie.director ?? 'Por confirmar'}</dd>
             </div>
+            {movie.tmdbRating !== null && (
+              <div>
+                <dt>Valoración TMDB</dt>
+                <dd>
+                  {movie.tmdbRating.toFixed(1)}/10
+                  {movie.tmdbVoteCount !== null
+                    ? ` · ${movie.tmdbVoteCount.toLocaleString('es-CL')} votos`
+                    : ''}
+                </dd>
+              </div>
+            )}
             <div>
               <dt>Última actualización</dt>
               <dd>{new Date(movie.updatedAt).toLocaleDateString('es-CL')}</dd>

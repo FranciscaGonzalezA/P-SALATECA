@@ -10,6 +10,9 @@ const baseRow = {
   duration_minutes: 75,
   director: 'Cristóbal León',
   synopsis: 'Sinopsis',
+  tmdb_vote_average: 7.5,
+  tmdb_vote_count: 200,
+  tmdb_popularity: 15,
   movie_updated_at: '2026-07-27 12:00:00.000',
   poster_url: null,
   genre_id: 1,
@@ -69,6 +72,9 @@ describe('MysqlCatalogRepository', () => {
     expect(result.total).toBe(1);
     expect(result.items[0]).toMatchObject({
       id: 7,
+      tmdbRating: 7.5,
+      tmdbVoteCount: 200,
+      tmdbPopularity: 15,
       genres: [
         { id: 1, name: 'Animación', slug: 'animacion' },
         { id: 2, name: 'Cine chileno', slug: 'cine-chileno' },
@@ -111,6 +117,20 @@ describe('MysqlCatalogRepository', () => {
     });
     expect(execute).toHaveBeenCalledTimes(1);
     expect(execute.mock.calls[0]?.[1]).toEqual([]);
+  });
+
+  it('ordena destacados con una nota ponderada por votos y popularidad como desempate', async () => {
+    execute
+      .mockResolvedValueOnce([[{ total: 1 }]])
+      .mockResolvedValueOnce([[{ id: 7 }]])
+      .mockResolvedValueOnce([[baseRow]]);
+
+    await repository.listCatalog({ sort: 'featured', page: 1, pageSize: 3 });
+
+    const rankingSql = String(execute.mock.calls[1]?.[0]);
+    expect(rankingSql).toContain('m.tmdb_vote_count / (m.tmdb_vote_count + 50.0)');
+    expect(rankingSql).toContain('COALESCE(m.tmdb_popularity, 0) DESC');
+    expect(rankingSql).toContain('LIMIT 3 OFFSET 0');
   });
 
   it('mapea detalle y fechas MySQL a DTO ISO', async () => {

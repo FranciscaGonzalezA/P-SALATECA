@@ -26,6 +26,9 @@ interface CatalogRow extends RowDataPacket {
   duration_minutes: number | null;
   director: string | null;
   synopsis: string | null;
+  tmdb_vote_average: number | null;
+  tmdb_vote_count: number | null;
+  tmdb_popularity: number | null;
   movie_updated_at: string;
   poster_url: string | null;
   genre_id: number | null;
@@ -140,6 +143,9 @@ function mapMovies(rows: readonly CatalogRow[]): MovieSummaryDto[] {
         director: row.director,
         synopsis: row.synopsis,
         posterUrl: row.poster_url,
+        tmdbRating: row.tmdb_vote_average,
+        tmdbVoteCount: row.tmdb_vote_count,
+        tmdbPopularity: row.tmdb_popularity,
         genres: [],
         screenings: [],
         genreIds: new Set<number>(),
@@ -178,6 +184,9 @@ function mapMovies(rows: readonly CatalogRow[]): MovieSummaryDto[] {
     director: movie.director,
     synopsis: movie.synopsis,
     posterUrl: movie.posterUrl,
+    tmdbRating: movie.tmdbRating,
+    tmdbVoteCount: movie.tmdbVoteCount,
+    tmdbPopularity: movie.tmdbPopularity,
     genres: movie.genres,
     screenings: movie.screenings,
   }));
@@ -260,6 +269,9 @@ const catalogSelect = `
     m.duration_minutes,
     m.director,
     m.synopsis,
+    CAST(m.tmdb_vote_average AS DOUBLE) AS tmdb_vote_average,
+    m.tmdb_vote_count,
+    CAST(m.tmdb_popularity AS DOUBLE) AS tmdb_popularity,
     m.updated_at AS movie_updated_at,
     poster.original_url AS poster_url,
     g.id AS genre_id,
@@ -332,13 +344,31 @@ export class MysqlCatalogRepository implements CatalogRepository {
       return { items: [], total: 0 };
     }
 
+    const catalogOrder =
+      filters.sort === 'featured'
+        ? `
+          CASE
+            WHEN
+              m.tmdb_vote_average IS NULL
+              OR m.tmdb_vote_count IS NULL
+              OR m.tmdb_vote_count = 0
+            THEN 0
+            ELSE
+              (m.tmdb_vote_count / (m.tmdb_vote_count + 50.0)) * m.tmdb_vote_average
+              + (50.0 / (m.tmdb_vote_count + 50.0)) * 5.0
+          END DESC,
+          COALESCE(m.tmdb_popularity, 0) DESC,
+          MIN(s.starts_at),
+          m.title
+        `
+        : 'MIN(s.starts_at), m.title';
     const [movieIdRows] = await this.pool.execute<MovieIdRow[]>(
       `
         SELECT m.id
         ${joins}
         WHERE ${where.sql}
         GROUP BY m.id, m.title
-        ORDER BY MIN(s.starts_at), m.title
+        ORDER BY ${catalogOrder}
         ${pagination}
       `,
       where.values,

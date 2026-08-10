@@ -12,6 +12,9 @@ export interface StoredMovieMetadataState {
   durationMinutes: number | null;
   director: string | null;
   synopsis: string | null;
+  tmdbVoteAverage: number | null;
+  tmdbVoteCount: number | null;
+  tmdbPopularity: number | null;
   hasPoster: boolean;
   hasGenres: boolean;
   metadataSyncedAt: Date | null;
@@ -24,6 +27,9 @@ export interface MovieMetadata {
   durationMinutes: number | null;
   director: string | null;
   synopsis: string | null;
+  tmdbVoteAverage: number | null;
+  tmdbVoteCount: number | null;
+  tmdbPopularity: number | null;
   genres: string[];
   posterUrl: string | null;
 }

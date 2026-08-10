@@ -90,7 +90,7 @@ function App() {
 
   useEffect(() => {
     const controller = new AbortController();
-    fetchCatalog({ page: 1, pageSize: 3 }, controller.signal)
+    fetchCatalog({ page: 1, pageSize: 3, sort: 'featured' }, controller.signal)
       .then((result) => setFeatured(result.items))
       .catch(() => undefined);
     return () => controller.abort();

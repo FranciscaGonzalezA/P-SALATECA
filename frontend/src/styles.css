@@ -804,6 +804,42 @@ main {
   text-transform: uppercase;
 }
 
+.featured-score {
+  position: absolute;
+  z-index: 3;
+  top: 0.85rem;
+  right: 0.85rem;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.32rem;
+  padding: 0.45rem 0.62rem;
+  color: #17132b;
+  background: rgb(255 248 223 / 96%);
+  border: 1px solid rgb(255 255 255 / 70%);
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgb(13 12 20 / 28%);
+  backdrop-filter: blur(8px);
+}
+
+.featured-score > span {
+  color: #ce7b00;
+  font-size: 0.92rem;
+}
+
+.featured-score strong {
+  font-size: 0.84rem;
+  line-height: 1;
+}
+
+.featured-score small {
+  padding-left: 0.34rem;
+  color: rgb(23 19 43 / 68%);
+  border-left: 1px solid rgb(23 19 43 / 20%);
+  font-size: 0.62rem;
+  font-weight: 750;
+  line-height: 1;
+}
+
 .poster-title {
   max-width: 90%;
   font-family: Georgia, 'Times New Roman', serif;

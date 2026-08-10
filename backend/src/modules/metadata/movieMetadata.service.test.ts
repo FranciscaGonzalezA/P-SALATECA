@@ -14,6 +14,9 @@ const metadata: MovieMetadata = {
   durationMinutes: 90,
   director: 'Directora',
   synopsis: 'Sinopsis',
+  tmdbVoteAverage: 7.8,
+  tmdbVoteCount: 250,
+  tmdbPopularity: 12.5,
   genres: ['Drama'],
   posterUrl: 'https://image.tmdb.org/poster.jpg',
 };
@@ -28,6 +31,9 @@ function storedMovie(overrides: Partial<StoredMovieMetadataState> = {}): StoredM
     durationMinutes: null,
     director: null,
     synopsis: null,
+    tmdbVoteAverage: null,
+    tmdbVoteCount: null,
+    tmdbPopularity: null,
     hasPoster: false,
     hasGenres: false,
     metadataSyncedAt: null,
@@ -42,7 +48,14 @@ describe('MovieMetadataService', () => {
         .fn()
         .mockResolvedValueOnce(storedMovie())
         .mockResolvedValueOnce(
-          storedMovie({ id: 2, tmdbId: 9, metadataSyncedAt: new Date('2026-08-01') }),
+          storedMovie({
+            id: 2,
+            tmdbId: 9,
+            tmdbVoteAverage: 7,
+            tmdbVoteCount: 100,
+            tmdbPopularity: 10,
+            metadataSyncedAt: new Date(),
+          }),
         ),
       saveMetadata: vi.fn(),
     };

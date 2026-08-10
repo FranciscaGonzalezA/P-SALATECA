@@ -15,9 +15,12 @@ interface MovieMetadataRow extends RowDataPacket {
   duration_minutes: number | null;
   director: string | null;
   synopsis: string | null;
+  tmdb_vote_average: number | null;
+  tmdb_vote_count: number | null;
+  tmdb_popularity: number | null;
   has_poster: number;
   has_genres: number;
-  metadata_synced_at: Date | null;
+  metadata_synced_at: string | Date | null;
 }
 
 interface MovieIdRow extends RowDataPacket {
@@ -33,6 +36,12 @@ function slug(value: string): string {
     .replace(/[^\p{Letter}\p{Number}]+/gu, '-')
     .replace(/^-|-$/g, '')
     .slice(0, 80);
+}
+
+function mysqlDateTimeToDate(value: string | Date | null): Date | null {
+  if (value === null || value instanceof Date) return value;
+  const normalized = value.includes('T') ? value : value.replace(' ', 'T');
+  return new Date(`${normalized.replace(/Z$/, '')}Z`);
 }
 
 async function upsertTmdbSource(connection: PoolConnection): Promise<number> {
@@ -127,6 +136,9 @@ export class MysqlMovieMetadataRepository implements MovieMetadataRepository {
           m.duration_minutes,
           m.director,
           m.synopsis,
+          CAST(m.tmdb_vote_average AS DOUBLE) AS tmdb_vote_average,
+          m.tmdb_vote_count,
+          CAST(m.tmdb_popularity AS DOUBLE) AS tmdb_popularity,
           m.metadata_synced_at,
           EXISTS (
             SELECT 1 FROM content_assets a
@@ -153,9 +165,12 @@ export class MysqlMovieMetadataRepository implements MovieMetadataRepository {
       durationMinutes: row.duration_minutes,
       director: row.director,
       synopsis: row.synopsis,
+      tmdbVoteAverage: row.tmdb_vote_average,
+      tmdbVoteCount: row.tmdb_vote_count,
+      tmdbPopularity: row.tmdb_popularity,
       hasPoster: Boolean(row.has_poster),
       hasGenres: Boolean(row.has_genres),
-      metadataSyncedAt: row.metadata_synced_at,
+      metadataSyncedAt: mysqlDateTimeToDate(row.metadata_synced_at),
     };
   }
 
@@ -178,6 +193,9 @@ export class MysqlMovieMetadataRepository implements MovieMetadataRepository {
             duration_minutes = COALESCE(duration_minutes, ?),
             director = COALESCE(director, ?),
             synopsis = COALESCE(synopsis, ?),
+            tmdb_vote_average = COALESCE(?, tmdb_vote_average),
+            tmdb_vote_count = COALESCE(?, tmdb_vote_count),
+            tmdb_popularity = COALESCE(?, tmdb_popularity),
             metadata_source = 'tmdb',
             metadata_synced_at = CURRENT_TIMESTAMP(3)
           WHERE id = ?
@@ -189,6 +207,9 @@ export class MysqlMovieMetadataRepository implements MovieMetadataRepository {
           metadata.durationMinutes,
           metadata.director,
           metadata.synopsis,
+          metadata.tmdbVoteAverage,
+          metadata.tmdbVoteCount,
+          metadata.tmdbPopularity,
           movieId,
         ],
       );

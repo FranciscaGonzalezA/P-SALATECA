@@ -82,7 +82,7 @@ export function HomeView({ featured, onCatalog, onMovie }: HomeViewProps) {
         </div>
         <div className="movie-grid">
           {featured.slice(0, 3).map((movie) => (
-            <MovieCard movie={movie} onOpen={onMovie} key={movie.id} />
+            <MovieCard movie={movie} onOpen={onMovie} showFeaturedScore key={movie.id} />
           ))}
         </div>
       </section>

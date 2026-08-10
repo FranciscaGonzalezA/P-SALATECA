@@ -22,6 +22,9 @@ interface TmdbMovieDetails {
   runtime?: number;
   overview?: string;
   poster_path?: string | null;
+  vote_average?: number;
+  vote_count?: number;
+  popularity?: number;
   genres?: Array<{ name?: string }>;
   credits?: {
     crew?: Array<{ job?: string; name?: string }>;
@@ -189,6 +192,12 @@ function nonEmpty(value: string | undefined): string | null {
   return cleaned ? cleaned : null;
 }
 
+function finiteNumber(value: number | undefined, minimum: number, maximum?: number): number | null {
+  if (!Number.isFinite(value) || value === undefined || value < minimum) return null;
+  if (maximum !== undefined && value > maximum) return null;
+  return value;
+}
+
 export class TmdbClient implements MovieMetadataProvider {
   private readonly fetchImpl: typeof fetch;
   private readonly language: string;
@@ -288,6 +297,9 @@ export class TmdbClient implements MovieMetadataProvider {
         typeof details.runtime === 'number' && details.runtime > 0 ? details.runtime : null,
       director: directors.length > 0 ? directors.join(' y ') : null,
       synopsis: nonEmpty(details.overview),
+      tmdbVoteAverage: finiteNumber(details.vote_average, 0, 10),
+      tmdbVoteCount: finiteNumber(details.vote_count, 0),
+      tmdbPopularity: finiteNumber(details.popularity, 0),
       genres: [
         ...new Set(
           (details.genres ?? [])

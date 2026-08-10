@@ -60,4 +60,16 @@ describe('MovieCard', () => {
     );
     expect(screen.getByText('Sin funciones próximas.')).toBeInTheDocument();
   });
+
+  it('muestra una insignia numérica solo cuando la tarjeta es destacada', () => {
+    const movie = { ...demoMovies[0]!, tmdbRating: 7.6, tmdbVoteCount: 1234 };
+    const { rerender } = render(<MovieCard movie={movie} onOpen={() => undefined} />);
+
+    expect(screen.queryByLabelText(/Valoración TMDB/)).not.toBeInTheDocument();
+
+    rerender(<MovieCard movie={movie} onOpen={() => undefined} showFeaturedScore />);
+    expect(screen.getByLabelText('Valoración TMDB: 7.6 de 10, 1234 votos')).toHaveTextContent(
+      '★7,61.234 votos',
+    );
+  });
 });

@@ -2,6 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { catalogFiltersSchema, movieIdSchema } from './catalog.schemas.js';
 
 describe('catalogFiltersSchema', () => {
+  it('acepta el orden especial para destacados', () => {
+    expect(catalogFiltersSchema.parse({ orden: 'destacados' })).toMatchObject({
+      orden: 'destacados',
+      pagina: 1,
+      limite: 12,
+    });
+  });
+
   it('aplica paginación segura y acepta filtros combinados', () => {
     const result = catalogFiltersSchema.parse({
       fecha: '2026-08-01',

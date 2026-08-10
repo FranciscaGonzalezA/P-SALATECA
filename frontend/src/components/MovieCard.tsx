@@ -4,6 +4,7 @@ import { useState, type MouseEvent } from 'react';
 interface MovieCardProps {
   movie: MovieSummaryDto;
   onOpen: (movieId: number) => void;
+  showFeaturedScore?: boolean | undefined;
 }
 
 function toTitleCase(title: string): string {
@@ -14,7 +15,7 @@ function toTitleCase(title: string): string {
     });
 }
 
-export function MovieCard({ movie, onOpen }: MovieCardProps) {
+export function MovieCard({ movie, onOpen, showFeaturedScore = false }: MovieCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const nextScreening = movie.screenings[0];
   const posterClass = `movie-poster poster-tone-${movie.id % 5}`;
@@ -51,6 +52,25 @@ export function MovieCard({ movie, onOpen }: MovieCardProps) {
       <div className="movie-card-inner">
         <div className="movie-card-face movie-card-front" aria-hidden={isFlipped}>
           <div className={posterClass}>
+            {showFeaturedScore && movie.tmdbRating !== null && (
+              <div
+                className="featured-score"
+                aria-label={`Valoración TMDB: ${movie.tmdbRating.toFixed(1)} de 10${
+                  movie.tmdbVoteCount !== null ? `, ${movie.tmdbVoteCount} votos` : ''
+                }`}
+              >
+                <span aria-hidden="true">★</span>
+                <strong>
+                  {movie.tmdbRating.toLocaleString('es-CL', {
+                    minimumFractionDigits: 1,
+                    maximumFractionDigits: 1,
+                  })}
+                </strong>
+                {movie.tmdbVoteCount !== null && (
+                  <small>{movie.tmdbVoteCount.toLocaleString('es-CL')} votos</small>
+                )}
+              </div>
+            )}
             {movie.posterUrl ? (
               <img src={movie.posterUrl} alt={`Afiche de ${displayTitle}`} loading="lazy" />
             ) : (

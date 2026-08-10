@@ -65,6 +65,9 @@ export interface MovieSummaryDto {
   director: string | null;
   synopsis: string | null;
   posterUrl: string | null;
+  tmdbRating: number | null;
+  tmdbVoteCount: number | null;
+  tmdbPopularity: number | null;
   genres: GenreDto[];
   screenings: ScreeningDto[];
 }

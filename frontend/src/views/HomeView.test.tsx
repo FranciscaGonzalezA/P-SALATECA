@@ -8,11 +8,22 @@ describe('HomeView', () => {
   it('muestra hasta tres destacadas y conecta sus acciones', async () => {
     const onCatalog = vi.fn();
     const onMovie = vi.fn();
-    render(<HomeView featured={demoMovies} onCatalog={onCatalog} onMovie={onMovie} />);
+    render(
+      <HomeView
+        featured={demoMovies.map((movie, index) => ({
+          ...movie,
+          tmdbRating: 8 - index / 10,
+          tmdbVoteCount: 1000 - index,
+        }))}
+        onCatalog={onCatalog}
+        onMovie={onMovie}
+      />,
+    );
 
     expect(screen.getByText('RM')).toBeInTheDocument();
     expect(screen.queryByText('ÑUBLE')).not.toBeInTheDocument();
     expect(screen.getAllByRole('link', { name: /Ver .+ y sus funciones/ })).toHaveLength(3);
+    expect(screen.getAllByLabelText(/Valoración TMDB/)).toHaveLength(3);
     await userEvent.click(screen.getByRole('button', { name: 'Descubrir la cartelera' }));
     await userEvent.click(screen.getAllByRole('link', { name: /Ver .+ y sus funciones/ })[0]!);
 

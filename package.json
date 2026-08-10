@@ -20,7 +20,8 @@
     "format:check": "prettier --check .",
     "db:migrate": "pnpm --filter backend db:migrate",
     "db:seed": "pnpm --filter backend db:seed",
-    "db:ingest": "pnpm --filter backend db:ingest"
+    "db:ingest": "pnpm --filter backend db:ingest",
+    "db:enrich-metadata": "pnpm --filter backend db:enrich-metadata"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "4.1.10",

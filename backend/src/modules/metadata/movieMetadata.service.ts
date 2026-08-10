@@ -7,8 +7,16 @@ import type {
   StoredMovieMetadataState,
 } from './metadata.types.js';
 
+const metadataRefreshIntervalMs = 7 * 24 * 60 * 60 * 1_000;
+
 function hasCompleteMetadata(movie: StoredMovieMetadataState): boolean {
-  return movie.metadataSyncedAt !== null;
+  return (
+    movie.metadataSyncedAt !== null &&
+    movie.metadataSyncedAt.getTime() >= Date.now() - metadataRefreshIntervalMs &&
+    movie.tmdbVoteAverage !== null &&
+    movie.tmdbVoteCount !== null &&
+    movie.tmdbPopularity !== null
+  );
 }
 
 function uniqueTargets(targets: readonly MovieMetadataTarget[]): MovieMetadataTarget[] {
