@@ -70,9 +70,18 @@ export async function collectFromConnectors(
       successfulSources: sources.filter((source) => source.status === 'succeeded').length,
       failedSources: sources.filter((source) => source.status === 'failed').length,
       rawRecords: sources.reduce((total, source) => total + source.rawRecords.length, 0),
-      acceptedRecords: sources.reduce((total, source) => total + (source.normalization?.summary.accepted ?? 0), 0),
-      rejectedRecords: sources.reduce((total, source) => total + (source.normalization?.summary.rejected ?? 0), 0),
-      duplicateRecords: sources.reduce((total, source) => total + (source.normalization?.summary.duplicates ?? 0), 0),
+      acceptedRecords: sources.reduce(
+        (total, source) => total + (source.normalization?.summary.accepted ?? 0),
+        0,
+      ),
+      rejectedRecords: sources.reduce(
+        (total, source) => total + (source.normalization?.summary.rejected ?? 0),
+        0,
+      ),
+      duplicateRecords: sources.reduce(
+        (total, source) => total + (source.normalization?.summary.duplicates ?? 0),
+        0,
+      ),
     },
   };
 }

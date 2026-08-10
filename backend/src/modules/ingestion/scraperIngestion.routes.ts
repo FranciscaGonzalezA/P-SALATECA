@@ -57,7 +57,10 @@ export function createScraperIngestionRouter(
     }
     if (!authorized(request.get('authorization'), ingestToken)) {
       response.status(401).json({
-        error: { code: 'invalid_scraper_token', message: 'La credencial del scraper no es válida.' },
+        error: {
+          code: 'invalid_scraper_token',
+          message: 'La credencial del scraper no es válida.',
+        },
       });
       return;
     }

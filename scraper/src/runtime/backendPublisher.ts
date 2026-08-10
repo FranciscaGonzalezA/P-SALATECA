@@ -38,7 +38,10 @@ export class BackendPublisher {
             validationIssues: normalized.rejection.issues,
           };
     });
-    const endpoint = new URL('internal/scraper/ingest', `${this.apiBaseUrl.href.replace(/\/?$/, '/')}`);
+    const endpoint = new URL(
+      'internal/scraper/ingest',
+      `${this.apiBaseUrl.href.replace(/\/?$/, '/')}`,
+    );
     const response = await this.fetchImplementation(endpoint, {
       method: 'POST',
       headers: {
@@ -51,10 +54,11 @@ export class BackendPublisher {
       }),
     });
     const body = (await response.json().catch(() => undefined)) as
-      | { data?: IngestionResult; error?: { message?: string } }
-      | undefined;
+      { data?: IngestionResult; error?: { message?: string } } | undefined;
     if (!response.ok || !body?.data) {
-      throw new Error(body?.error?.message ?? `El backend rechazó la ingesta con HTTP ${response.status}.`);
+      throw new Error(
+        body?.error?.message ?? `El backend rechazó la ingesta con HTTP ${response.status}.`,
+      );
     }
     return body.data;
   }

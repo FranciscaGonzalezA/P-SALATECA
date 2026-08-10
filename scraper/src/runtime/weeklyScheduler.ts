@@ -15,7 +15,9 @@ function scheduleParts(date: Date, timezone: string): { day: string; date: strin
     minute: '2-digit',
     hourCycle: 'h23',
   }).formatToParts(date);
-  const values = Object.fromEntries(parts.filter((part) => part.type !== 'literal').map((part) => [part.type, part.value]));
+  const values = Object.fromEntries(
+    parts.filter((part) => part.type !== 'literal').map((part) => [part.type, part.value]),
+  );
   return {
     day: (values.weekday ?? '').toLocaleLowerCase('en'),
     date: `${values.year}-${values.month}-${values.day}`,
@@ -25,7 +27,9 @@ function scheduleParts(date: Date, timezone: string): { day: string; date: strin
 
 export function scheduledRunKey(date: Date, schedule: WeeklySchedule): string | undefined {
   const parts = scheduleParts(date, schedule.timezone);
-  return parts.day === schedule.day && parts.time === schedule.time ? `${parts.date}T${parts.time}` : undefined;
+  return parts.day === schedule.day && parts.time === schedule.time
+    ? `${parts.date}T${parts.time}`
+    : undefined;
 }
 
 export function startWeeklyScheduler(

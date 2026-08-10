@@ -14,12 +14,19 @@ const optionalSecret = z.preprocess(
 );
 
 const booleanValue = z.preprocess(
-  (value) => (typeof value === 'string' ? ['1', 'true', 'yes', 'si', 'sí'].includes(value.toLowerCase()) : value),
+  (value) =>
+    typeof value === 'string'
+      ? ['1', 'true', 'yes', 'si', 'sí'].includes(value.toLowerCase())
+      : value,
   z.boolean(),
 );
 
 const schema = z.object({
-  SCRAPER_USER_AGENT: z.string().trim().min(1).default('CineArtePlatform/0.1 (contact@example.com)'),
+  SCRAPER_USER_AGENT: z
+    .string()
+    .trim()
+    .min(1)
+    .default('CineArtePlatform/0.1 (contact@example.com)'),
   SCRAPER_REQUEST_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(60_000).default(10_000),
   SCRAPER_REQUEST_RETRIES: z.coerce.number().int().min(0).max(5).default(2),
   SCRAPER_BACKEND_URL: z.string().url().default('http://localhost:3000/api/v1'),
@@ -29,7 +36,10 @@ const schema = z.object({
   SCRAPER_SCHEDULE_DAY: z
     .enum(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'])
     .default('wednesday'),
-  SCRAPER_SCHEDULE_TIME: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).default('09:00'),
+  SCRAPER_SCHEDULE_TIME: z
+    .string()
+    .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
+    .default('09:00'),
   SCRAPER_SCHEDULE_TIMEZONE: z.string().trim().min(1).default('America/Santiago'),
   SCRAPER_RUN_ON_START: booleanValue.default(false),
 });

@@ -5,7 +5,13 @@ import { assertCollectionThresholds, collectFromConnectors } from './collectionR
 import { scheduledRunKey } from './weeklyScheduler.js';
 
 function connector(id: string, collect: SourceConnector['collect']): SourceConnector {
-  return { id, name: id, type: 'website', sourceUrl: new URL(`https://example.com/${id}`), collect };
+  return {
+    id,
+    name: id,
+    type: 'website',
+    sourceUrl: new URL(`https://example.com/${id}`),
+    collect,
+  };
 }
 
 describe('ejecución del scraper', () => {
@@ -25,7 +31,11 @@ describe('ejecución del scraper', () => {
         throw new Error('selector roto');
       }),
     ]);
-    expect(report.summary).toMatchObject({ successfulSources: 1, failedSources: 1, acceptedRecords: 1 });
+    expect(report.summary).toMatchObject({
+      successfulSources: 1,
+      failedSources: 1,
+      acceptedRecords: 1,
+    });
     expect(() => assertCollectionThresholds(report, 2, 1)).toThrow(/Sólo respondieron/);
     expect(() => assertCollectionThresholds(report, 1, 2)).toThrow(/Sólo se obtuvieron/);
   });
@@ -39,7 +49,15 @@ describe('ejecución del scraper', () => {
         request = init;
         return new Response(
           JSON.stringify({
-            data: { runId: 1, status: 'succeeded', processed: 1, inserted: 1, updated: 0, rejected: 0, duplicates: 0 },
+            data: {
+              runId: 1,
+              status: 'succeeded',
+              processed: 1,
+              inserted: 1,
+              updated: 0,
+              rejected: 0,
+              duplicates: 0,
+            },
           }),
           { status: 200, headers: { 'Content-Type': 'application/json' } },
         );

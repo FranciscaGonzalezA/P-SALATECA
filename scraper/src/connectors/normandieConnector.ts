@@ -9,7 +9,9 @@ const weekdayPattern = '(?:lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|
 
 function validDate(year: number, month: number, day: number): Date | undefined {
   const value = new Date(Date.UTC(year, month - 1, day));
-  return value.getUTCFullYear() === year && value.getUTCMonth() === month - 1 && value.getUTCDate() === day
+  return value.getUTCFullYear() === year &&
+    value.getUTCMonth() === month - 1 &&
+    value.getUTCDate() === day
     ? value
     : undefined;
 }
@@ -49,7 +51,9 @@ export class NormandieConnector implements SourceConnector {
     const screenings: RawScreening[] = [];
 
     for (const container of $('.contenedorcartelera').toArray()) {
-      const label = cleanText($(container).find('.titulocartelera').first().text() || $(container).text());
+      const label = cleanText(
+        $(container).find('.titulocartelera').first().text() || $(container).text(),
+      );
       const range = parseWeekRange(label, capturedAt);
       if (!range) continue;
       const rangeDays = eachDay(range);

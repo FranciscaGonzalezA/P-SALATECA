@@ -59,7 +59,9 @@ export class CinetecaConnector implements SourceConnector {
         const startDate = typeof event.startDate === 'string' ? event.startDate : undefined;
         if (!movieTitle || !startDate || isNonMovieActivity(movieTitle)) continue;
         const eventUrl =
-          (typeof event.url === 'string' ? event.url : undefined) ?? nestedUrl(event.offers) ?? response.url.href;
+          (typeof event.url === 'string' ? event.url : undefined) ??
+          nestedUrl(event.offers) ??
+          response.url.href;
         const locationName = objectName(event.location);
         screenings.push({
           movieTitle,

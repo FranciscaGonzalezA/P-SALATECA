@@ -21,7 +21,10 @@ export class ElBiografoConnector implements SourceConnector {
     const $ = load(response.body);
     const capturedAt = this.now();
     const grid = $('.movies-grid').first();
-    const range = parseNamedMonthRange(cleanText(grid.parent().text() || $('body').text()), capturedAt);
+    const range = parseNamedMonthRange(
+      cleanText(grid.parent().text() || $('body').text()),
+      capturedAt,
+    );
     if (!grid.length || !range) return [];
 
     const screenings: RawScreening[] = [];

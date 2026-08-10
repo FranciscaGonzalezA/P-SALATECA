@@ -39,7 +39,9 @@ export class FetchHttpClient implements HttpClient {
 
   constructor(private readonly options: FetchHttpClientOptions) {
     this.fetchImplementation = options.fetchImplementation ?? fetch;
-    this.wait = options.wait ?? ((milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds)));
+    this.wait =
+      options.wait ??
+      ((milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds)));
     this.maxResponseBytes = options.maxResponseBytes ?? 5_000_000;
   }
 
@@ -63,7 +65,11 @@ export class FetchHttpClient implements HttpClient {
         });
         const contentLength = Number(response.headers.get('content-length') ?? 0);
         if (contentLength > this.maxResponseBytes) {
-          throw new HttpRequestError('La respuesta supera el tamaño máximo permitido.', url, response.status);
+          throw new HttpRequestError(
+            'La respuesta supera el tamaño máximo permitido.',
+            url,
+            response.status,
+          );
         }
         if (!response.ok) {
           const error = new HttpRequestError(
@@ -76,14 +82,21 @@ export class FetchHttpClient implements HttpClient {
         } else {
           const body = await response.text();
           if (Buffer.byteLength(body, 'utf8') > this.maxResponseBytes) {
-            throw new HttpRequestError('La respuesta supera el tamaño máximo permitido.', url, response.status);
+            throw new HttpRequestError(
+              'La respuesta supera el tamaño máximo permitido.',
+              url,
+              response.status,
+            );
           }
           return { body, status: response.status, url: new URL(response.url || url.href) };
         }
       } catch (error) {
         lastError = error;
         const status = error instanceof HttpRequestError ? error.status : undefined;
-        if ((status !== undefined && !isRetryableStatus(status)) || attempt === this.options.retries) {
+        if (
+          (status !== undefined && !isRetryableStatus(status)) ||
+          attempt === this.options.retries
+        ) {
           if (error instanceof HttpRequestError) throw error;
           throw new HttpRequestError(
             error instanceof Error ? error.message : 'No fue posible consultar la fuente.',

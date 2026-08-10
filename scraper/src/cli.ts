@@ -8,7 +8,9 @@ import { assertCollectionThresholds, collectFromConnectors } from './runtime/col
 import { startWeeklyScheduler } from './runtime/weeklyScheduler.js';
 
 function optionValues(argumentsList: readonly string[], name: string): string[] {
-  return argumentsList.flatMap((value, index) => (value === name && argumentsList[index + 1] ? [argumentsList[index + 1]!] : []));
+  return argumentsList.flatMap((value, index) =>
+    value === name && argumentsList[index + 1] ? [argumentsList[index + 1]!] : [],
+  );
 }
 
 function optionValue(argumentsList: readonly string[], name: string): string | undefined {
@@ -37,7 +39,13 @@ if (connectors.length === 0) {
 
 async function execute(): Promise<void> {
   const report = await collectFromConnectors(connectors);
-  console.info(JSON.stringify({ startedAt: report.startedAt, finishedAt: report.finishedAt, ...report.summary }, null, 2));
+  console.info(
+    JSON.stringify(
+      { startedAt: report.startedAt, finishedAt: report.finishedAt, ...report.summary },
+      null,
+      2,
+    ),
+  );
   assertCollectionThresholds(
     report,
     Math.min(scraperEnv.SCRAPER_MIN_SUCCESSFUL_SOURCES, connectors.length),
@@ -48,7 +56,11 @@ async function execute(): Promise<void> {
   if (outputPath) {
     const absoluteOutput = resolve(process.cwd(), outputPath);
     await mkdir(dirname(absoluteOutput), { recursive: true });
-    await writeFile(absoluteOutput, JSON.stringify({ records: normalizedRecords, report }, null, 2), 'utf8');
+    await writeFile(
+      absoluteOutput,
+      JSON.stringify({ records: normalizedRecords, report }, null, 2),
+      'utf8',
+    );
     console.info(`Resultado guardado en ${absoluteOutput}`);
   }
 

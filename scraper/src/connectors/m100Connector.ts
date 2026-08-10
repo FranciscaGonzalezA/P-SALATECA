@@ -1,7 +1,13 @@
 import { load } from 'cheerio';
 import type { RawScreening } from '../domain/screening.js';
 import type { HttpClient } from '../http/httpClient.js';
-import { eachDay, isoDate, parseNumericDateRange, parseTime, parseWeekdayRange } from '../parsing/dates.js';
+import {
+  eachDay,
+  isoDate,
+  parseNumericDateRange,
+  parseTime,
+  parseWeekdayRange,
+} from '../parsing/dates.js';
 import { cleanMovieTitle, cleanText, isNonMovieActivity } from '../parsing/text.js';
 import type { SourceConnector } from './sourceConnector.js';
 
@@ -44,12 +50,19 @@ export class M100Connector implements SourceConnector {
     spacedBody.find('*').append(' ');
     const text = cleanText(spacedBody.text());
     const range = parseNumericDateRange(text, this.now());
-    const scheduleMatch = /\b(?:lun(?:es)?|mar(?:tes)?|mi[eé](?:rcoles)?|jue(?:ves)?|vie(?:rnes)?|s[aá]b(?:ado)?|dom(?:ingo)?)(?:\s+a\s+(?:lun(?:es)?|mar(?:tes)?|mi[eé](?:rcoles)?|jue(?:ves)?|vie(?:rnes)?|s[aá]b(?:ado)?|dom(?:ingo)?))?\s*[–—-]\s*\d{1,2}[:.]\d{2}/i.exec(
-      text,
-    )?.[0];
+    const scheduleMatch =
+      /\b(?:lun(?:es)?|mar(?:tes)?|mi[eé](?:rcoles)?|jue(?:ves)?|vie(?:rnes)?|s[aá]b(?:ado)?|dom(?:ingo)?)(?:\s+a\s+(?:lun(?:es)?|mar(?:tes)?|mi[eé](?:rcoles)?|jue(?:ves)?|vie(?:rnes)?|s[aá]b(?:ado)?|dom(?:ingo)?))?\s*[–—-]\s*\d{1,2}[:.]\d{2}/i.exec(
+        text,
+      )?.[0];
     const allowedWeekdays = scheduleMatch ? parseWeekdayRange(scheduleMatch) : undefined;
     const screeningTime = scheduleMatch ? parseTime(scheduleMatch) : undefined;
-    if (!movieTitle || isNonMovieActivity(movieTitle) || !range || !allowedWeekdays || !screeningTime) {
+    if (
+      !movieTitle ||
+      isNonMovieActivity(movieTitle) ||
+      !range ||
+      !allowedWeekdays ||
+      !screeningTime
+    ) {
       return [];
     }
     const capturedAt = this.now();

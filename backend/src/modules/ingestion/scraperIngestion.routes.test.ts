@@ -58,7 +58,9 @@ const normalizedPayload = {
 
 describe('createScraperIngestionRouter', () => {
   it('rechaza credenciales ausentes o incorrectas', async () => {
-    expect((await request(app(token)).post('/api/v1/internal/scraper/ingest').send({})).status).toBe(401);
+    expect(
+      (await request(app(token)).post('/api/v1/internal/scraper/ingest').send({})).status,
+    ).toBe(401);
     expect(
       (
         await request(app(token))
