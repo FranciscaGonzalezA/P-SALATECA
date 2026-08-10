@@ -27,8 +27,9 @@ docker compose up -d mysql
 docker compose ps
 ```
 
-La primera creación del volumen ejecuta los archivos de `database/migrations` en orden. Si el
-volumen ya existe, aplica las migraciones nuevas manualmente con el cliente `mysql`.
+El contenedor crea la base vacía y conserva sus datos en un volumen aislado. Después de que MySQL
+esté saludable, aplica las migraciones versionadas con `pnpm db:migrate`. El perfil Docker completo
+realiza este paso automáticamente antes de iniciar la API.
 
 Con una instalación nativa de MySQL 8.4, crea una base con `utf8mb4` y un usuario de aplicación
 con privilegios limitados a esa base. No uses `root` desde el backend.

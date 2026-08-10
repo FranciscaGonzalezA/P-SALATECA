@@ -32,7 +32,9 @@ docker compose ps
 ```
 
 El desarrollo local continúa igual; para conectarlo a MySQL de Docker usa
-`MYSQL_HOST=127.0.0.1` y `MYSQL_PORT=3307` en `.env`.
+`MYSQL_HOST=127.0.0.1` y `MYSQL_PORT=3307` en `.env`, y luego ejecuta `pnpm db:migrate`. El
+contenedor MySQL no aplica migraciones por su cuenta para evitar que compita con el migrador del
+backend.
 
 Cuando la base esté saludable, construye y levanta la aplicación completa:
 
