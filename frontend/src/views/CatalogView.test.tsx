@@ -66,6 +66,14 @@ describe('CatalogView', () => {
       ),
     );
 
+    await userEvent.selectOptions(screen.getByLabelText('Ordenar por'), 'featured');
+    await waitFor(() =>
+      expect(fetchCatalog).toHaveBeenLastCalledWith(
+        expect.objectContaining({ search: 'lobo', venue: 'sala-k', sort: 'featured', page: 1 }),
+        expect.any(AbortSignal),
+      ),
+    );
+
     const movieButtons = await screen.findAllByRole('link', {
       name: /Ver .+ y sus funciones/,
     });
@@ -93,6 +101,7 @@ describe('CatalogView', () => {
       'true',
     );
     expect(screen.getByLabelText('Fecha')).toHaveAttribute('min', localDateValue());
+    expect(screen.getByLabelText('Ordenar por')).toHaveValue('upcoming');
   });
 
   it('muestra origen demo y permite avanzar de página', async () => {

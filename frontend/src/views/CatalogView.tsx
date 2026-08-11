@@ -181,6 +181,21 @@ export function CatalogView({ onMovie }: CatalogViewProps) {
             ))}
           </select>
         </div>
+        <div>
+          <label htmlFor="catalog-sort">Ordenar por</label>
+          <select
+            id="catalog-sort"
+            value={query.sort ?? 'upcoming'}
+            onChange={(event) =>
+              updateQuery({
+                sort: event.target.value === 'featured' ? 'featured' : undefined,
+              })
+            }
+          >
+            <option value="upcoming">Próximas funciones</option>
+            <option value="featured">Destacadas</option>
+          </select>
+        </div>
         <button type="button" className="clear-button" onClick={resetQuery}>
           Limpiar filtros
         </button>

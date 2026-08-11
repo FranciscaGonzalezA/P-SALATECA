@@ -219,7 +219,26 @@ export function filterDemoMovies(filters: DemoCatalogFilters): {
         (!search ||
           movie.title.toLocaleLowerCase('es-CL').includes(search) ||
           movie.director?.toLocaleLowerCase('es-CL').includes(search)),
-    );
+    )
+    .sort((left, right) => {
+      if (filters.sort === 'featured') {
+        const featuredScore = (movie: MovieSummaryDto) => {
+          const rating = movie.tmdbRating ?? 0;
+          const votes = movie.tmdbVoteCount ?? 0;
+          return votes > 0 ? (votes / (votes + 50)) * rating + (50 / (votes + 50)) * 5 : 0;
+        };
+        const scoreDifference = featuredScore(right) - featuredScore(left);
+        if (scoreDifference !== 0) return scoreDifference;
+
+        const popularityDifference = (right.tmdbPopularity ?? 0) - (left.tmdbPopularity ?? 0);
+        if (popularityDifference !== 0) return popularityDifference;
+      }
+
+      const screeningDifference = (left.screenings[0]?.startsAt ?? '').localeCompare(
+        right.screenings[0]?.startsAt ?? '',
+      );
+      return screeningDifference || left.title.localeCompare(right.title, 'es-CL');
+    });
   const offset = (filters.page - 1) * filters.pageSize;
 
   return {
