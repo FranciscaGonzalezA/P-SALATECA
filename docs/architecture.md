@@ -63,7 +63,7 @@ autorización de la API.
 
 ## Límites del primer día
 
-Esta base no implementa scraping productivo de Instagram ni descarga material protegido. Esas
-integraciones requieren revisar términos de uso, permisos y disponibilidad de una API oficial.
-TMDB se utiliza como fuente de metadatos posterior a la importación; sus credenciales nunca se
-almacenan en Git.
+Esta base no automatiza el inicio de sesión de Instagram ni descarga material protegido. Nexo
+Cinema se integra únicamente mediante un token configurable para la API de Instagram. TMDB se
+utiliza como fuente de metadatos posterior a la importación; sus credenciales nunca se almacenan
+en Git.

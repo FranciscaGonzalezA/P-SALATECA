@@ -102,6 +102,7 @@ services:
       SCRAPER_SCHEDULE_TIME: ${SCRAPER_SCHEDULE_TIME:-09:00}
       SCRAPER_SCHEDULE_TIMEZONE: ${SCRAPER_SCHEDULE_TIMEZONE:-America/Santiago}
       SCRAPER_RUN_ON_START: ${SCRAPER_RUN_ON_START:-false}
+      NEXO_INSTAGRAM_ACCESS_TOKEN: ${NEXO_INSTAGRAM_ACCESS_TOKEN:-}
     depends_on:
       backend:
         condition: service_healthy

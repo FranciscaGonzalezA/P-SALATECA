@@ -31,7 +31,7 @@ const schema = z.object({
   SCRAPER_REQUEST_RETRIES: z.coerce.number().int().min(0).max(5).default(2),
   SCRAPER_BACKEND_URL: z.string().url().default('http://localhost:3000/api/v1'),
   SCRAPER_INGEST_TOKEN: optionalSecret,
-  SCRAPER_MIN_SUCCESSFUL_SOURCES: z.coerce.number().int().min(1).max(5).default(3),
+  SCRAPER_MIN_SUCCESSFUL_SOURCES: z.coerce.number().int().min(1).max(12).default(3),
   SCRAPER_MIN_ACCEPTED_RECORDS: z.coerce.number().int().min(1).max(10_000).default(1),
   SCRAPER_SCHEDULE_DAY: z
     .enum(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'])
@@ -42,6 +42,10 @@ const schema = z.object({
     .default('09:00'),
   SCRAPER_SCHEDULE_TIMEZONE: z.string().trim().min(1).default('America/Santiago'),
   SCRAPER_RUN_ON_START: booleanValue.default(false),
+  NEXO_INSTAGRAM_ACCESS_TOKEN: z.preprocess(
+    (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+    z.string().trim().min(1).optional(),
+  ),
 });
 
 const result = schema.safeParse(process.env);

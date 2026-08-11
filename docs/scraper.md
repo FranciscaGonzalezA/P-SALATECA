@@ -1,12 +1,17 @@
 # Scraper de cartelera
 
-El módulo `scraper` incorpora conectores productivos para Cine Arte Normandie, El Biógrafo,
-Sala K, Matucana 100 y Cineteca Nacional. Cada conector produce el contrato `RawScreening`; la
-normalización común valida fechas, zona horaria, trazabilidad y duplicados antes de publicar.
+El módulo `scraper` contiene conectores para las doce fuentes del generador original: Cine Arte
+Normandie, Centro Arte Alameda/Passline, El Biógrafo, Sala K, Sala Nemesio/Ticketplus, Cine
+CCC/Ecopass, Matucana 100, Goethe-Institut Chile, Cineteca Nacional, Cine UC, Duoc UC/Luma y Nexo
+Cinema/Instagram. Cada conector produce el contrato `RawScreening`; la normalización común valida
+fechas, zona horaria, trazabilidad y duplicados antes de publicar.
 
-Instagram permanece deshabilitado. Cine UC tampoco se consulta porque su antigua URL de cartelera
-ya no expone una programación compatible. Ninguna fuente debe habilitarse sin un conector probado
-y, para redes sociales, sin revisar permisos o una API oficial.
+Once conectores no requieren credenciales. Nexo se registra sólo cuando existe
+`NEXO_INSTAGRAM_ACCESS_TOKEN` y consulta la API de Instagram con Bearer token; no automatiza un
+inicio de sesión ni guarda cookies. Cine UC puede informar HTTP 403 si el CAPTCHA de Cloudflare
+rechaza la IP del servidor. Ese fallo queda aislado y no descarta las demás fuentes. Una fuente que
+responde sin funciones vigentes, como Passline o Goethe, produce cero registros sin inventar
+cartelera.
 
 ## Configuración
 
@@ -18,6 +23,15 @@ Los umbrales `SCRAPER_MIN_SUCCESSFUL_SOURCES` y `SCRAPER_MIN_ACCEPTED_RECORDS` i
 una ejecución vacía o con demasiadas fuentes rotas. Cada fallo se informa por fuente y provoca un
 código de salida distinto de cero en la ejecución manual, sin eliminar los resultados de las
 fuentes que sí respondieron.
+
+Para habilitar Nexo Cinema, entrega un token vigente con permiso para leer los medios de la cuenta:
+
+```dotenv
+NEXO_INSTAGRAM_ACCESS_TOKEN=token_emitido_por_instagram
+```
+
+El token se envía en la cabecera `Authorization` y no se incorpora a URLs, archivos de salida ni
+mensajes de error.
 
 ## Ejecución manual
 
@@ -39,8 +53,9 @@ Limitar la prueba a una o más fuentes:
 pnpm scraper:run -- --source normandie --source m100_cine --output tmp/prueba.json
 ```
 
-Identificadores disponibles: `normandie`, `el_biografo`, `sala_k`, `m100_cine` y
-`cineteca_nacional`.
+Identificadores disponibles: `normandie`, `passline_alameda`, `el_biografo`, `sala_k`,
+`ticketplus_nemesio`, `ecopass_cine_ccc`, `m100_cine`, `goethe_chile`, `cineteca_nacional`,
+`cine_uc`, `duoc_luma` y `nexo_instagram`. El último requiere el token indicado arriba.
 
 ## Programación semanal
 

@@ -28,12 +28,17 @@ const http = new FetchHttpClient({
   retries: scraperEnv.SCRAPER_REQUEST_RETRIES,
   userAgent: scraperEnv.SCRAPER_USER_AGENT,
 });
-const allConnectors = createDefaultConnectors(http);
+const allConnectors = createDefaultConnectors(http, {
+  nexoInstagramAccessToken: scraperEnv.NEXO_INSTAGRAM_ACCESS_TOKEN,
+});
 const connectors = selectedSources.size
   ? allConnectors.filter((connector) => selectedSources.has(connector.id))
   : allConnectors;
 
 if (connectors.length === 0) {
+  if (selectedSources.has('nexo_instagram') && !scraperEnv.NEXO_INSTAGRAM_ACCESS_TOKEN) {
+    throw new Error('NEXO_INSTAGRAM_ACCESS_TOKEN es obligatorio para consultar Nexo Cinema.');
+  }
   throw new Error(`No existe ninguna fuente para: ${[...selectedSources].join(', ')}.`);
 }
 

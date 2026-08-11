@@ -4,8 +4,12 @@ export interface HttpResponse {
   url: URL;
 }
 
+export interface HttpRequestOptions {
+  headers?: Readonly<Record<string, string>>;
+}
+
 export interface HttpClient {
-  get(url: URL): Promise<HttpResponse>;
+  get(url: URL, options?: HttpRequestOptions): Promise<HttpResponse>;
 }
 
 export interface FetchHttpClientOptions {
@@ -45,7 +49,7 @@ export class FetchHttpClient implements HttpClient {
     this.maxResponseBytes = options.maxResponseBytes ?? 5_000_000;
   }
 
-  async get(url: URL): Promise<HttpResponse> {
+  async get(url: URL, requestOptions: HttpRequestOptions = {}): Promise<HttpResponse> {
     if (!['http:', 'https:'].includes(url.protocol)) {
       throw new HttpRequestError('El conector sólo admite URLs HTTP o HTTPS.', url);
     }
@@ -61,6 +65,7 @@ export class FetchHttpClient implements HttpClient {
           headers: {
             Accept: 'text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8',
             'User-Agent': this.options.userAgent,
+            ...requestOptions.headers,
           },
         });
         const contentLength = Number(response.headers.get('content-length') ?? 0);

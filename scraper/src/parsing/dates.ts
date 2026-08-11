@@ -190,10 +190,64 @@ export function extractNamedDateTimes(
     if (!date) continue;
     const end = matches[index + 1]?.index ?? cleaned.length;
     const fragment = cleaned.slice(match.index + match[0].length, end);
-    for (const timeMatch of fragment.matchAll(/\b(\d{1,2})[:.](\d{2})\b/g)) {
-      const time = parseTime(timeMatch[0]);
-      if (time) values.push({ date: isoDate(date), time });
+    const timePattern =
+      /\b(\d{1,2})(?:[:.,](\d{2}))\s*(?:h(?:rs?)?\.?)?|\b(\d{1,2})\s*h(?:rs?)?\.?/gi;
+    for (const timeMatch of fragment.matchAll(timePattern)) {
+      const hour = Number(timeMatch[1] ?? timeMatch[3]);
+      const minute = Number(timeMatch[2] ?? 0);
+      if (hour <= 23 && minute <= 59) {
+        values.push({
+          date: isoDate(date),
+          time: `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`,
+        });
+      }
     }
   }
+  return values;
+}
+
+export interface DateFallback {
+  month: number;
+  year: number;
+}
+
+export function extractSpanishDateTimes(
+  text: string,
+  reference: Date,
+  fallback?: DateFallback,
+): Array<{ date: string; time: string }> {
+  const cleaned = cleanText(text);
+  const pattern =
+    /(?:(lunes|martes|mi[eÃ©]rcoles|jueves|viernes|s[aÃ¡]bado|domingo)\s+)?(\d{1,2})(?:\s+(?:de\s+)?([\p{Letter}.]+))?(?:\s+(?:de|del)?\s*(\d{4}))?(?:\s*(?:a\s+las|[-â€“â€”,;]))?\s*(\d{1,2})(?:[:.,](\d{2}))?\s*h(?:rs?)?\.?/giu;
+  const values: Array<{ date: string; time: string }> = [];
+  const seen = new Set<string>();
+
+  for (const match of cleaned.matchAll(pattern)) {
+    const weekday = match[1];
+    const dayText = match[2];
+    const monthText = match[3];
+    const hourText = match[5];
+    if (!dayText || !hourText) continue;
+    const parsedMonth = monthText ? monthNumber(monthText) : undefined;
+    if (!weekday && !parsedMonth) continue;
+    const month = parsedMonth ?? fallback?.month;
+    if (!month) continue;
+    const day = Number(dayText);
+    const year = Number(match[4] ?? fallback?.year ?? inferYear(month, day, reference));
+    const hour = Number(hourText);
+    const minute = Number(match[6] ?? 0);
+    const date = validUtcDate(year, month, day);
+    if (!date || hour > 23 || minute > 59) continue;
+    const value = {
+      date: isoDate(date),
+      time: `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`,
+    };
+    const key = `${value.date}T${value.time}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      values.push(value);
+    }
+  }
+
   return values;
 }
