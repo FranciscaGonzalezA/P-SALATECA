@@ -22,6 +22,17 @@ describe('buildCatalogUrl', () => {
     expect(url.searchParams.get('orden')).toBe('destacados');
   });
 
+  it.each([
+    ['alphabetical-asc', 'alfabetico_asc'],
+    ['alphabetical-desc', 'alfabetico_desc'],
+  ] as const)('serializa el orden %s', (sort, expected) => {
+    const url = new URL(
+      buildCatalogUrl({ sort, page: 1, pageSize: 30 }, 'https://api.example.com/api/v1'),
+    );
+
+    expect(url.searchParams.get('orden')).toBe(expected);
+  });
+
   it('serializa filtros combinados sin concatenar valores manualmente', () => {
     const url = new URL(
       buildCatalogUrl(

@@ -61,7 +61,14 @@ export function createCatalogRouter(
       ...(query.sala ? { venue: query.sala } : {}),
       ...(query.genero ? { genre: query.genero } : {}),
       ...(query.buscar ? { search: query.buscar } : {}),
-      sort: query.orden === 'destacados' ? 'featured' : 'upcoming',
+      sort:
+        query.orden === 'destacados'
+          ? 'featured'
+          : query.orden === 'alfabetico_asc'
+            ? 'alphabetical-asc'
+            : query.orden === 'alfabetico_desc'
+              ? 'alphabetical-desc'
+              : 'upcoming',
       page: query.pagina,
       pageSize: query.limite,
     };

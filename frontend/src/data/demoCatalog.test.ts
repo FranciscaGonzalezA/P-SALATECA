@@ -43,9 +43,19 @@ describe('filterDemoMovies', () => {
     expect(demoMovies[0]?.screenings).toHaveLength(originalScreeningCount);
   });
 
-  it('ordena por próximas funciones o por películas destacadas', () => {
+  it('ordena por próximas funciones, destacadas o título', () => {
     const upcoming = filterDemoMovies({ sort: 'upcoming', page: 1, pageSize: 10 }).items;
     const featured = filterDemoMovies({ sort: 'featured', page: 1, pageSize: 10 }).items;
+    const alphabeticalAsc = filterDemoMovies({
+      sort: 'alphabetical-asc',
+      page: 1,
+      pageSize: 10,
+    }).items;
+    const alphabeticalDesc = filterDemoMovies({
+      sort: 'alphabetical-desc',
+      page: 1,
+      pageSize: 10,
+    }).items;
 
     expect(upcoming.map((movie) => movie.screenings[0]?.startsAt)).toEqual(
       [...upcoming]
@@ -53,6 +63,14 @@ describe('filterDemoMovies', () => {
         .sort((left, right) => (left ?? '').localeCompare(right ?? '')),
     );
     expect(featured[0]?.title).toBe('La casa lobo');
+    expect(alphabeticalAsc.map((movie) => movie.title)).toEqual(
+      [...alphabeticalAsc]
+        .map((movie) => movie.title)
+        .sort((left, right) => left.localeCompare(right, 'es-CL', { sensitivity: 'base' })),
+    );
+    expect(alphabeticalDesc.map((movie) => movie.title)).toEqual(
+      [...alphabeticalAsc].map((movie) => movie.title).reverse(),
+    );
   });
 
   it('devuelve una colección vacía para filtros sin coincidencias', () => {

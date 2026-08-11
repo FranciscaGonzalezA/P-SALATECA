@@ -133,6 +133,20 @@ describe('MysqlCatalogRepository', () => {
     expect(rankingSql).toContain('LIMIT 3 OFFSET 0');
   });
 
+  it.each([
+    ['alphabetical-asc', 'ORDER BY m.title ASC, MIN(s.starts_at)'],
+    ['alphabetical-desc', 'ORDER BY m.title DESC, MIN(s.starts_at)'],
+  ] as const)('ordena el catálogo con el criterio %s', async (sort, expectedSql) => {
+    execute
+      .mockResolvedValueOnce([[{ total: 1 }]])
+      .mockResolvedValueOnce([[{ id: 7 }]])
+      .mockResolvedValueOnce([[baseRow]]);
+
+    await repository.listCatalog({ sort, page: 1, pageSize: 12 });
+
+    expect(String(execute.mock.calls[1]?.[0])).toContain(expectedSql);
+  });
+
   it('mapea detalle y fechas MySQL a DTO ISO', async () => {
     execute.mockResolvedValueOnce([[baseRow]]);
 

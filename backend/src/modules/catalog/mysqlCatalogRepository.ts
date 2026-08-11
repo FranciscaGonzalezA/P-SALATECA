@@ -344,9 +344,9 @@ export class MysqlCatalogRepository implements CatalogRepository {
       return { items: [], total: 0 };
     }
 
-    const catalogOrder =
-      filters.sort === 'featured'
-        ? `
+    const catalogOrder = (() => {
+      if (filters.sort === 'featured') {
+        return `
           CASE
             WHEN
               m.tmdb_vote_average IS NULL
@@ -360,8 +360,16 @@ export class MysqlCatalogRepository implements CatalogRepository {
           COALESCE(m.tmdb_popularity, 0) DESC,
           MIN(s.starts_at),
           m.title
-        `
-        : 'MIN(s.starts_at), m.title';
+        `;
+      }
+      if (filters.sort === 'alphabetical-asc') {
+        return 'm.title ASC, MIN(s.starts_at)';
+      }
+      if (filters.sort === 'alphabetical-desc') {
+        return 'm.title DESC, MIN(s.starts_at)';
+      }
+      return 'MIN(s.starts_at), m.title';
+    })();
     const [movieIdRows] = await this.pool.execute<MovieIdRow[]>(
       `
         SELECT m.id

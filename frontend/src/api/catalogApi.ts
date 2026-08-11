@@ -16,7 +16,7 @@ export interface CatalogQuery {
   venue?: string | undefined;
   genre?: string | undefined;
   search?: string | undefined;
-  sort?: 'upcoming' | 'featured' | undefined;
+  sort?: 'upcoming' | 'featured' | 'alphabetical-asc' | 'alphabetical-desc' | undefined;
   page: number;
   pageSize: number;
 }
@@ -46,13 +46,21 @@ export class CatalogApiError extends Error {
 
 export function buildCatalogUrl(query: CatalogQuery, baseUrl = apiBaseUrl): string {
   const url = new URL(`${baseUrl}/cartelera`);
+  const publicSort =
+    query.sort === 'featured'
+      ? 'destacados'
+      : query.sort === 'alphabetical-asc'
+        ? 'alfabetico_asc'
+        : query.sort === 'alphabetical-desc'
+          ? 'alfabetico_desc'
+          : undefined;
   const parameters: Array<[string, string | number | undefined]> = [
     ['fecha', query.date],
     ['horario', query.time],
     ['sala', query.venue],
     ['genero', query.genre],
     ['buscar', query.search],
-    ['orden', query.sort === 'featured' ? 'destacados' : undefined],
+    ['orden', publicSort],
     ['pagina', query.page],
     ['limite', query.pageSize],
   ];

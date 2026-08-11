@@ -12,7 +12,7 @@ export interface CatalogFilters {
   venue?: string | undefined;
   genre?: string | undefined;
   search?: string | undefined;
-  sort?: 'upcoming' | 'featured' | undefined;
+  sort?: 'upcoming' | 'featured' | 'alphabetical-asc' | 'alphabetical-desc' | undefined;
   page: number;
   pageSize: number;
 }

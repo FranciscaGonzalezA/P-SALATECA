@@ -190,7 +190,7 @@ export interface DemoCatalogFilters {
   venue?: string | undefined;
   genre?: string | undefined;
   search?: string | undefined;
-  sort?: 'upcoming' | 'featured' | undefined;
+  sort?: 'upcoming' | 'featured' | 'alphabetical-asc' | 'alphabetical-desc' | undefined;
   page: number;
   pageSize: number;
 }
@@ -221,6 +221,12 @@ export function filterDemoMovies(filters: DemoCatalogFilters): {
           movie.director?.toLocaleLowerCase('es-CL').includes(search)),
     )
     .sort((left, right) => {
+      const titleDifference = left.title.localeCompare(right.title, 'es-CL', {
+        sensitivity: 'base',
+      });
+      if (filters.sort === 'alphabetical-asc') return titleDifference;
+      if (filters.sort === 'alphabetical-desc') return -titleDifference;
+
       if (filters.sort === 'featured') {
         const featuredScore = (movie: MovieSummaryDto) => {
           const rating = movie.tmdbRating ?? 0;
@@ -237,7 +243,7 @@ export function filterDemoMovies(filters: DemoCatalogFilters): {
       const screeningDifference = (left.screenings[0]?.startsAt ?? '').localeCompare(
         right.screenings[0]?.startsAt ?? '',
       );
-      return screeningDifference || left.title.localeCompare(right.title, 'es-CL');
+      return screeningDifference || titleDifference;
     });
   const offset = (filters.page - 1) * filters.pageSize;
 

@@ -10,6 +10,10 @@ describe('catalogFiltersSchema', () => {
     });
   });
 
+  it.each(['alfabetico_asc', 'alfabetico_desc'] as const)('acepta el orden %s', (orden) => {
+    expect(catalogFiltersSchema.parse({ orden })).toMatchObject({ orden });
+  });
+
   it('aplica paginación segura y acepta filtros combinados', () => {
     const result = catalogFiltersSchema.parse({
       fecha: '2026-08-01',

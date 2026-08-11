@@ -186,14 +186,20 @@ export function CatalogView({ onMovie }: CatalogViewProps) {
           <select
             id="catalog-sort"
             value={query.sort ?? 'upcoming'}
-            onChange={(event) =>
+            onChange={(event) => {
+              const sort = event.target.value;
               updateQuery({
-                sort: event.target.value === 'featured' ? 'featured' : undefined,
-              })
-            }
+                sort:
+                  sort === 'featured' || sort === 'alphabetical-asc' || sort === 'alphabetical-desc'
+                    ? sort
+                    : undefined,
+              });
+            }}
           >
             <option value="upcoming">Próximas funciones</option>
             <option value="featured">Destacadas</option>
+            <option value="alphabetical-asc">Alfabético A–Z</option>
+            <option value="alphabetical-desc">Alfabético Z–A</option>
           </select>
         </div>
         <button type="button" className="clear-button" onClick={resetQuery}>

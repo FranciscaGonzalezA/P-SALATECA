@@ -18,9 +18,10 @@ MySQL ni importa código del backend.
 
 `/cartelera` acepta `fecha`, `horario`, `sala`, `genero`, `buscar`, `orden`, `pagina` y `limite`. Los
 filtros se pueden combinar. `limite` permite entre 1 y 50 resultados y utiliza 12 por defecto.
-`orden` admite `proximas` (comportamiento predeterminado) y `destacados`. Este último pondera la
-valoración de TMDB por su cantidad de votos usando 50 votos de confianza y una media de referencia
-de 5,0; la popularidad de TMDB se utiliza como desempate y la próxima función como criterio final.
+`orden` admite `proximas` (comportamiento predeterminado), `destacados`, `alfabetico_asc` y
+`alfabetico_desc`. El orden de destacados pondera la valoración de TMDB por su cantidad de votos
+usando 50 votos de confianza y una media de referencia de 5,0; la popularidad de TMDB se utiliza
+como desempate y la próxima función como criterio final.
 La cartelera, las funciones de cada película y el catálogo de `/salas` exponen únicamente salas
 verificadas de la Región Metropolitana (`region_code = 'CL-RM'`).
 

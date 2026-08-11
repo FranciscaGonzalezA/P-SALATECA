@@ -74,6 +74,14 @@ describe('CatalogView', () => {
       ),
     );
 
+    await userEvent.selectOptions(screen.getByLabelText('Ordenar por'), 'alphabetical-desc');
+    await waitFor(() =>
+      expect(fetchCatalog).toHaveBeenLastCalledWith(
+        expect.objectContaining({ sort: 'alphabetical-desc', page: 1 }),
+        expect.any(AbortSignal),
+      ),
+    );
+
     const movieButtons = await screen.findAllByRole('link', {
       name: /Ver .+ y sus funciones/,
     });

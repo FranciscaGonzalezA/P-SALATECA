@@ -78,6 +78,19 @@ describe('createCatalogRouter', () => {
     });
   });
 
+  it.each([
+    ['alfabetico_asc', 'alphabetical-asc'],
+    ['alfabetico_desc', 'alphabetical-desc'],
+  ] as const)('traduce el orden público %s', async (publicSort, internalSort) => {
+    await request(app).get(`/cartelera?orden=${publicSort}`);
+
+    expect(repository.listCatalog).toHaveBeenCalledWith({
+      sort: internalSort,
+      page: 1,
+      pageSize: 12,
+    });
+  });
+
   it('devuelve errores de parámetros por campo', async () => {
     const response = await request(app).get('/cartelera?fecha=2026-02-30&limite=99');
 
