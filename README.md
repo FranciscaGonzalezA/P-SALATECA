@@ -58,8 +58,15 @@ final con MySQL.
 
 El panel editorial está disponible en `http://localhost:5173/admin`. Antes de iniciar el backend,
 define `ADMIN_EMAIL` y `ADMIN_PASSWORD` en `.env`; la contraseña debe contener al menos doce
-caracteres. El backend crea o sincroniza esa cuenta con el rol `admin` al arrancar. Las sesiones
+caracteres. El backend crea esa cuenta si no existe y sincroniza su rol `admin` al arrancar, sin
+sobrescribir cambios posteriores de contraseña. Las sesiones
 duran ocho horas por defecto y se guardan en una cookie `HttpOnly`.
+
+El acceso administrativo incluye recuperación de contraseña desde `/admin`. Configura
+`PASSWORD_RESET_FROM_EMAIL` y `RESEND_API_KEY` para enviar los enlaces mediante Resend; estos
+vencen después de 30 minutos por defecto y solo se pueden usar una vez. En desarrollo, si el correo
+no está configurado, el backend imprime el enlace en su consola para facilitar pruebas locales.
+Después de cambiar la contraseña se invalidan todas las sesiones activas de la cuenta.
 
 Para revisar la interfaz sin base de datos ni credenciales, abre `/admin-demo`. Esta ruta utiliza
 datos temporales en memoria y no reemplaza el panel protegido.

@@ -25,11 +25,14 @@ describe('rutas de autenticación', () => {
       }),
       createSession: vi.fn(),
       deleteSession: vi.fn(),
+      savePasswordResetToken: vi.fn(),
+      consumePasswordResetToken: vi.fn().mockResolvedValue(true),
+      deletePasswordResetToken: vi.fn(),
       upsertAdmin: vi.fn(),
     };
     app = express();
     app.use(express.json());
-    app.use(createAuthRouter(new AuthService(repository, 8)));
+    app.use(createAuthRouter(new AuthService(repository, 8), { send: vi.fn() }));
   });
 
   it('inicia sesión, publica la identidad y cierra la sesión', async () => {
@@ -61,9 +64,7 @@ describe('rutas de autenticación', () => {
       .post('/auth/login')
       .send({ email: 'nadie@example.com', password: 'incorrecta' });
     expect(denied.status).toBe(401);
-
-    const me = await request(app).get('/auth/me');
-    expect(me.status).toBe(401);
+    expect((await request(app).get('/auth/me')).status).toBe(401);
   });
 
   it('bloquea un origen externo antes de procesar credenciales', async () => {
@@ -73,5 +74,55 @@ describe('rutas de autenticación', () => {
       .send({ email: 'admin@salateca.cl', password: 'clave-administrador' });
     expect(response.status).toBe(403);
     expect(repository.findUserByEmail).not.toHaveBeenCalled();
+  });
+
+  it('solicita y completa la recuperación sin revelar si el correo existe', async () => {
+    const mailer = { send: vi.fn() };
+    app = express();
+    app.use(express.json());
+    app.use(createAuthRouter(new AuthService(repository, 8, 30), mailer));
+
+    const requested = await request(app)
+      .post('/auth/forgot-password')
+      .send({ email: 'admin@salateca.cl' });
+    expect(requested.status).toBe(202);
+    expect(mailer.send).toHaveBeenCalledWith(
+      expect.objectContaining({ email: 'admin@salateca.cl', token: expect.any(String) }),
+    );
+
+    vi.mocked(repository.findUserByEmail).mockResolvedValueOnce(null);
+    const unknown = await request(app)
+      .post('/auth/forgot-password')
+      .send({ email: 'nadie@example.com' });
+    expect(unknown.status).toBe(202);
+
+    const completed = await request(app)
+      .post('/auth/reset-password')
+      .send({
+        token: 'a'.repeat(43),
+        password: 'nueva-clave-segura',
+        passwordConfirmation: 'nueva-clave-segura',
+      });
+    expect(completed.status).toBe(200);
+    expect(repository.consumePasswordResetToken).toHaveBeenCalled();
+  });
+
+  it('rechaza enlaces vencidos y contraseñas inválidas', async () => {
+    vi.mocked(repository.consumePasswordResetToken).mockResolvedValue(false);
+    const token = 'b'.repeat(43);
+    const mismatch = await request(app).post('/auth/reset-password').send({
+      token,
+      password: 'nueva-clave-segura',
+      passwordConfirmation: 'distinta-clave-segura',
+    });
+    expect(mismatch.status).toBe(400);
+
+    const expired = await request(app).post('/auth/reset-password').send({
+      token,
+      password: 'nueva-clave-segura',
+      passwordConfirmation: 'nueva-clave-segura',
+    });
+    expect(expired.status).toBe(400);
+    expect(expired.body.error.message).toContain('venció');
   });
 });

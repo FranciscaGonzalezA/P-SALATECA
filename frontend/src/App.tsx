@@ -12,11 +12,14 @@ import { PostsView } from './views/PostsView';
 import { AdminView } from './views/AdminView';
 import { AdminPreviewView } from './views/AdminPreviewView';
 import { LoginView } from './views/LoginView';
+import { ForgotPasswordView } from './views/ForgotPasswordView';
+import { ResetPasswordView } from './views/ResetPasswordView';
 
 interface RouteState {
-  page: AppRoute | 'movie' | 'post' | 'admin-demo';
+  page: AppRoute | 'movie' | 'post' | 'admin-demo' | 'forgot-password' | 'reset-password';
   movieId?: number | undefined;
   postId?: number | undefined;
+  resetToken?: string | undefined;
 }
 
 type MovieOrigin = Extract<AppRoute, 'home' | 'catalog'>;
@@ -32,9 +35,13 @@ function routePath(nextRoute: RouteState): string {
           ? '/admin'
           : nextRoute.page === 'admin-demo'
             ? '/admin-demo'
-            : nextRoute.page === 'post'
-              ? `/posts/${nextRoute.postId}`
-              : `/peliculas/${nextRoute.movieId}`;
+            : nextRoute.page === 'forgot-password'
+              ? '/admin/recuperar'
+              : nextRoute.page === 'reset-password'
+                ? `/admin/restablecer${nextRoute.resetToken ? `?token=${encodeURIComponent(nextRoute.resetToken)}` : ''}`
+                : nextRoute.page === 'post'
+                  ? `/posts/${nextRoute.postId}`
+                  : `/peliculas/${nextRoute.movieId}`;
 }
 
 function routeFromLocation(): RouteState {
@@ -54,6 +61,15 @@ function routeFromLocation(): RouteState {
   }
   if (window.location.pathname === '/admin-demo') {
     return { page: 'admin-demo' };
+  }
+  if (window.location.pathname === '/admin/recuperar') {
+    return { page: 'forgot-password' };
+  }
+  if (window.location.pathname === '/admin/restablecer') {
+    return {
+      page: 'reset-password',
+      resetToken: new URLSearchParams(window.location.search).get('token') ?? undefined,
+    };
   }
   return window.location.pathname === '/posts' ? { page: 'posts' } : { page: 'home' };
 }
@@ -132,7 +148,9 @@ function App() {
         : 'catalog'
       : route.page === 'post'
         ? 'posts'
-        : route.page === 'admin-demo'
+        : route.page === 'admin-demo' ||
+            route.page === 'forgot-password' ||
+            route.page === 'reset-password'
           ? 'admin'
           : route.page;
 
@@ -179,6 +197,7 @@ function App() {
       {route.page === 'admin' && !authLoading && currentUser?.role !== 'admin' && (
         <LoginView
           onAuthenticated={setCurrentUser}
+          onForgotPassword={() => navigate({ page: 'forgot-password' })}
           onPreview={() => navigate({ page: 'admin-demo' })}
         />
       )}
@@ -186,6 +205,12 @@ function App() {
         <AdminView user={currentUser} onLogout={endSession} />
       )}
       {route.page === 'admin-demo' && <AdminPreviewView />}
+      {route.page === 'forgot-password' && (
+        <ForgotPasswordView onBack={() => navigate({ page: 'admin' })} />
+      )}
+      {route.page === 'reset-password' && (
+        <ResetPasswordView token={route.resetToken} onBack={() => navigate({ page: 'admin' })} />
+      )}
     </SiteChrome>
   );
 }

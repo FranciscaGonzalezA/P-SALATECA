@@ -1,5 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { AuthApiError, fetchCurrentUser, login, logout } from './authApi';
+import {
+  AuthApiError,
+  fetchCurrentUser,
+  login,
+  logout,
+  requestPasswordReset,
+  resetPassword,
+} from './authApi';
 
 const user = { id: 1, email: 'admin@salateca.cl', role: 'admin' as const };
 
@@ -42,5 +49,29 @@ describe('cliente de autenticación', () => {
       status: 401,
     });
     expect(new AuthApiError('Error', 500)).toBeInstanceOf(Error);
+  });
+
+  it('solicita y completa la recuperación de contraseña', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ data: { message: 'Revisa tu correo.' } }), { status: 202 }),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ data: { message: 'Contraseña actualizada.' } }), {
+          status: 200,
+        }),
+      );
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(requestPasswordReset(user.email)).resolves.toBe('Revisa tu correo.');
+    await expect(
+      resetPassword('token-seguro', 'nueva-clave-segura', 'nueva-clave-segura'),
+    ).resolves.toBe('Contraseña actualizada.');
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({
+      token: 'token-seguro',
+      password: 'nueva-clave-segura',
+      passwordConfirmation: 'nueva-clave-segura',
+    });
   });
 });

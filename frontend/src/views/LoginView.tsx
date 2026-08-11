@@ -5,9 +5,10 @@ import { login, logout } from '../api/authApi';
 interface LoginViewProps {
   onAuthenticated: (user: AuthenticatedUserDto) => void;
   onPreview?: () => void;
+  onForgotPassword?: () => void;
 }
 
-export function LoginView({ onAuthenticated, onPreview }: LoginViewProps) {
+export function LoginView({ onAuthenticated, onPreview, onForgotPassword }: LoginViewProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -68,6 +69,11 @@ export function LoginView({ onAuthenticated, onPreview }: LoginViewProps) {
         <button type="submit" disabled={submitting}>
           {submitting ? 'Ingresando…' : 'Ingresar'}
         </button>
+        {onForgotPassword && (
+          <button type="button" className="admin-text-button" onClick={onForgotPassword}>
+            ¿Olvidaste tu contraseña?
+          </button>
+        )}
         {onPreview && (
           <button type="button" className="admin-preview-button" onClick={onPreview}>
             Ver demostración sin iniciar sesión

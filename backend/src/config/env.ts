@@ -23,6 +23,15 @@ const envSchema = z
     ADMIN_EMAIL: z.string().email().optional(),
     ADMIN_PASSWORD: z.string().min(12).optional(),
     SESSION_DURATION_HOURS: z.coerce.number().int().min(1).max(168).default(8),
+    PASSWORD_RESET_TOKEN_MINUTES: z.coerce.number().int().min(10).max(120).default(30),
+    PASSWORD_RESET_FROM_EMAIL: optionalEnvironmentValue,
+    RESEND_API_KEY: z.preprocess(
+      (value) =>
+        typeof value === 'string' && (value.trim() === '' || value.startsWith('replace_with_'))
+          ? undefined
+          : value,
+      z.string().min(1).optional(),
+    ),
     TMDB_API_KEY: optionalEnvironmentValue,
     TMDB_READ_ACCESS_TOKEN: optionalEnvironmentValue,
     TMDB_API_TOKEN: optionalEnvironmentValue,

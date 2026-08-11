@@ -32,6 +32,9 @@ describe('rutas administrativas de salas', () => {
         .mockResolvedValue({ id: 1, email: 'admin@salateca.cl', role: 'admin' }),
       createSession: vi.fn(),
       deleteSession: vi.fn(),
+      savePasswordResetToken: vi.fn(),
+      consumePasswordResetToken: vi.fn(),
+      deletePasswordResetToken: vi.fn(),
       upsertAdmin: vi.fn(),
     };
     venuesRepository = {

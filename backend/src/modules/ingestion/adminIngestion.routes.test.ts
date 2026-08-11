@@ -53,6 +53,9 @@ describe('ruta administrativa de importación Excel', () => {
         .mockResolvedValue({ id: 1, email: 'admin@salateca.cl', role: 'admin' }),
       createSession: vi.fn(),
       deleteSession: vi.fn(),
+      savePasswordResetToken: vi.fn(),
+      consumePasswordResetToken: vi.fn(),
+      deletePasswordResetToken: vi.fn(),
       upsertAdmin: vi.fn(),
     };
     metadataEnricher = {

@@ -61,12 +61,70 @@ export class MysqlAuthRepository implements AuthRepository {
     await this.pool.execute('DELETE FROM user_sessions WHERE token_hash = ?', [tokenHash]);
   }
 
+  async savePasswordResetToken(tokenHash: string, userId: number, expiresAt: Date): Promise<void> {
+    await this.pool.execute(
+      `INSERT INTO password_reset_tokens (token_hash, user_id, expires_at)
+       VALUES (?, ?, ?)
+       ON DUPLICATE KEY UPDATE
+         token_hash = VALUES(token_hash),
+         expires_at = VALUES(expires_at),
+         created_at = UTC_TIMESTAMP(3),
+         used_at = NULL`,
+      [tokenHash, userId, expiresAt],
+    );
+  }
+
+  async consumePasswordResetToken(tokenHash: string, passwordHash: string): Promise<boolean> {
+    const connection = await this.pool.getConnection();
+    try {
+      await connection.beginTransaction();
+      const [rows] = await connection.execute<(RowDataPacket & { user_id: number })[]>(
+        `SELECT prt.user_id
+         FROM password_reset_tokens prt
+         INNER JOIN users u ON u.id = prt.user_id
+         WHERE prt.token_hash = ?
+           AND prt.expires_at > UTC_TIMESTAMP(3)
+           AND prt.used_at IS NULL
+           AND u.is_active = TRUE
+           AND u.role = 'admin'
+         LIMIT 1
+         FOR UPDATE`,
+        [tokenHash],
+      );
+      const userId = rows[0]?.user_id;
+      if (!userId) {
+        await connection.rollback();
+        return false;
+      }
+
+      await connection.execute('UPDATE users SET password_hash = ? WHERE id = ?', [
+        passwordHash,
+        userId,
+      ]);
+      await connection.execute('DELETE FROM user_sessions WHERE user_id = ?', [userId]);
+      await connection.execute(
+        'UPDATE password_reset_tokens SET used_at = UTC_TIMESTAMP(3) WHERE user_id = ?',
+        [userId],
+      );
+      await connection.commit();
+      return true;
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
+  async deletePasswordResetToken(tokenHash: string): Promise<void> {
+    await this.pool.execute('DELETE FROM password_reset_tokens WHERE token_hash = ?', [tokenHash]);
+  }
+
   async upsertAdmin(email: string, passwordHash: string): Promise<void> {
     await this.pool.execute(
       `INSERT INTO users (email, password_hash, role)
        VALUES (?, ?, 'admin')
        ON DUPLICATE KEY UPDATE
-         password_hash = VALUES(password_hash),
          role = 'admin',
          is_active = TRUE`,
       [email, passwordHash],

@@ -30,18 +30,20 @@ añade `meta` con paginación y tiempo de procesamiento. Los errores usan `error
 
 ## Autenticación y administración
 
-| Método   | Ruta                       | Acceso  | Descripción                                |
-| -------- | -------------------------- | ------- | ------------------------------------------ |
-| `POST`   | `/auth/login`              | Público | Inicia una sesión mediante correo y clave. |
-| `GET`    | `/auth/me`                 | Sesión  | Devuelve la identidad autenticada.         |
-| `POST`   | `/auth/logout`             | Público | Elimina la sesión y su cookie.             |
-| `POST`   | `/admin/posts`             | Admin   | Crea una publicación.                      |
-| `PUT`    | `/admin/posts/:id`         | Admin   | Actualiza una publicación.                 |
-| `PATCH`  | `/admin/posts/:id/order`   | Admin   | Mueve una publicación arriba o abajo.      |
-| `DELETE` | `/admin/posts/:id`         | Admin   | Elimina una publicación.                   |
-| `POST`   | `/admin/screenings/import` | Admin   | Importa funciones desde un archivo XLSX.   |
-| `GET`    | `/admin/venues/pending`    | Admin   | Lista salas sin código de región.          |
-| `PATCH`  | `/admin/venues/:id/region` | Admin   | Valida manualmente la región de una sala.  |
+| Método   | Ruta                       | Acceso  | Descripción                                  |
+| -------- | -------------------------- | ------- | -------------------------------------------- |
+| `POST`   | `/auth/login`              | Público | Inicia una sesión mediante correo y clave.   |
+| `POST`   | `/auth/forgot-password`    | Público | Solicita un enlace temporal de recuperación. |
+| `POST`   | `/auth/reset-password`     | Público | Define una clave nueva mediante el token.    |
+| `GET`    | `/auth/me`                 | Sesión  | Devuelve la identidad autenticada.           |
+| `POST`   | `/auth/logout`             | Público | Elimina la sesión y su cookie.               |
+| `POST`   | `/admin/posts`             | Admin   | Crea una publicación.                        |
+| `PUT`    | `/admin/posts/:id`         | Admin   | Actualiza una publicación.                   |
+| `PATCH`  | `/admin/posts/:id/order`   | Admin   | Mueve una publicación arriba o abajo.        |
+| `DELETE` | `/admin/posts/:id`         | Admin   | Elimina una publicación.                     |
+| `POST`   | `/admin/screenings/import` | Admin   | Importa funciones desde un archivo XLSX.     |
+| `GET`    | `/admin/venues/pending`    | Admin   | Lista salas sin código de región.            |
+| `PATCH`  | `/admin/venues/:id/region` | Admin   | Valida manualmente la región de una sala.    |
 
 La automatización utiliza además `POST /internal/scraper/ingest`. Es un endpoint de servicio, no
 una ruta para navegadores: exige `Authorization: Bearer <SCRAPER_INGEST_TOKEN>` y permanece
@@ -52,6 +54,12 @@ La sesión usa un token opaco aleatorio. Solo su hash SHA-256 se persiste en MyS
 lo recibe en una cookie `HttpOnly`, `SameSite=Lax` y `Secure` en producción. Las mutaciones
 administrativas validan el origen configurado en `FRONTEND_ORIGIN`. Una solicitud sin sesión
 recibe `401`; una cuenta sin el rol `admin` recibe `403`.
+
+La recuperación responde siempre `202` al solicitar un enlace, exista o no el correo, para no
+revelar cuentas registradas. El token aleatorio solo se conserva como hash SHA-256, vence según
+`PASSWORD_RESET_TOKEN_MINUTES` y queda inutilizado después del primer uso. Una recuperación válida
+reemplaza el hash `scrypt` de la contraseña e invalida todas las sesiones existentes. La clave
+nueva y su confirmación deben coincidir y contener entre 12 y 256 caracteres.
 
 El cuerpo de creación y actualización de posts contiene `title`, `body`, `imageUrl`,
 `sourceName`, `sourceUrl` y `keywords`.

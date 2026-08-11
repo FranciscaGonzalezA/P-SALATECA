@@ -20,6 +20,12 @@ Configura `ADMIN_EMAIL` y `ADMIN_PASSWORD` para crear la cuenta administradora i
 contraseña debe tener al menos doce caracteres. `SESSION_DURATION_HOURS` controla la duración de
 la sesión y utiliza ocho horas por defecto.
 
+Para habilitar el envío real de enlaces de recuperación configura `RESEND_API_KEY` y
+`PASSWORD_RESET_FROM_EMAIL` con un remitente verificado en Resend. La duración del enlace se
+controla con `PASSWORD_RESET_TOKEN_MINUTES` (30 por defecto). Sin esas dos variables, el entorno de
+desarrollo escribe el enlace en la consola del backend; en producción la solicitud falla y no deja
+un token utilizable.
+
 Opción recomendada para un entorno reproducible:
 
 ```powershell

@@ -1109,7 +1109,7 @@ main {
 
 .filter-panel {
   display: grid;
-  grid-template-columns: minmax(220px, 1.5fr) repeat(4, minmax(130px, 0.7fr)) auto;
+  grid-template-columns: minmax(220px, 1.5fr) repeat(5, minmax(120px, 0.7fr)) auto;
   gap: 0.7rem;
   padding: 1rem;
   border: 1px solid var(--line);
@@ -1949,6 +1949,14 @@ main {
   color: var(--ink);
   border: 1px solid var(--ink);
   background: transparent;
+}
+
+.admin-login-card .admin-text-button {
+  padding: 0.25rem;
+  color: var(--blue);
+  background: transparent;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 
 .admin-demo-banner {
