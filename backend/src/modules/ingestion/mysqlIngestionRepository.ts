@@ -259,6 +259,7 @@ class MysqlIngestionTransaction implements IngestionTransaction {
     runId: number,
     status: IngestionRunStatus,
     summary: IngestionSummary,
+    synchronizedSourceIds: readonly number[],
   ): Promise<void> {
     await this.connection.execute(
       `
@@ -281,6 +282,18 @@ class MysqlIngestionTransaction implements IngestionTransaction {
         runId,
       ],
     );
+
+    if (status !== 'failed' && synchronizedSourceIds.length > 0) {
+      const placeholders = synchronizedSourceIds.map(() => '?').join(', ');
+      await this.connection.execute(
+        `
+          UPDATE sources
+          SET last_successful_sync_at = CURRENT_TIMESTAMP(3)
+          WHERE id IN (${placeholders})
+        `,
+        [...synchronizedSourceIds],
+      );
+    }
   }
 
   private async findOrCreateMovie(screening: NormalizedScreeningDto): Promise<number> {

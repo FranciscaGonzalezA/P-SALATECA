@@ -90,7 +90,12 @@ export interface IngestionTransaction {
     issues?: readonly IngestionValidationIssue[],
   ): Promise<void>;
   runInSavepoint<T>(name: string, operation: () => Promise<T>): Promise<T>;
-  finishRun(runId: number, status: IngestionRunStatus, summary: IngestionSummary): Promise<void>;
+  finishRun(
+    runId: number,
+    status: IngestionRunStatus,
+    summary: IngestionSummary,
+    synchronizedSourceIds: readonly number[],
+  ): Promise<void>;
 }
 
 export interface IngestionRepository {

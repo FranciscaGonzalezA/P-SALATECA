@@ -63,6 +63,7 @@ export async function ingestScreenings(
       duplicates: 0,
     };
     const errors: IngestionRowError[] = [];
+    const synchronizedSourceIds = new Set<number>();
 
     for (const [index, candidate] of request.records.entries()) {
       const parsed = parseNormalizedScreening(candidate.normalizedPayload);
@@ -90,7 +91,13 @@ export async function ingestScreenings(
           const publicationSourceId = candidate.source
             ? await transaction.upsertSource(candidate.source)
             : sourceId;
-          return transaction.publishScreening(publicationSourceId, stagingRecordId, parsed.data);
+          const publicationOutcome = await transaction.publishScreening(
+            publicationSourceId,
+            stagingRecordId,
+            parsed.data,
+          );
+          synchronizedSourceIds.add(publicationSourceId);
+          return publicationOutcome;
         });
 
         summary[outcome === 'duplicate' ? 'duplicates' : outcome] += 1;
@@ -108,7 +115,7 @@ export async function ingestScreenings(
     }
 
     const status = resolveRunStatus(summary);
-    await transaction.finishRun(runId, status, summary);
+    await transaction.finishRun(runId, status, summary, [...synchronizedSourceIds]);
 
     return {
       runId,

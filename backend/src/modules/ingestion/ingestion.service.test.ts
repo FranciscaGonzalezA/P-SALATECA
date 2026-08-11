@@ -16,7 +16,14 @@ class MemoryIngestionTransaction implements IngestionTransaction {
   readonly errors: IngestionValidationIssue[] = [];
   readonly sources: IngestionSource[] = [];
   readonly publishedSourceIds: number[] = [];
-  finished: { runId: number; status: IngestionRunStatus; summary: IngestionSummary } | undefined;
+  finished:
+    | {
+        runId: number;
+        status: IngestionRunStatus;
+        summary: IngestionSummary;
+        synchronizedSourceIds: number[];
+      }
+    | undefined;
   private publicationIndex = 0;
 
   constructor(
@@ -73,8 +80,14 @@ class MemoryIngestionTransaction implements IngestionTransaction {
     runId: number,
     status: IngestionRunStatus,
     summary: IngestionSummary,
+    synchronizedSourceIds: readonly number[],
   ): Promise<void> {
-    this.finished = { runId, status, summary: { ...summary } };
+    this.finished = {
+      runId,
+      status,
+      summary: { ...summary },
+      synchronizedSourceIds: [...synchronizedSourceIds],
+    };
   }
 }
 
@@ -148,6 +161,7 @@ describe('ingestScreenings', () => {
     ]);
     expect(transaction.errors.length).toBeGreaterThan(0);
     expect(transaction.finished?.status).toBe('partially_succeeded');
+    expect(transaction.finished?.synchronizedSourceIds).toEqual([10]);
   });
 
   it('marca el lote como fallido cuando todos los registros son rechazados', async () => {
@@ -185,6 +199,7 @@ describe('ingestScreenings', () => {
     expect(result.inserted).toBe(2);
     expect(transaction.sources).toEqual([rowSources[0], ...rowSources]);
     expect(transaction.publishedSourceIds).toEqual([11, 12]);
+    expect(transaction.finished?.synchronizedSourceIds).toEqual([11, 12]);
   });
 
   it('aísla un error de persistencia y continúa con el siguiente registro', async () => {

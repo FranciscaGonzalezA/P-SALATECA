@@ -77,6 +77,7 @@ describe('MysqlIngestionRepository', () => {
       .mockResolvedValueOnce([{ insertId: 30 }])
       .mockResolvedValueOnce([{}])
       .mockResolvedValueOnce([{}])
+      .mockResolvedValueOnce([{}])
       .mockResolvedValueOnce([{}]);
 
     await withTransaction(connection, async (transaction) => {
@@ -107,12 +108,33 @@ describe('MysqlIngestionRepository', () => {
         updated: 0,
         rejected: 1,
         duplicates: 0,
-      });
+      }, [10, 11]);
     });
 
-    expect(connection.execute).toHaveBeenCalledTimes(6);
+    expect(connection.execute).toHaveBeenCalledTimes(7);
     expect(connection.execute.mock.calls[2]?.[1]?.[1]).toBe(screening.sourceUrl);
     expect(connection.execute.mock.calls[5]?.[1]).toEqual(['partially_succeeded', 2, 1, 1, 0, 20]);
+    expect(connection.execute.mock.calls[6]?.[0]).toContain('last_successful_sync_at');
+    expect(connection.execute.mock.calls[6]?.[1]).toEqual([10, 11]);
+  });
+
+  it('conserva la ultima sincronizacion exitosa cuando el lote falla', async () => {
+    connection.execute.mockResolvedValueOnce([{}]);
+
+    await withTransaction(connection, async (transaction) => {
+      await transaction.finishRun(20, 'failed', {
+        processed: 1,
+        inserted: 0,
+        updated: 0,
+        rejected: 1,
+        duplicates: 0,
+      }, [10]);
+    });
+
+    const [sql, parameters] = connection.execute.mock.calls[0] ?? [];
+    expect(sql).toContain('UPDATE ingestion_runs');
+    expect(parameters).toEqual(['failed', 1, 0, 1, 0, 20]);
+    expect(connection.execute).toHaveBeenCalledOnce();
   });
 
   it('usa una URL segura en staging cuando el valor rechazado excede la columna', async () => {
