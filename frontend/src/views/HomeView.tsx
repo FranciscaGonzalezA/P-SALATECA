@@ -3,11 +3,19 @@ import { MovieCard } from '../components/MovieCard';
 
 interface HomeViewProps {
   featured: MovieSummaryDto[];
+  featuredError: boolean;
   onCatalog: () => void;
   onMovie: (movieId: number) => void;
+  onRetryFeatured: () => void;
 }
 
-export function HomeView({ featured, onCatalog, onMovie }: HomeViewProps) {
+export function HomeView({
+  featured,
+  featuredError,
+  onCatalog,
+  onMovie,
+  onRetryFeatured,
+}: HomeViewProps) {
   return (
     <>
       <section className="hero-section">
@@ -80,11 +88,21 @@ export function HomeView({ featured, onCatalog, onMovie }: HomeViewProps) {
             <h2>Funciones destacadas</h2>
           </div>
         </div>
-        <div className="movie-grid">
-          {featured.slice(0, 3).map((movie) => (
-            <MovieCard movie={movie} onOpen={onMovie} showFeaturedScore key={movie.id} />
-          ))}
-        </div>
+        {featuredError ? (
+          <div className="state-card featured-error" role="alert">
+            <h3>No pudimos cargar las funciones destacadas</h3>
+            <p>La información no está disponible en este momento. Inténtalo nuevamente.</p>
+            <button type="button" onClick={onRetryFeatured}>
+              Reintentar
+            </button>
+          </div>
+        ) : (
+          <div className="movie-grid">
+            {featured.slice(0, 3).map((movie) => (
+              <MovieCard movie={movie} onOpen={onMovie} showFeaturedScore key={movie.id} />
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="newsletter-section">

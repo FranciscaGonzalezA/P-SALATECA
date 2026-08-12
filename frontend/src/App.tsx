@@ -81,6 +81,8 @@ function App() {
     return storedOrigin === 'home' ? 'home' : 'catalog';
   });
   const [featured, setFeatured] = useState<Awaited<ReturnType<typeof fetchCatalog>>['items']>([]);
+  const [featuredError, setFeaturedError] = useState(false);
+  const [featuredRequestVersion, setFeaturedRequestVersion] = useState(0);
   const [currentUser, setCurrentUser] = useState<AuthenticatedUserDto | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
 
@@ -107,10 +109,18 @@ function App() {
   useEffect(() => {
     const controller = new AbortController();
     fetchCatalog({ page: 1, pageSize: 3, sort: 'featured' }, controller.signal)
-      .then((result) => setFeatured(result.items))
-      .catch(() => undefined);
+      .then((result) => {
+        setFeatured(result.items);
+        setFeaturedError(false);
+      })
+      .catch((error: unknown) => {
+        if (!(error instanceof DOMException && error.name === 'AbortError')) {
+          setFeatured([]);
+          setFeaturedError(true);
+        }
+      });
     return () => controller.abort();
-  }, []);
+  }, [featuredRequestVersion]);
 
   const navigate = (nextRoute: RouteState) => {
     window.history.pushState({}, '', routePath(nextRoute));
@@ -168,8 +178,13 @@ function App() {
       {(route.page === 'home' || (isMovieModal && movieOrigin === 'home')) && (
         <HomeView
           featured={featured}
+          featuredError={featuredError}
           onCatalog={() => navigate({ page: 'catalog' })}
           onMovie={(movieId) => openMovie(movieId, 'home')}
+          onRetryFeatured={() => {
+            setFeaturedError(false);
+            setFeaturedRequestVersion((version) => version + 1);
+          }}
         />
       )}
       {(route.page === 'catalog' || (isMovieModal && movieOrigin === 'catalog')) && (

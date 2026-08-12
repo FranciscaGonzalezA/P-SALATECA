@@ -190,6 +190,17 @@ describe('CatalogView', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
     expect(fetchCatalog).toHaveBeenCalledTimes(2);
   });
+
+  it('reemplaza el error técnico de red por un mensaje amigable', async () => {
+    fetchCatalog.mockReset().mockRejectedValue(new TypeError('Failed to fetch'));
+    render(<CatalogView onMovie={() => undefined} />);
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent(
+      'La cartelera no está disponible en este momento. Inténtalo nuevamente en unos minutos.',
+    );
+    expect(alert).not.toHaveTextContent('Failed to fetch');
+  });
 });
 
 describe('buildPaginationItems', () => {

@@ -12,11 +12,27 @@ vi.mock('./api/catalogApi', () => ({ fetchCatalog }));
 vi.mock('./api/authApi', () => ({ fetchCurrentUser, logout }));
 
 vi.mock('./views/HomeView', () => ({
-  HomeView: ({ onCatalog, onMovie }: { onCatalog: () => void; onMovie: (id: number) => void }) => (
+  HomeView: ({
+    featuredError,
+    onCatalog,
+    onMovie,
+    onRetryFeatured,
+  }: {
+    featuredError: boolean;
+    onCatalog: () => void;
+    onMovie: (id: number) => void;
+    onRetryFeatured: () => void;
+  }) => (
     <div>
       <h1>Inicio simulado</h1>
       <button onClick={onCatalog}>Ir a cartelera</button>
       <button onClick={() => onMovie(7)}>Ir a película</button>
+      {featuredError && (
+        <div role="alert">
+          No se cargaron las destacadas
+          <button onClick={onRetryFeatured}>Reintentar destacadas</button>
+        </div>
+      )}
     </div>
   ),
 }));
@@ -128,5 +144,25 @@ describe('App', () => {
     expect(
       screen.getByRole('heading', { name: 'Demostración administrativa' }),
     ).toBeInTheDocument();
+  });
+
+  it('hace visible el fallo de destacadas y permite reintentar la consulta', async () => {
+    fetchCatalog
+      .mockReset()
+      .mockRejectedValueOnce(new TypeError('Failed to fetch'))
+      .mockResolvedValueOnce({
+        items: [],
+        total: 0,
+        totalPages: 0,
+        elapsedMs: 0,
+        demo: false,
+      });
+
+    render(<App />);
+    expect(await screen.findByRole('alert')).toHaveTextContent('No se cargaron las destacadas');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Reintentar destacadas' }));
+    await waitFor(() => expect(fetchCatalog).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument());
   });
 });

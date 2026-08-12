@@ -14,6 +14,17 @@ const initialQuery: CatalogQuery = {
   pageSize: 30,
 };
 
+const catalogUnavailableMessage =
+  'La cartelera no está disponible en este momento. Inténtalo nuevamente en unos minutos.';
+
+function getCatalogErrorMessage(error: unknown): string {
+  if (error instanceof TypeError || (error instanceof Error && error.message === 'Failed to fetch')) {
+    return catalogUnavailableMessage;
+  }
+
+  return error instanceof Error ? error.message : catalogUnavailableMessage;
+}
+
 export function CatalogView({ onMovie }: CatalogViewProps) {
   const today = localDateValue();
   const [query, setQuery] = useState(initialQuery);
@@ -50,11 +61,7 @@ export function CatalogView({ onMovie }: CatalogViewProps) {
       })
       .catch((requestError: unknown) => {
         if (!(requestError instanceof DOMException && requestError.name === 'AbortError')) {
-          setError(
-            requestError instanceof Error
-              ? requestError.message
-              : 'No fue posible cargar la cartelera.',
-          );
+          setError(getCatalogErrorMessage(requestError));
         }
       })
       .finally(() => {

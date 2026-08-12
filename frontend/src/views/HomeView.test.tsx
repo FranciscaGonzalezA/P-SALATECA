@@ -15,8 +15,10 @@ describe('HomeView', () => {
           tmdbRating: 8 - index / 10,
           tmdbVoteCount: 1000 - index,
         }))}
+        featuredError={false}
         onCatalog={onCatalog}
         onMovie={onMovie}
+        onRetryFeatured={() => undefined}
       />,
     );
 
@@ -33,5 +35,24 @@ describe('HomeView', () => {
     const newsletterForm = screen.getByLabelText('Correo electrónico').closest('form');
     expect(newsletterForm).not.toBeNull();
     fireEvent.submit(newsletterForm!);
+  });
+
+  it('avisa cuando falla la carga de funciones destacadas y permite reintentar', async () => {
+    const onRetryFeatured = vi.fn();
+    render(
+      <HomeView
+        featured={[]}
+        featuredError
+        onCatalog={() => undefined}
+        onMovie={() => undefined}
+        onRetryFeatured={onRetryFeatured}
+      />,
+    );
+
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'No pudimos cargar las funciones destacadas',
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
+    expect(onRetryFeatured).toHaveBeenCalledOnce();
   });
 });
