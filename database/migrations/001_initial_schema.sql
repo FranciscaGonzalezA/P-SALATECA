@@ -9,7 +9,7 @@ CREATE TABLE sources (
   updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   PRIMARY KEY (id),
   UNIQUE KEY uq_sources_base_url (base_url(500))
-) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE ingestion_runs (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -26,7 +26,7 @@ CREATE TABLE ingestion_runs (
   CONSTRAINT fk_ingestion_runs_source
     FOREIGN KEY (source_id) REFERENCES sources (id)
     ON UPDATE RESTRICT ON DELETE RESTRICT
-) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE staging_records (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -45,7 +45,7 @@ CREATE TABLE staging_records (
   CONSTRAINT fk_staging_ingestion_run
     FOREIGN KEY (ingestion_run_id) REFERENCES ingestion_runs (id)
     ON UPDATE RESTRICT ON DELETE CASCADE
-) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE venues (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -60,7 +60,7 @@ CREATE TABLE venues (
   PRIMARY KEY (id),
   UNIQUE KEY uq_venues_canonical_name (canonical_name),
   KEY idx_venues_municipality (municipality)
-) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE movies (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -81,7 +81,7 @@ CREATE TABLE movies (
     CHECK (release_year IS NULL OR release_year BETWEEN 1888 AND 2200),
   CONSTRAINT chk_movies_duration
     CHECK (duration_minutes IS NULL OR duration_minutes BETWEEN 1 AND 1440)
-) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE genres (
   id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -90,7 +90,7 @@ CREATE TABLE genres (
   PRIMARY KEY (id),
   UNIQUE KEY uq_genres_name (name),
   UNIQUE KEY uq_genres_slug (slug)
-) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE movie_genres (
   movie_id BIGINT UNSIGNED NOT NULL,
@@ -102,7 +102,7 @@ CREATE TABLE movie_genres (
   CONSTRAINT fk_movie_genres_genre
     FOREIGN KEY (genre_id) REFERENCES genres (id)
     ON UPDATE RESTRICT ON DELETE RESTRICT
-) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE screenings (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -136,7 +136,7 @@ CREATE TABLE screenings (
   CONSTRAINT fk_screenings_staging_record
     FOREIGN KEY (staging_record_id) REFERENCES staging_records (id)
     ON UPDATE RESTRICT ON DELETE SET NULL
-) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE content_assets (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -163,5 +163,4 @@ CREATE TABLE content_assets (
   CONSTRAINT fk_content_assets_source
     FOREIGN KEY (source_id) REFERENCES sources (id)
     ON UPDATE RESTRICT ON DELETE RESTRICT
-) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
-
+) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;

@@ -20,6 +20,10 @@ interface ScreeningRow extends RowDataPacket {
   screening_format: string | null;
 }
 
+interface MovieIdRow extends RowDataPacket {
+  id: number;
+}
+
 function toJson(value: unknown): string {
   return JSON.stringify(value ?? null);
 }
@@ -85,7 +89,7 @@ class MysqlIngestionTransaction implements IngestionTransaction {
           processing_status,
           captured_at
         )
-        VALUES (?, ?, ?, CAST(? AS JSON), CAST(? AS JSON), 'pending', ?)
+        VALUES (?, ?, ?, ?, ?, 'pending', ?)
       `,
       [
         runId,
@@ -116,7 +120,7 @@ class MysqlIngestionTransaction implements IngestionTransaction {
             error_message,
             raw_value
           )
-          VALUES (?, ?, ?, ?, ?, CAST(? AS JSON))
+          VALUES (?, ?, ?, ?, ?, ?)
         `,
         [runId, stagingRecordId, issue.field, issue.code, issue.message, toJson(issue.rawValue)],
       );
@@ -230,7 +234,7 @@ class MysqlIngestionTransaction implements IngestionTransaction {
         UPDATE staging_records
         SET
           processing_status = ?,
-          validation_errors = CAST(? AS JSON),
+          validation_errors = ?,
           processed_at = CURRENT_TIMESTAMP(3)
         WHERE id = ?
       `,
@@ -297,6 +301,33 @@ class MysqlIngestionTransaction implements IngestionTransaction {
   }
 
   private async findOrCreateMovie(screening: NormalizedScreeningDto): Promise<number> {
+    // Excel does not include a release year. Once metadata enrichment fills that
+    // field, an INSERT keyed by (canonical_title, release_year) would otherwise
+    // create a second, yearless movie on the next import.
+    const [existingMovies] = await this.connection.execute<MovieIdRow[]>(
+      `
+        SELECT id
+        FROM movies
+        WHERE canonical_title = ?
+        ORDER BY
+          tmdb_id IS NULL ASC,
+          release_year IS NULL ASC,
+          metadata_synced_at IS NULL ASC,
+          id ASC
+        LIMIT 1
+        FOR UPDATE
+      `,
+      [screening.movieKey],
+    );
+    const existingMovie = existingMovies[0];
+    if (existingMovie) {
+      await this.connection.execute(`UPDATE movies SET title = ? WHERE id = ?`, [
+        screening.movieTitle,
+        existingMovie.id,
+      ]);
+      return existingMovie.id;
+    }
+
     const [result] = await this.connection.execute<ResultSetHeader>(
       `
         INSERT INTO movies (title, canonical_title)

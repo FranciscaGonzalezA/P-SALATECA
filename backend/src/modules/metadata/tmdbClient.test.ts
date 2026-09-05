@@ -49,7 +49,7 @@ describe('TmdbClient', () => {
           credits: { crew: [{ job: 'Director', name: 'Cristóbal León' }] },
         }),
       );
-    const client = new TmdbClient({ readAccessToken: 'token', fetchImpl });
+    const client = new TmdbClient({ readAccessToken: 'token', fallbackLanguages: [], fetchImpl });
 
     await expect(client.findByTitle('La casa lobo')).resolves.toEqual({
       status: 'found',
@@ -85,7 +85,7 @@ describe('TmdbClient', () => {
         }),
       )
       .mockResolvedValueOnce(jsonResponse({ id: 1, original_title: 'Gloria' }));
-    const client = new TmdbClient({ apiKey: 'key', fetchImpl });
+    const client = new TmdbClient({ apiKey: 'key', fallbackLanguages: [], fetchImpl });
 
     await expect(client.findByTitle('Glória')).resolves.toMatchObject({
       status: 'found',
@@ -110,7 +110,7 @@ describe('TmdbClient', () => {
         }),
       )
       .mockResolvedValueOnce(jsonResponse({ id: 142, original_title: 'Brokeback Mountain' }));
-    const client = new TmdbClient({ readAccessToken: 'token', fetchImpl });
+    const client = new TmdbClient({ readAccessToken: 'token', fallbackLanguages: [], fetchImpl });
 
     await expect(client.findByTitle('Secreto en la montaña')).resolves.toMatchObject({
       status: 'found',
@@ -134,7 +134,7 @@ describe('TmdbClient', () => {
         }),
       )
       .mockResolvedValueOnce(jsonResponse({ id: 277834 }));
-    const client = new TmdbClient({ readAccessToken: 'token', fetchImpl });
+    const client = new TmdbClient({ readAccessToken: 'token', fallbackLanguages: [], fetchImpl });
 
     await expect(client.findByTitle('PLANÉTA DEL TESORO')).resolves.toMatchObject({
       status: 'found',
@@ -158,7 +158,7 @@ describe('TmdbClient', () => {
         }),
       )
       .mockResolvedValueOnce(jsonResponse({ id: 9479 }));
-    const client = new TmdbClient({ readAccessToken: 'token', fetchImpl });
+    const client = new TmdbClient({ readAccessToken: 'token', fallbackLanguages: [], fetchImpl });
 
     await expect(client.findByTitle('El extraño mundo de Jack (doblada)')).resolves.toMatchObject({
       status: 'found',
@@ -179,7 +179,7 @@ describe('TmdbClient', () => {
         }),
       )
       .mockResolvedValueOnce(jsonResponse({ id: 2, release_date: '1989-06-23' }));
-    const client = new TmdbClient({ readAccessToken: 'token', fetchImpl });
+    const client = new TmdbClient({ readAccessToken: 'token', fallbackLanguages: [], fetchImpl });
 
     await expect(client.findByTitle('Batman (1989)')).resolves.toMatchObject({
       status: 'found',
@@ -211,7 +211,7 @@ describe('TmdbClient', () => {
           alternative_titles: { titles: [{ title: 'Secreto en la montaña' }] },
         }),
       );
-    const client = new TmdbClient({ readAccessToken: 'token', fetchImpl });
+    const client = new TmdbClient({ readAccessToken: 'token', fallbackLanguages: [], fetchImpl });
 
     await expect(client.findByTitle('SECRETO EN LA MONTAÑA')).resolves.toMatchObject({
       status: 'found',
@@ -221,8 +221,44 @@ describe('TmdbClient', () => {
 
   it('informa errores HTTP sin incluir las credenciales', async () => {
     const fetchImpl = vi.fn<typeof fetch>().mockResolvedValue(jsonResponse({}, 401));
-    const client = new TmdbClient({ readAccessToken: 'secreto', fetchImpl });
+    const client = new TmdbClient({
+      readAccessToken: 'secreto',
+      fallbackLanguages: [],
+      fetchImpl,
+    });
 
     await expect(client.findByTitle('Película')).rejects.toThrow('TMDB respondió HTTP 401');
+  });
+
+  it('completa sinopsis y afiche desde idiomas de respaldo', async () => {
+    const fetchImpl = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(
+        jsonResponse({
+          results: [{ id: 7, title: 'Película', original_title: 'Movie' }],
+        }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({ id: 7, original_title: 'Movie', overview: '', poster_path: null }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({ id: 7, overview: 'Sinopsis en español.', poster_path: '/poster.jpg' }),
+      );
+    const client = new TmdbClient({
+      readAccessToken: 'token',
+      language: 'es-CL',
+      fallbackLanguages: ['es-ES', 'en-US'],
+      fetchImpl,
+    });
+
+    await expect(client.findByTitle('Película')).resolves.toMatchObject({
+      status: 'found',
+      metadata: {
+        synopsis: 'Sinopsis en español.',
+        posterUrl: 'https://image.tmdb.org/t/p/w780/poster.jpg',
+      },
+    });
+    expect(String(fetchImpl.mock.calls[2]?.[0])).toContain('language=es-ES');
+    expect(fetchImpl).toHaveBeenCalledTimes(3);
   });
 });

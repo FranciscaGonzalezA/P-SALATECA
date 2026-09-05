@@ -1,7 +1,13 @@
 import type { GenreDto, MovieSummaryDto, VenueDto } from '@salateca/contracts';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { fetchCatalog, fetchGenres, fetchVenues, type CatalogQuery } from '../api/catalogApi';
 import { MovieCard } from '../components/MovieCard';
+import {
+  getCatalogQuerySnapshot,
+  resetCatalogQuery,
+  subscribeToCatalogQuery,
+  updateCatalogQuery,
+} from '../state/catalogQueryStore';
 import { buildPaginationItems } from '../utils/pagination';
 import { localDateValue } from '../utils/localDate';
 
@@ -9,16 +15,14 @@ interface CatalogViewProps {
   onMovie: (movieId: number) => void;
 }
 
-const initialQuery: CatalogQuery = {
-  page: 1,
-  pageSize: 30,
-};
-
 const catalogUnavailableMessage =
   'La cartelera no está disponible en este momento. Inténtalo nuevamente en unos minutos.';
 
 function getCatalogErrorMessage(error: unknown): string {
-  if (error instanceof TypeError || (error instanceof Error && error.message === 'Failed to fetch')) {
+  if (
+    error instanceof TypeError ||
+    (error instanceof Error && error.message === 'Failed to fetch')
+  ) {
     return catalogUnavailableMessage;
   }
 
@@ -27,7 +31,11 @@ function getCatalogErrorMessage(error: unknown): string {
 
 export function CatalogView({ onMovie }: CatalogViewProps) {
   const today = localDateValue();
-  const [query, setQuery] = useState(initialQuery);
+  const query = useSyncExternalStore(
+    subscribeToCatalogQuery,
+    getCatalogQuerySnapshot,
+    getCatalogQuerySnapshot,
+  );
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [movies, setMovies] = useState<MovieSummaryDto[]>([]);
   const [venues, setVenues] = useState<VenueDto[]>([]);
@@ -37,6 +45,7 @@ export function CatalogView({ onMovie }: CatalogViewProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [demo, setDemo] = useState(false);
+  const [requestVersion, setRequestVersion] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -71,19 +80,25 @@ export function CatalogView({ onMovie }: CatalogViewProps) {
       });
 
     return () => controller.abort();
-  }, [query]);
+  }, [query, requestVersion]);
 
   const updateQuery = (changes: Partial<CatalogQuery>) => {
     setLoading(true);
     setError(null);
-    setQuery((current) => ({ ...current, ...changes, page: changes.page ?? 1 }));
+    updateCatalogQuery(changes);
   };
 
   const resetQuery = () => {
     setLoading(true);
     setError(null);
-    setQuery(initialQuery);
+    resetCatalogQuery();
     setFiltersOpen(false);
+  };
+
+  const retryCatalog = () => {
+    setLoading(true);
+    setError(null);
+    setRequestVersion((version) => version + 1);
   };
 
   const activeFilterCount = [query.search, query.date, query.time, query.venue, query.genre].filter(
@@ -238,7 +253,7 @@ export function CatalogView({ onMovie }: CatalogViewProps) {
         <div className="state-card error-state" role="alert">
           <h2>No pudimos cargar la cartelera</h2>
           <p>{error}</p>
-          <button type="button" onClick={() => updateQuery({ page: query.page })}>
+          <button type="button" onClick={retryCatalog}>
             Reintentar
           </button>
         </div>

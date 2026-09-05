@@ -1,0 +1,8 @@
+Options -MultiViews
+RewriteEngine On
+
+# Preserve real files and directories, and send client-side routes to Vite's
+# entry point so pages such as /login continue to work after a refresh.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.html [L]

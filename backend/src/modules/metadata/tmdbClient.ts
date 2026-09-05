@@ -9,6 +9,8 @@ interface TmdbSearchResult {
   title: string;
   original_title: string;
   release_date?: string;
+  overview?: string;
+  poster_path?: string | null;
 }
 
 interface TmdbSearchResponse {
@@ -38,6 +40,7 @@ export interface TmdbClientOptions {
   readAccessToken?: string | undefined;
   apiKey?: string | undefined;
   language?: string | undefined;
+  fallbackLanguages?: readonly string[] | undefined;
   timeoutMs?: number | undefined;
   fetchImpl?: typeof fetch | undefined;
 }
@@ -45,6 +48,13 @@ export interface TmdbClientOptions {
 export interface NormalizedMovieTitleQuery {
   query: string;
   year?: number | undefined;
+}
+
+export class TmdbRequestError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'TmdbRequestError';
+  }
 }
 
 const editionQualifier =
@@ -201,6 +211,7 @@ function finiteNumber(value: number | undefined, minimum: number, maximum?: numb
 export class TmdbClient implements MovieMetadataProvider {
   private readonly fetchImpl: typeof fetch;
   private readonly language: string;
+  private readonly fallbackLanguages: readonly string[];
   private readonly timeoutMs: number;
 
   constructor(private readonly options: TmdbClientOptions) {
@@ -209,6 +220,9 @@ export class TmdbClient implements MovieMetadataProvider {
     }
     this.fetchImpl = options.fetchImpl ?? fetch;
     this.language = options.language ?? 'es-CL';
+    this.fallbackLanguages = [...new Set(options.fallbackLanguages ?? ['es-ES', 'en-US'])].filter(
+      (language) => language !== this.language,
+    );
     this.timeoutMs = options.timeoutMs ?? 10_000;
   }
 
@@ -245,10 +259,7 @@ export class TmdbClient implements MovieMetadataProvider {
           search.results.map((candidate) => {
             let details = detailsCache.get(candidate.id);
             if (!details) {
-              details = this.request<TmdbMovieDetails>(`/3/movie/${candidate.id}`, {
-                append_to_response: 'alternative_titles,credits',
-                language: this.language,
-              });
+              details = this.getMovieDetails(candidate.id);
               detailsCache.set(candidate.id, details);
             }
             return details;
@@ -262,21 +273,41 @@ export class TmdbClient implements MovieMetadataProvider {
         }
       }
       if (!firstMovieCandidate) return { status: 'not_found' };
-      let firstDetails = detailsCache.get(firstMovieCandidate.id);
-      if (!firstDetails) {
-        firstDetails = this.request<TmdbMovieDetails>(`/3/movie/${firstMovieCandidate.id}`, {
-          append_to_response: 'alternative_titles,credits',
-          language: this.language,
-        });
-      }
-      return { status: 'found', metadata: this.mapDetails(await firstDetails) };
+      const firstDetails = detailsCache.get(firstMovieCandidate.id);
+      return {
+        status: 'found',
+        metadata: this.mapDetails(
+          await (firstDetails ?? this.getMovieDetails(firstMovieCandidate.id)),
+        ),
+      };
     }
 
-    const details = await this.request<TmdbMovieDetails>(`/3/movie/${match.id}`, {
+    const details = await this.getMovieDetails(match.id);
+    return { status: 'found', metadata: this.mapDetails(details) };
+  }
+
+  private async getMovieDetails(movieId: number): Promise<TmdbMovieDetails> {
+    let details = await this.request<TmdbMovieDetails>(`/3/movie/${movieId}`, {
       append_to_response: 'alternative_titles,credits',
       language: this.language,
     });
-    return { status: 'found', metadata: this.mapDetails(details) };
+
+    for (const language of this.fallbackLanguages) {
+      if (nonEmpty(details.overview) && details.poster_path) break;
+      const fallback = await this.request<TmdbMovieDetails>(`/3/movie/${movieId}`, {
+        append_to_response: 'alternative_titles,credits',
+        language,
+      });
+      const overview = nonEmpty(details.overview) ?? nonEmpty(fallback.overview);
+      const posterPath = details.poster_path ?? fallback.poster_path;
+      details = {
+        ...details,
+        ...(overview ? { overview } : {}),
+        ...(posterPath ? { poster_path: posterPath } : {}),
+      };
+    }
+
+    return details;
   }
 
   private mapDetails(details: TmdbMovieDetails): MovieMetadata {
@@ -320,17 +351,27 @@ export class TmdbClient implements MovieMetadataProvider {
       url.searchParams.set('api_key', this.options.apiKey);
     }
 
-    const response = await this.fetchImpl(url, {
-      headers: {
-        Accept: 'application/json',
-        ...(this.options.readAccessToken
-          ? { Authorization: `Bearer ${this.options.readAccessToken}` }
-          : {}),
-      },
-      signal: AbortSignal.timeout(this.timeoutMs),
-    });
+    let response: Response;
+    try {
+      response = await this.fetchImpl(url, {
+        headers: {
+          Accept: 'application/json',
+          ...(this.options.readAccessToken
+            ? { Authorization: `Bearer ${this.options.readAccessToken}` }
+            : {}),
+        },
+        signal: AbortSignal.timeout(this.timeoutMs),
+      });
+    } catch (error) {
+      const timedOut = error instanceof Error && error.name === 'TimeoutError';
+      throw new TmdbRequestError(
+        timedOut
+          ? 'TMDB tardó demasiado en responder. Intenta nuevamente.'
+          : 'No fue posible conectarse con TMDB. Revisa la conexión e intenta nuevamente.',
+      );
+    }
     if (!response.ok) {
-      throw new Error(`TMDB respondió HTTP ${response.status}.`);
+      throw new TmdbRequestError(`TMDB respondió HTTP ${response.status}.`);
     }
     return (await response.json()) as T;
   }

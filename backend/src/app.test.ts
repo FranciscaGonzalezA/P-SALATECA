@@ -9,6 +9,8 @@ describe('createApp', () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ name: 'Cine Arte API', version: 'v1' });
     expect(response.headers).not.toHaveProperty('x-powered-by');
+    expect(response.headers['x-content-type-options']).toBe('nosniff');
+    expect(response.headers['x-frame-options']).toBe('SAMEORIGIN');
   });
 
   it('responde errores 404 con un contrato estable', async () => {

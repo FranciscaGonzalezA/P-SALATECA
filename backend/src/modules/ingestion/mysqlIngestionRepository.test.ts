@@ -102,17 +102,28 @@ describe('MysqlIngestionRepository', () => {
       await transaction.markStaging(30, 'rejected', [
         { field: 'record', code: 'invalid', message: 'Inválido' },
       ]);
-      await transaction.finishRun(20, 'partially_succeeded', {
-        processed: 2,
-        inserted: 1,
-        updated: 0,
-        rejected: 1,
-        duplicates: 0,
-      }, [10, 11]);
+      await transaction.finishRun(
+        20,
+        'partially_succeeded',
+        {
+          processed: 2,
+          inserted: 1,
+          updated: 0,
+          rejected: 1,
+          duplicates: 0,
+        },
+        [10, 11],
+      );
     });
 
     expect(connection.execute).toHaveBeenCalledTimes(7);
+    expect(connection.execute.mock.calls[2]?.[0]).not.toContain('CAST(? AS JSON)');
     expect(connection.execute.mock.calls[2]?.[1]?.[1]).toBe(screening.sourceUrl);
+    expect(connection.execute.mock.calls[2]?.[1]?.[3]).toBe(
+      JSON.stringify({ sourceUrl: screening.sourceUrl }),
+    );
+    expect(connection.execute.mock.calls[3]?.[0]).not.toContain('CAST(? AS JSON)');
+    expect(connection.execute.mock.calls[4]?.[0]).not.toContain('CAST(? AS JSON)');
     expect(connection.execute.mock.calls[5]?.[1]).toEqual(['partially_succeeded', 2, 1, 1, 0, 20]);
     expect(connection.execute.mock.calls[6]?.[0]).toContain('last_successful_sync_at');
     expect(connection.execute.mock.calls[6]?.[1]).toEqual([10, 11]);
@@ -122,13 +133,18 @@ describe('MysqlIngestionRepository', () => {
     connection.execute.mockResolvedValueOnce([{}]);
 
     await withTransaction(connection, async (transaction) => {
-      await transaction.finishRun(20, 'failed', {
-        processed: 1,
-        inserted: 0,
-        updated: 0,
-        rejected: 1,
-        duplicates: 0,
-      }, [10]);
+      await transaction.finishRun(
+        20,
+        'failed',
+        {
+          processed: 1,
+          inserted: 0,
+          updated: 0,
+          rejected: 1,
+          duplicates: 0,
+        },
+        [10],
+      );
     });
 
     const [sql, parameters] = connection.execute.mock.calls[0] ?? [];
@@ -156,6 +172,7 @@ describe('MysqlIngestionRepository', () => {
 
   it('crea una función nueva y detecta una repetición idéntica', async () => {
     connection.execute.mockImplementation((sql: string) => {
+      if (sql.includes('SELECT id') && sql.includes('FROM movies')) return Promise.resolve([[]]);
       if (sql.includes('INSERT INTO movies')) return Promise.resolve([{ insertId: 7 }]);
       if (sql.includes('INSERT INTO venues')) return Promise.resolve([{ insertId: 8 }]);
       if (sql.includes('SELECT id, source_id')) return Promise.resolve([[]]);
@@ -170,7 +187,9 @@ describe('MysqlIngestionRepository', () => {
     ).toBe(true);
 
     connection.execute.mockImplementation((sql: string) => {
-      if (sql.includes('INSERT INTO movies')) return Promise.resolve([{ insertId: 7 }]);
+      if (sql.includes('SELECT id') && sql.includes('FROM movies')) {
+        return Promise.resolve([[{ id: 7 }]]);
+      }
       if (sql.includes('INSERT INTO venues')) return Promise.resolve([{ insertId: 8 }]);
       if (sql.includes('SELECT id, source_id')) {
         return Promise.resolve([
@@ -195,7 +214,9 @@ describe('MysqlIngestionRepository', () => {
 
   it('actualiza una función cuando cambia su procedencia o metadatos', async () => {
     connection.execute.mockImplementation((sql: string) => {
-      if (sql.includes('INSERT INTO movies')) return Promise.resolve([{ insertId: 7 }]);
+      if (sql.includes('SELECT id') && sql.includes('FROM movies')) {
+        return Promise.resolve([[{ id: 7 }]]);
+      }
       if (sql.includes('INSERT INTO venues')) return Promise.resolve([{ insertId: 8 }]);
       if (sql.includes('SELECT id, source_id')) {
         return Promise.resolve([
@@ -219,6 +240,45 @@ describe('MysqlIngestionRepository', () => {
     expect(
       connection.execute.mock.calls.some(([sql]) => String(sql).includes('UPDATE screenings')),
     ).toBe(true);
+  });
+
+  it('reutiliza una película enriquecida al reimportar un Excel sin año', async () => {
+    connection.execute.mockImplementation((sql: string) => {
+      if (sql.includes('SELECT id') && sql.includes('FROM movies')) {
+        return Promise.resolve([[{ id: 7 }]]);
+      }
+      if (sql.includes('INSERT INTO venues')) return Promise.resolve([{ insertId: 8 }]);
+      if (sql.includes('SELECT id, source_id')) {
+        return Promise.resolve([
+          [
+            {
+              id: 9,
+              source_id: 10,
+              official_url: screening.sourceUrl,
+              language: screening.language,
+              screening_format: screening.format,
+            },
+          ],
+        ]);
+      }
+      return Promise.resolve([{}]);
+    });
+
+    await withTransaction(connection, async (transaction) => {
+      await expect(transaction.publishScreening(10, 31, screening)).resolves.toBe('duplicate');
+    });
+
+    expect(
+      connection.execute.mock.calls.some(([sql]) => String(sql).includes('INSERT INTO movies')),
+    ).toBe(false);
+    expect(connection.execute.mock.calls).toEqual(
+      expect.arrayContaining([
+        [expect.stringContaining('WHERE canonical_title = ?'), [screening.movieKey]],
+      ]),
+    );
+    const movieLookupSql = String(connection.execute.mock.calls[0]?.[0]);
+    expect(movieLookupSql).toContain('tmdb_id IS NULL ASC');
+    expect(movieLookupSql).toContain('release_year IS NULL ASC');
   });
 
   it('aísla operaciones mediante savepoints y valida sus nombres', async () => {

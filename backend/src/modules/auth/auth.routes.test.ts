@@ -76,6 +76,23 @@ describe('rutas de autenticación', () => {
     expect(repository.findUserByEmail).not.toHaveBeenCalled();
   });
 
+  it('limita los intentos reiterados de inicio de sesión', async () => {
+    vi.mocked(repository.findUserByEmail).mockResolvedValue(null);
+
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      const response = await request(app)
+        .post('/auth/login')
+        .send({ email: 'admin@salateca.cl', password: 'clave-incorrecta' });
+      expect(response.status).toBe(401);
+    }
+
+    const blocked = await request(app)
+      .post('/auth/login')
+      .send({ email: 'admin@salateca.cl', password: 'clave-incorrecta' });
+    expect(blocked.status).toBe(429);
+    expect(blocked.body.error.code).toBe('too_many_authentication_attempts');
+  });
+
   it('solicita y completa la recuperación sin revelar si el correo existe', async () => {
     const mailer = { send: vi.fn() };
     app = express();

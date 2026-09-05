@@ -87,6 +87,7 @@ describe('MysqlMovieMetadataRepository', () => {
     const { pool, connection } = poolWithConnection();
     connection.execute
       .mockResolvedValueOnce([[]])
+      .mockResolvedValueOnce([[]])
       .mockResolvedValueOnce([{}])
       .mockResolvedValueOnce([{ insertId: 10 }])
       .mockResolvedValueOnce([{ insertId: 20 }])
@@ -111,7 +112,7 @@ describe('MysqlMovieMetadataRepository', () => {
     expect(connection.commit).toHaveBeenCalledOnce();
     expect(connection.rollback).not.toHaveBeenCalled();
     expect(connection.release).toHaveBeenCalledOnce();
-    expect(connection.execute.mock.calls[1]?.[0]).toContain('COALESCE(original_title, ?)');
+    expect(connection.execute.mock.calls[2]?.[0]).toContain('COALESCE(original_title, ?)');
     expect(connection.execute.mock.calls.at(-1)?.[0]).toContain('INSERT INTO content_assets');
   });
 
@@ -119,6 +120,7 @@ describe('MysqlMovieMetadataRepository', () => {
     const { pool, connection } = poolWithConnection();
     connection.execute
       .mockResolvedValueOnce([[{ id: 8 }]])
+      .mockResolvedValueOnce([[]])
       .mockResolvedValueOnce([{}])
       .mockResolvedValueOnce([{ insertId: 10 }]);
 
@@ -136,7 +138,33 @@ describe('MysqlMovieMetadataRepository', () => {
       posterUrl: null,
     });
 
-    expect(connection.execute.mock.calls[1]?.[1]?.[0]).toBeNull();
+    expect(connection.execute.mock.calls[2]?.[1]?.[0]).toBeNull();
+    expect(connection.commit).toHaveBeenCalledOnce();
+  });
+
+  it('omite el año si colisiona con otro registro del mismo título canónico', async () => {
+    const { pool, connection } = poolWithConnection();
+    connection.execute
+      .mockResolvedValueOnce([[]])
+      .mockResolvedValueOnce([[{ id: 8 }]])
+      .mockResolvedValueOnce([{}])
+      .mockResolvedValueOnce([{ insertId: 10 }]);
+
+    await new MysqlMovieMetadataRepository(pool).saveMetadata(4, {
+      tmdbId: 99,
+      originalTitle: 'Original',
+      releaseYear: 2020,
+      durationMinutes: null,
+      director: null,
+      synopsis: 'Sinopsis',
+      tmdbVoteAverage: 7,
+      tmdbVoteCount: 100,
+      tmdbPopularity: 8,
+      genres: [],
+      posterUrl: null,
+    });
+
+    expect(connection.execute.mock.calls[2]?.[1]?.[2]).toBeNull();
     expect(connection.commit).toHaveBeenCalledOnce();
   });
 });

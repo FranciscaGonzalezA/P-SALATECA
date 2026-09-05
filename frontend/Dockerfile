@@ -25,7 +25,9 @@ RUN pnpm --filter @salateca/contracts build && pnpm --filter frontend build
 
 FROM nginx:1.28.3-alpine AS runtime
 
-COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
+ENV BACKEND_UPSTREAM=backend:3000
+
+COPY frontend/nginx.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /workspace/frontend/dist /usr/share/nginx/html
 
 EXPOSE 80

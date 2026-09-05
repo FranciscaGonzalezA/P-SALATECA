@@ -147,7 +147,9 @@ export function SiteChrome({
           aria-label="Destacados"
           title={railExpanded ? undefined : 'Destacados'}
         >
-          <span className="side-rail-icon" aria-hidden="true">◆</span>
+          <span className="side-rail-icon" aria-hidden="true">
+            ◆
+          </span>
           <span className="side-rail-label" aria-hidden={!railExpanded}>
             Destacados
           </span>
@@ -158,7 +160,9 @@ export function SiteChrome({
           aria-label="Contacto"
           title={railExpanded ? undefined : 'Contacto'}
         >
-          <span className="side-rail-icon" aria-hidden="true">✉</span>
+          <span className="side-rail-icon" aria-hidden="true">
+            ✉
+          </span>
           <span className="side-rail-label" aria-hidden={!railExpanded}>
             Contacto
           </span>

@@ -1,5 +1,6 @@
 import cors from 'cors';
 import express, { type Express } from 'express';
+import helmet from 'helmet';
 import { env } from './config/env.js';
 import { createAdminPostsRouter } from './modules/posts/adminPosts.routes.js';
 import { AuthService } from './modules/auth/auth.service.js';
@@ -29,20 +30,22 @@ export function createApp(): Express {
     env.TMDB_READ_ACCESS_TOKEN ?? env.TMDB_API_TOKEN,
   );
   const tmdbApiKey = usableTmdbCredential(env.TMDB_API_KEY);
-  const metadataService =
+  const tmdbClient =
     tmdbReadAccessToken || tmdbApiKey
-      ? new MovieMetadataService(
-          new MysqlMovieMetadataRepository(),
-          new TmdbClient({
-            readAccessToken: tmdbReadAccessToken,
-            apiKey: tmdbApiKey,
-            language: env.TMDB_LANGUAGE,
-            timeoutMs: env.TMDB_REQUEST_TIMEOUT_MS,
-          }),
-        )
+      ? new TmdbClient({
+          readAccessToken: tmdbReadAccessToken,
+          apiKey: tmdbApiKey,
+          language: env.TMDB_LANGUAGE,
+          timeoutMs: env.TMDB_REQUEST_TIMEOUT_MS,
+        })
       : undefined;
+  const metadataService = tmdbClient
+    ? new MovieMetadataService(new MysqlMovieMetadataRepository(), tmdbClient)
+    : undefined;
 
   app.disable('x-powered-by');
+  if (env.NODE_ENV === 'production') app.set('trust proxy', 1);
+  app.use(helmet());
   app.use(
     cors({
       origin: env.FRONTEND_ORIGIN,

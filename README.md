@@ -119,4 +119,5 @@ estrategia, procedimientos y evidencia de calidad están en
 [docs/qa-report-2026-07-28.md](docs/qa-report-2026-07-28.md).
 
 La puesta en marcha gradual y aislada de todos los servicios con Docker se documenta en
-[docs/docker.md](docs/docker.md).
+[docs/docker.md](docs/docker.md). El despliegue de producción se documenta en
+[docs/deployment-railway.md](docs/deployment-railway.md).

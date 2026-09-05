@@ -16,4 +16,4 @@ CREATE TABLE posts (
   CONSTRAINT fk_posts_source
     FOREIGN KEY (source_id) REFERENCES sources (id)
     ON UPDATE RESTRICT ON DELETE RESTRICT
-) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;

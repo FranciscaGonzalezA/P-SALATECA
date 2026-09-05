@@ -183,6 +183,23 @@ export class MysqlMovieMetadataRepository implements MovieMetadataRepository {
         [metadata.tmdbId, movieId],
       );
       const availableTmdbId = owners.length === 0 ? metadata.tmdbId : null;
+      let availableReleaseYear = metadata.releaseYear;
+      if (metadata.releaseYear !== null) {
+        const [releaseYearConflicts] = await connection.execute<MovieIdRow[]>(
+          `
+            SELECT conflicting.id
+            FROM movies target
+            INNER JOIN movies conflicting
+              ON conflicting.canonical_title = target.canonical_title
+              AND conflicting.release_year = ?
+              AND conflicting.id <> target.id
+            WHERE target.id = ?
+            LIMIT 1
+          `,
+          [metadata.releaseYear, movieId],
+        );
+        if (releaseYearConflicts.length > 0) availableReleaseYear = null;
+      }
       await connection.execute(
         `
           UPDATE movies
@@ -203,7 +220,7 @@ export class MysqlMovieMetadataRepository implements MovieMetadataRepository {
         [
           availableTmdbId,
           metadata.originalTitle,
-          metadata.releaseYear,
+          availableReleaseYear,
           metadata.durationMinutes,
           metadata.director,
           metadata.synopsis,

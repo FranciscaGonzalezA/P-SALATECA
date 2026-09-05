@@ -1,5 +1,6 @@
 import type { ApiResponse, AuthenticatedUserDto } from '@salateca/contracts';
 import { Router } from 'express';
+import { rateLimit } from 'express-rate-limit';
 import { z } from 'zod';
 import { AuthService } from './auth.service.js';
 import {
@@ -39,8 +40,33 @@ export function createAuthRouter(
 ): Router {
   const router = Router();
   const authenticate = createAuthenticate(authService);
+  const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    skipSuccessfulRequests: true,
+    message: {
+      error: {
+        code: 'too_many_authentication_attempts',
+        message: 'Demasiados intentos. Espera unos minutos antes de volver a intentarlo.',
+      },
+    },
+  });
+  const passwordResetLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+      error: {
+        code: 'too_many_password_reset_attempts',
+        message: 'Demasiadas solicitudes. Espera unos minutos antes de volver a intentarlo.',
+      },
+    },
+  });
 
-  router.post('/auth/login', requireTrustedOrigin, async (request, response) => {
+  router.post('/auth/login', loginLimiter, requireTrustedOrigin, async (request, response) => {
     const parsed = loginSchema.safeParse(request.body);
     if (!parsed.success) {
       response.status(400).json({
@@ -66,53 +92,63 @@ export function createAuthRouter(
     response.json(body);
   });
 
-  router.post('/auth/forgot-password', requireTrustedOrigin, async (request, response) => {
-    const parsed = forgotPasswordSchema.safeParse(request.body);
-    if (parsed.success) {
-      const resetRequest = await authService.requestPasswordReset(parsed.data.email);
-      if (resetRequest) {
-        try {
-          await passwordResetMailer.send(resetRequest);
-        } catch (error) {
-          await authService.deletePasswordResetToken(resetRequest.token);
-          throw error;
+  router.post(
+    '/auth/forgot-password',
+    passwordResetLimiter,
+    requireTrustedOrigin,
+    async (request, response) => {
+      const parsed = forgotPasswordSchema.safeParse(request.body);
+      if (parsed.success) {
+        const resetRequest = await authService.requestPasswordReset(parsed.data.email);
+        if (resetRequest) {
+          try {
+            await passwordResetMailer.send(resetRequest);
+          } catch (error) {
+            await authService.deletePasswordResetToken(resetRequest.token);
+            throw error;
+          }
         }
       }
-    }
 
-    response.status(202).json({
-      data: {
-        message:
-          'Si existe una cuenta administradora con ese correo, recibirás un enlace de recuperación.',
-      },
-    });
-  });
-
-  router.post('/auth/reset-password', requireTrustedOrigin, async (request, response) => {
-    const parsed = resetPasswordSchema.safeParse(request.body);
-    if (!parsed.success) {
-      response.status(400).json({
-        error: {
-          code: 'invalid_password_reset',
-          message: 'Revisa el enlace y usa una contraseña de al menos 12 caracteres.',
+      response.status(202).json({
+        data: {
+          message:
+            'Si existe una cuenta administradora con ese correo, recibirás un enlace de recuperación.',
         },
       });
-      return;
-    }
+    },
+  );
 
-    const reset = await authService.resetPassword(parsed.data.token, parsed.data.password);
-    if (!reset) {
-      response.status(400).json({
-        error: {
-          code: 'invalid_password_reset',
-          message: 'El enlace de recuperación no es válido o ya venció.',
-        },
-      });
-      return;
-    }
+  router.post(
+    '/auth/reset-password',
+    passwordResetLimiter,
+    requireTrustedOrigin,
+    async (request, response) => {
+      const parsed = resetPasswordSchema.safeParse(request.body);
+      if (!parsed.success) {
+        response.status(400).json({
+          error: {
+            code: 'invalid_password_reset',
+            message: 'Revisa el enlace y usa una contraseña de al menos 12 caracteres.',
+          },
+        });
+        return;
+      }
 
-    response.json({ data: { message: 'Tu contraseña fue actualizada.' } });
-  });
+      const reset = await authService.resetPassword(parsed.data.token, parsed.data.password);
+      if (!reset) {
+        response.status(400).json({
+          error: {
+            code: 'invalid_password_reset',
+            message: 'El enlace de recuperación no es válido o ya venció.',
+          },
+        });
+        return;
+      }
+
+      response.json({ data: { message: 'Tu contraseña fue actualizada.' } });
+    },
+  );
 
   router.get('/auth/me', authenticate, (_request, response) => {
     const body: ApiResponse<AuthenticatedUserDto> = { data: response.locals.authUser };

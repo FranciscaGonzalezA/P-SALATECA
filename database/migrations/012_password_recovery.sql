@@ -10,4 +10,4 @@ CREATE TABLE password_reset_tokens (
   CONSTRAINT fk_password_reset_tokens_user
     FOREIGN KEY (user_id) REFERENCES users (id)
     ON UPDATE RESTRICT ON DELETE CASCADE
-) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;

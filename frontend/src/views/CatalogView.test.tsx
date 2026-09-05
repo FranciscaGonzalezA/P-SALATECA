@@ -20,6 +20,7 @@ vi.mock('../api/catalogApi', () => ({
 
 describe('CatalogView', () => {
   beforeEach(() => {
+    window.history.replaceState({}, '', '/cartelera');
     fetchCatalog.mockReset().mockResolvedValue({
       items: demoMovies.slice(0, 2),
       total: 8,
@@ -55,6 +56,7 @@ describe('CatalogView', () => {
         expect.any(AbortSignal),
       ),
     );
+    expect(new URLSearchParams(window.location.search).get('buscar')).toBe('lobo');
 
     fireEvent.change(screen.getByLabelText('Sala'), {
       target: { value: 'sala-k' },
@@ -65,6 +67,7 @@ describe('CatalogView', () => {
         expect.any(AbortSignal),
       ),
     );
+    expect(new URLSearchParams(window.location.search).get('sala')).toBe('sala-k');
 
     await userEvent.selectOptions(screen.getByLabelText('Ordenar por'), 'featured');
     await waitFor(() =>
@@ -73,6 +76,7 @@ describe('CatalogView', () => {
         expect.any(AbortSignal),
       ),
     );
+    expect(new URLSearchParams(window.location.search).get('orden')).toBe('destacados');
 
     await userEvent.selectOptions(screen.getByLabelText('Ordenar por'), 'alphabetical-desc');
     await waitFor(() =>
@@ -92,6 +96,57 @@ describe('CatalogView', () => {
     await waitFor(() =>
       expect(fetchCatalog).toHaveBeenLastCalledWith(
         { page: 1, pageSize: 30 },
+        expect.any(AbortSignal),
+      ),
+    );
+    expect(window.location.search).toBe('');
+  });
+
+  it('restaura filtros desde un enlace compartido y los conserva al volver a montar', async () => {
+    window.history.replaceState(
+      {},
+      '',
+      '/cartelera?buscar=cine+chileno&sala=sala-k&genero=drama&orden=alfabetico_asc&pagina=2',
+    );
+
+    const { unmount } = render(<CatalogView onMovie={() => undefined} />);
+
+    await waitFor(() =>
+      expect(fetchCatalog).toHaveBeenLastCalledWith(
+        {
+          search: 'cine chileno',
+          venue: 'sala-k',
+          genre: 'drama',
+          sort: 'alphabetical-asc',
+          page: 2,
+          pageSize: 30,
+        },
+        expect.any(AbortSignal),
+      ),
+    );
+    expect(screen.getByLabelText('Buscar película o dirección')).toHaveValue('cine chileno');
+    expect(screen.getByLabelText('Sala')).toHaveValue('sala-k');
+    expect(screen.getByRole('combobox', { name: 'Género' })).toHaveValue('drama');
+
+    unmount();
+    render(<CatalogView onMovie={() => undefined} />);
+
+    expect(screen.getByLabelText('Buscar película o dirección')).toHaveValue('cine chileno');
+    expect(window.location.search).toContain('buscar=cine+chileno');
+  });
+
+  it('sincroniza la vista cuando cambia la URL mediante el historial', async () => {
+    render(<CatalogView onMovie={() => undefined} />);
+    await screen.findByText('8 películas encontradas');
+
+    window.history.replaceState({}, '', '/cartelera?fecha=2026-09-18&horario=20%3A30');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+
+    expect(await screen.findByLabelText('Fecha')).toHaveValue('2026-09-18');
+    expect(screen.getByLabelText('Horario')).toHaveValue('20:30');
+    await waitFor(() =>
+      expect(fetchCatalog).toHaveBeenLastCalledWith(
+        expect.objectContaining({ date: '2026-09-18', time: '20:30', page: 1 }),
         expect.any(AbortSignal),
       ),
     );
