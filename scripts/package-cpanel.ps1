@@ -4,6 +4,22 @@ $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $releaseRoot = Join-Path $repositoryRoot 'release\cpanel'
 $stagingRoot = Join-Path $releaseRoot '.staging'
 
+# Keep the cPanel artifact deterministic: Vite embeds these values at build time.
+# Without them, the browser falls back to localhost and cannot reach production.
+$env:VITE_API_URL = 'https://api.rpayweb.cl/api/v1'
+$env:VITE_DEMO_MODE = 'false'
+
+Push-Location $repositoryRoot
+try {
+  & pnpm build
+  if ($LASTEXITCODE -ne 0) {
+    throw "La compilación de producción falló con código $LASTEXITCODE."
+  }
+}
+finally {
+  Pop-Location
+}
+
 if (-not $releaseRoot.StartsWith($repositoryRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
   throw "La carpeta de salida está fuera del repositorio: $releaseRoot"
 }
