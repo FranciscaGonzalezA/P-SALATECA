@@ -121,3 +121,8 @@ estrategia, procedimientos y evidencia de calidad están en
 La puesta en marcha gradual y aislada de todos los servicios con Docker se documenta en
 [docs/docker.md](docs/docker.md). El despliegue de producción se documenta en
 [docs/deployment-railway.md](docs/deployment-railway.md).
+
+La evidencia preparada para la **Segunda Vista del Prototipo** se encuentra en
+[docs/hito-2/README.md](docs/hito-2/README.md). Incluye trazabilidad de requisitos, diagramas
+actualizados, resultados técnicos, gestión del proyecto, guion de demostración y checklist de
+entrega.
