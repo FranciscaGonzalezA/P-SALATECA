@@ -11,4 +11,5 @@ export const databasePool = mysql.createPool({
   enableKeepAlive: true,
   charset: 'utf8mb4',
   timezone: 'Z',
+  dateStrings: true,
 });

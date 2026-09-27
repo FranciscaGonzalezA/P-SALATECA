@@ -37,3 +37,31 @@ La base preparada contempla las historias visibles:
 - El modelo conceptual del informe debe ajustarse: `screenings` necesita una relación directa con
   `sources`, y género conviene como relación muchos-a-muchos porque una película puede tener
   varios géneros.
+
+## Avance verificado al 27 de julio de 2026
+
+- KAN-1 cuenta con normalización de fechas, horarios, zona horaria, alias, trazabilidad, rechazos
+  y duplicados. El lote controlado alcanza una tasa de normalización del 90 %.
+- KAN-6 incluye migraciones para staging, ejecuciones, errores, cartelera, géneros, salas, fuentes
+  y condición de uso de recursos.
+- KAN-7 dispone de un servicio transaccional, savepoint por registro y entrada JSON/CSV.
+- La API implementa cartelera paginada, filtros combinados, películas, funciones, salas y géneros.
+- El frontend implementa inicio, cartelera, ficha de película, preferencias de contraste y tamaño
+  de texto, estados de carga/error/vacío y navegación responsive basada en Moqups.
+- Compilación, lint, formato y pruebas unitarias están automatizados desde el monorepo.
+
+La migración y las consultas reales siguen pendientes de ejecutarse contra MySQL 8.4 en este
+equipo. Tampoco se han realizado todavía mediciones con veinte usuarios simulados ni pruebas SUS
+con cinco usuarios reales; esos resultados no deben declararse como cumplidos en el informe.
+
+## Corte QA del 28 de julio de 2026
+
+Se incorporaron umbrales de cobertura, pruebas HTTP, componentes React, repositorios SQL con
+dobles, transacciones, parsers y casos temporales extremos. También se agregó un arnés reproducible
+para veinte usuarios concurrentes y procedimientos de integración, seguridad, accesibilidad y
+liberación.
+
+Los resultados y limitaciones verificables están en
+[qa-report-2026-07-28.md](qa-report-2026-07-28.md); la ejecución futura se rige por
+[qa-strategy.md](qa-strategy.md). La ausencia local de Docker/MySQL continúa impidiendo certificar
+infraestructura real y rendimiento, por lo que esas etapas permanecen pendientes.

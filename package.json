@@ -9,15 +9,24 @@
     "dev:frontend": "pnpm --filter frontend dev",
     "dev:backend": "pnpm --filter backend dev",
     "dev:scraper": "pnpm --filter scraper dev",
+    "scraper:run": "pnpm --filter scraper scrape",
+    "scraper:schedule": "pnpm --filter scraper schedule",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",
+    "test:coverage": "pnpm --filter backend --filter frontend --filter scraper test:coverage",
+    "quality": "pnpm format:check && pnpm lint && pnpm test:coverage && pnpm build",
+    "qa:audit": "pnpm audit --prod --audit-level moderate",
+    "qa:load": "node tests/performance/catalog-load.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:migrate": "pnpm --filter backend db:migrate",
-    "db:seed": "pnpm --filter backend db:seed"
+    "db:seed": "pnpm --filter backend db:seed",
+    "db:ingest": "pnpm --filter backend db:ingest",
+    "db:enrich-metadata": "pnpm --filter backend db:enrich-metadata"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "4.1.10",
     "prettier": "^3.9.5"
   }
 }

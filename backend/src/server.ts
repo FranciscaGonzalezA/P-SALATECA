@@ -1,6 +1,16 @@
 import { createApp } from './app.js';
 import { env } from './config/env.js';
 import { databasePool } from './db/pool.js';
+import { AuthService } from './modules/auth/auth.service.js';
+import { MysqlAuthRepository } from './modules/auth/mysqlAuthRepository.js';
+
+if (env.ADMIN_EMAIL && env.ADMIN_PASSWORD) {
+  const authService = new AuthService(new MysqlAuthRepository());
+  await authService.bootstrapAdmin(env.ADMIN_EMAIL, env.ADMIN_PASSWORD);
+  console.info(`Administrador inicial sincronizado: ${env.ADMIN_EMAIL}`);
+} else {
+  console.warn('ADMIN_EMAIL y ADMIN_PASSWORD no están configurados; no se creó un administrador.');
+}
 
 const app = createApp();
 const server = app.listen(env.BACKEND_PORT, () => {
