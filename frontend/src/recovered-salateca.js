@@ -22362,7 +22362,8 @@ function we(e) {
   return {
     page: Number.isSafeInteger(t) && t > 0 ? t : 1,
     pageSize: _e.pageSize,
-    search: D(e, `buscar`),
+    // Preserve spaces while the controlled search input is being edited.
+    search: e.get(`buscar`) || void 0,
     date: D(e, `fecha`),
     time: D(e, `horario`),
     venue: D(e, `sala`),
