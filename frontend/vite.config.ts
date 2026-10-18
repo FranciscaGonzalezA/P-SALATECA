@@ -9,6 +9,9 @@ export default defineConfig(({ mode }) => {
     envDir: '..',
     server: {
       port: Number(env.FRONTEND_PORT || 5173),
+      proxy: {
+        '/api': `http://127.0.0.1:${env.BACKEND_PORT || 3000}`,
+      },
     },
   };
 });

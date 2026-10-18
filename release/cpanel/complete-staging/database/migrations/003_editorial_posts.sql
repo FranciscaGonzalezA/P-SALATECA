@@ -1,0 +1,19 @@
+CREATE TABLE posts (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  source_id BIGINT UNSIGNED NOT NULL,
+  title VARCHAR(500) NOT NULL,
+  body LONGTEXT NOT NULL,
+  image_url VARCHAR(2048) NULL,
+  source_url VARCHAR(2048) NOT NULL,
+  keywords JSON NOT NULL,
+  created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_posts_source_url (source_url(500)),
+  KEY idx_posts_source (source_id),
+  CONSTRAINT chk_posts_keywords_array
+    CHECK (JSON_TYPE(keywords) = 'ARRAY'),
+  CONSTRAINT fk_posts_source
+    FOREIGN KEY (source_id) REFERENCES sources (id)
+    ON UPDATE RESTRICT ON DELETE RESTRICT
+) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;

@@ -1,0 +1,25 @@
+export declare const env: {
+  RATE_LIMIT_MAX: number;
+  MYSQL_QUEUE_LIMIT: number;
+  REQUEST_TIMEOUT_MS: number;
+  NODE_ENV: 'development' | 'test' | 'production';
+  BACKEND_PORT: number;
+  FRONTEND_ORIGIN: string;
+  MYSQL_HOST: string;
+  MYSQL_PORT: number;
+  MYSQL_DATABASE: string;
+  MYSQL_USER: string;
+  MYSQL_PASSWORD: string;
+  MYSQL_CONNECTION_LIMIT: number;
+  SESSION_DURATION_HOURS: number;
+  PASSWORD_RESET_TOKEN_MINUTES: number;
+  TMDB_LANGUAGE: string;
+  TMDB_REQUEST_TIMEOUT_MS: number;
+  ADMIN_EMAIL?: string | undefined;
+  ADMIN_PASSWORD?: string | undefined;
+  PASSWORD_RESET_FROM_EMAIL?: string | undefined;
+  RESEND_API_KEY?: string | undefined;
+  TMDB_API_KEY?: string | undefined;
+  TMDB_READ_ACCESS_TOKEN?: string | undefined;
+  TMDB_API_TOKEN?: string | undefined;
+};

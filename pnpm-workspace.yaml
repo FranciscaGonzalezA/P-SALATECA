@@ -1,7 +1,6 @@
 packages:
   - frontend
   - backend
-  - scraper
 
 allowBuilds:
   esbuild: true
